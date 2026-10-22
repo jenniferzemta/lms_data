@@ -11,15 +11,15 @@
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-10-22]
 Phase globale     : PRÉPARATION (avant V1)
-Version suivante  : V1 Socle — phase SAM : Design
-Avancement (M)    : V1 0/13 · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé (Next.js 16 + Django REST) ; premier déploiement Vercel réussi ; avertissement Turbopack/Tailwind corrigé
-En cours          : maquettes et implémentation du catalogue mobile (360 px)
-Prochaine tâche   : F1.4 : Implémenter le Catalogue de cours mobile-first (360 px)
-Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
+Version suivante  : V1 Socle — phase SAM : Développement (F1.4)
+Avancement (M)    : V1 0/13 (F1.4 en validation 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration fidèle de la maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page
+En cours          : validation visuelle par Laure du catalogue et de l'accueil
+Prochaine tâche   : validation visuelle F1.4, puis F1.1 + F1.3 (modélisation Django des comptes et rôles)
+Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react officielles
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Initialisé sur main, synchronisé avec GitHub (origin/main)
-Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind loader and inter font"
+Dépôt             : Branche feat/catalog-page, build Next.js validé (8/8 pages générées avec succès)
+Dernière commande : git commit -m "feat(catalog): implement responsive datalab-styled catalog and home views"
 ```
 
 ---
@@ -58,7 +58,7 @@ Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind 
 | F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ⬜ | |
 | F1.2 | Interface et contenus bilingues FR/EN | M | ⬜ | |
 | F1.3 | Rôles et droits côté serveur | M | ⬜ | |
-| F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | ⬜ | |
+| F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | 🔎 | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, branche feat/catalog-page |
 | F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ⬜ | |
 | F1.6 | Fichiers téléchargeables par leçon | M | ⬜ | |
 | F1.7 | Quiz (unique, multiple, V/F, numérique) + note de passage | M | ⬜ | |
@@ -124,7 +124,7 @@ Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind 
 |---|---|---|
 | Monorepo, `docker-compose.yml`, `.env.example`, CI | 🟨 | `docker-compose.yml` et `.env.example` créés |
 | `backend/` (Django) — applications créées | 🟨 | Projet `config` initialisé, structure `apps/` prête, check OK |
-| `frontend/` (Next.js) — design system `ui/` | 🟨 | Next.js 16 + Tailwind v4 + `next-intl` bilingue FR/EN + tokens DataMboa, build testé avec succès |
+| `frontend/` (Next.js) — design system `ui/` et catalogue | 🟨 | Vues Accueil et Catalogue fidèles à la maquette DataLab, icônes Lucide, responsive 360px à desktop, build validé |
 | `messages/fr.json` et `messages/en.json` | ✅ | Fichiers créés et branchés via middleware next-intl |
 | Contrat OpenAPI (`docs/api/`) | ⬜ | À générer après les premiers endpoints |
 | Tests (back, front, E2E) | ⬜ | À configurer |
@@ -143,6 +143,7 @@ Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind 
 | 2026-10-16 | Quatre formules : Découverte 0 / Essentiel 10 000 / Professionnel 30 000 / Expert 100 000 FCFA par mois (à tester dès la V1) | — |
 | 2026-10-22 | Agent de codage : Antigravity ; instructions dans `AGENTS.md` et `.agents/` | — |
 | 2026-10-22 | Nom de la plateforme retenu : **DataMboa** ; nom de domaine cible : **datamboa.com** | — |
+| 2026-10-22 | Design system conforme à la maquette Stitch DataLab (DataMboa), icônes officielles `lucide-react`, palette `#142b4a`, `#13b8a6`, `#f4b942` | — |
 
 ---
 
@@ -158,7 +159,7 @@ Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind 
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. F1.4 : Implémenter le Catalogue de cours mobile-first (360 px) à partir de la maquette Stitch.
+1. Validation visuelle de Laure sur le catalogue et l'accueil (`feat/catalog-page`).
 2. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts`).
 
 ---
@@ -171,3 +172,4 @@ Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind 
 | 2026-10-22 | — | Initialisation Git (.gitignore, premier commit sur main, relié et poussé sur GitHub) ; choix du nom DataMboa (datamboa.com) | `.gitignore`, `PROJECT_STATUS.md` | Identité visuelle et maquettes 360 px |
 | 2026-10-22 | — | Maquettes mobile (docs/wireframes-v1-mobile.md) + Squelette monorepo (docker-compose, .env.example, frontend Next.js + next-intl bilingue FR/EN, backend Django REST) | `docker-compose.yml`, `.env.example`, `frontend/`, `backend/` | Commit et merge sur main |
 | 2026-10-22 | — | Résolution avertissement Turbopack Tailwind v4, ajout police Inter optimisée, premier déploiement Vercel validé | `frontend/next.config.ts`, `frontend/app/[locale]/layout.tsx` | F1.4 Catalogue de cours |
+| 2026-10-22 | F1.4 | Intégration exacte des vues Accueil et Catalogue depuis la maquette Stitch DataLab (DataMboa), palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page | `frontend/app/[locale]/courses/page.tsx`, `frontend/features/catalog/`, `frontend/components/`, `frontend/messages/` | Validation visuelle par Laure, puis F1.1+F1.3 backend Django |

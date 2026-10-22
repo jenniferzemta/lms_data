@@ -2,16 +2,22 @@
 
 @theme inline {
   --color-brand-primary: #142b4a;
-  --color-brand-primary-dark: #0b1c30;
-  --color-brand-primary-light: #eef2ff;
+  --color-brand-primary-dark: #001632;
+  --color-brand-primary-light: #eff4ff;
+  --color-brand-primary-container: #142b4a;
   --color-brand-teal: #13b8a6;
+  --color-brand-teal-dark: #006b5f;
+  --color-brand-teal-light: #effcf9;
   --color-brand-amber: #f4b942;
   --color-brand-amber-dark: #d97706;
+  --color-brand-amber-light: #fffbeb;
   --color-brand-surface: #ffffff;
-  --color-brand-canvas: #f8fafc;
+  --color-brand-canvas: #f8f9ff;
+  --color-brand-canvas-alt: #f1f5f9;
   --color-brand-border: #e2e8f0;
-  --color-brand-text: #0f172a;
+  --color-brand-text: #0b1c30;
   --color-brand-muted: #475569;
+  --color-brand-muted-light: #94a3b8;
 }
 
 :root {

@@ -432,15 +432,15 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-10-22]
 Phase globale     : PRÉPARATION (avant V1)
-Version suivante  : V1 Socle — phase SAM : Design
-Avancement (M)    : V1 0/13 · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé (Next.js 16 + Django REST) ; premier déploiement Vercel réussi ; avertissement Turbopack/Tailwind corrigé
-En cours          : maquettes et implémentation du catalogue mobile (360 px)
-Prochaine tâche   : F1.4 : Implémenter le Catalogue de cours mobile-first (360 px)
-Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
+Version suivante  : V1 Socle — phase SAM : Développement (F1.4)
+Avancement (M)    : V1 0/13 (F1.4 en validation 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration fidèle de la maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page
+En cours          : validation visuelle par Laure du catalogue et de l'accueil
+Prochaine tâche   : validation visuelle F1.4, puis F1.1 + F1.3 (modélisation Django des comptes et rôles)
+Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react officielles
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Initialisé sur main, synchronisé avec GitHub (origin/main)
-Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind loader and inter font"
+Dépôt             : Branche feat/catalog-page, build Next.js validé (8/8 pages générées avec succès)
+Dernière commande : git commit -m "feat(catalog): implement responsive datalab-styled catalog and home views"
 ```
 
 ---

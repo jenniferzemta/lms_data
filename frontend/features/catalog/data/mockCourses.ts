@@ -1,0 +1,92 @@
+import { Course } from '../types';
+
+export const mockCourses: Course[] = [
+  {
+    id: 'course-excel-1',
+    slug: 'excel-fondamentaux',
+    title: 'Excel : les fondamentaux',
+    tool: 'excel',
+    level: 'debutant',
+    tier: 'free',
+    duration: '3h30',
+    lessonCount: 12,
+    localContext: 'Cas pratique : gestion de commerce',
+    description: 'Maîtrise les formules de base (SOMME, MOYENNE, SI), le tri et les tableaux pour analyser des ventes.',
+    progressPercentage: 45,
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Graphiques et tableaux de données Excel'
+  },
+  {
+    id: 'course-excel-2',
+    slug: 'analyser-ventes-excel',
+    title: 'Analyser des ventes avec Excel',
+    tool: 'excel',
+    level: 'debutant',
+    tier: 'essential',
+    duration: '4h00',
+    lessonCount: 15,
+    casPratiqueCount: 8,
+    localContext: 'Cas réel : Marché de Yaoundé',
+    description: 'Étude de cas sur les distributeurs de boissons et marchés à Yaoundé. Tableaux croisés dynamiques (TCD) et calcul de marges en FCFA.',
+    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Distribution commerciale et analyse de données de ventes'
+  },
+  {
+    id: 'course-sql-1',
+    slug: 'premiers-pas-sql',
+    title: 'Premiers pas en SQL',
+    tool: 'sql',
+    level: 'debutant',
+    tier: 'free',
+    duration: '2h45',
+    lessonCount: 10,
+    casPratiqueCount: 6,
+    localContext: 'Base de données de Microfinance',
+    description: 'Écrire des requêtes SELECT, WHERE, GROUP BY sur une base de données de microfinance locale (crédits et épargne en FCFA).',
+    imageUrl: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Requêtes SQL relationnelles'
+  },
+  {
+    id: 'course-powerbi-1',
+    slug: 'decouvrir-power-bi',
+    title: 'Découvrir Power BI',
+    tool: 'powerbi',
+    level: 'debutant',
+    tier: 'essential',
+    duration: '5h00',
+    lessonCount: 14,
+    casPratiqueCount: 10,
+    localContext: 'Tableaux de bord de direction',
+    description: 'Créer des rapports interactifs et visuels pour piloter les ventes régionales et indicateurs financiers en FCFA.',
+    imageUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Tableau de bord Power BI interactif'
+  },
+  {
+    id: 'course-python-1',
+    slug: 'python-data-pandas',
+    title: 'Python pour la Data & Pandas',
+    tool: 'python',
+    level: 'intermediaire',
+    tier: 'pro',
+    duration: '6h15',
+    lessonCount: 16,
+    localContext: 'Automatisation de reportings clients',
+    description: 'Nettoyer, transformer et croiser de volumineux fichiers Excel avec Python et Pandas directement dans le navigateur.',
+    imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Code Python pour traitement de données'
+  },
+  {
+    id: 'course-sql-2',
+    slug: 'sql-avance-jointures',
+    title: 'SQL Avancé & Jointures Métier',
+    tool: 'sql',
+    level: 'intermediaire',
+    tier: 'essential',
+    duration: '4h30',
+    lessonCount: 12,
+    localContext: 'Transactions Télécom & Mobile Money',
+    description: 'Jointures complexes, sous-requêtes et agrégations sur les flux de transactions financières et abonnés.',
+    imageUrl: 'https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?auto=format&fit=crop&w=600&q=80',
+    imageAlt: 'Bases de données SQL avancées'
+  }
+];
