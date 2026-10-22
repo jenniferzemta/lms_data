@@ -10,16 +10,16 @@
 
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-10-22]
-Phase globale     : PRÉPARATION (avant V1). État initial SUPPOSÉ : à confirmer par Laure et par vérification du dépôt (§0.2, étape 2).
+Phase globale     : PRÉPARATION (avant V1)
 Version suivante  : V1 Socle — phase SAM : Design
 Avancement (M)    : V1 0/13 · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges (16 oct. 2026) ; master prompt v2 ; kit Antigravity (AGENTS.md, règles, skills)
-En cours          : validation des priorités et des formules ; choix du nom et du domaine
-Prochaine tâche   : maquettes mobile (360 px) des écrans V1 (catalogue, leçon, paiement WhatsApp), puis initialisation du monorepo
-Décisions         : Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
-Questions ouvertes: nom et domaine ; agrégateur de paiement ; tableur du labo Excel ; hébergement ; équipe de rédaction de contenus ; fusion avec le master prompt front déjà présent dans le README du dépôt (à rapprocher de ce document)
-Dépôt             : à vérifier au démarrage (un front peut déjà exister)
-Dernière commande : (aucune)
+Fait              : cahier des charges ; kit Antigravity ; dépôt Git initialisé et synchronisé avec GitHub ; nom fixé (DataMboa / datamboa.com)
+En cours          : identité visuelle minimale et maquettes mobile (360 px) des écrans V1
+Prochaine tâche   : maquettes mobile (360 px) des 3 écrans V1 (catalogue, leçon, paiement WhatsApp), puis initialisation du monorepo
+Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
+Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
+Dépôt             : Initialisé sur main, synchronisé avec GitHub (origin/main)
+Dernière commande : git commit -m "chore: initialize repository with project specifications and agent kit"
 ```
 
 ---
@@ -32,7 +32,7 @@ Dernière commande : (aucune)
 | Version cible suivante | V1 — Socle |
 | Phase SAM de la version cible | Design |
 | Dernière mise à jour | 2026-10-22 |
-| Dépôt | À vérifier |
+| Dépôt | Initialisé sur `main`, synchronisé avec GitHub (`origin/main`) |
 
 ### Jalons de préparation
 
@@ -40,9 +40,10 @@ Dernière commande : (aucune)
 |---|---|---|
 | Cahier des charges rédigé | ✅ | Version du 16 oct. 2026 |
 | Master prompt v2 + kit Antigravity | ✅ | Ce document et `AGENTS.md`, `.agents/` |
+| Dépôt Git initialisé et configuré | ✅ | Synchronisé avec GitHub (`main`) |
+| Nom, domaine, identité visuelle | 🟨 | Nom et domaine validés : DataMboa / datamboa.com ; identité visuelle en cours |
 | Rendu académique du document d'analyse | ⬜ | Échéance indiquée : 10 nov. 2026 (à confirmer) |
 | Priorités et formules validées | ⬜ | Critère de passage de la préparation |
-| Nom, domaine, identité visuelle | ⬜ | À fixer avant les maquettes |
 | Choix de l'agrégateur Mobile Money | ⬜ | À comparer avant la V4, pas bloquant pour la V1 |
 | Premier cours rédigé (Excel débutant, FR + EN) | ⬜ | Le contenu est le vrai goulot d'étranglement |
 
@@ -121,13 +122,13 @@ Dernière commande : (aucune)
 
 | Zone | État | Notes |
 |---|---|---|
-| Monorepo, `docker-compose.yml`, `.env.example`, CI | ⬜ | |
-| `backend/` (Django) — applications créées | ⬜ | Aucune pour l'instant (état supposé) |
-| `frontend/` (Next.js) — design system `ui/` | ⬜ | Un front peut déjà exister : à vérifier |
-| `messages/fr.json` et `messages/en.json` | ⬜ | |
-| Contrat OpenAPI (`docs/api/`) | ⬜ | |
-| Tests (back, front, E2E) | ⬜ | |
-| Déploiement | ⬜ | |
+| Monorepo, `docker-compose.yml`, `.env.example`, CI | 🟨 | `docker-compose.yml` et `.env.example` créés |
+| `backend/` (Django) — applications créées | 🟨 | Projet `config` initialisé, structure `apps/` prête, check OK |
+| `frontend/` (Next.js) — design system `ui/` | 🟨 | Next.js 16 + Tailwind v4 + `next-intl` bilingue FR/EN + tokens DataMboa, build testé avec succès |
+| `messages/fr.json` et `messages/en.json` | ✅ | Fichiers créés et branchés via middleware next-intl |
+| Contrat OpenAPI (`docs/api/`) | ⬜ | À générer après les premiers endpoints |
+| Tests (back, front, E2E) | ⬜ | À configurer |
+| Déploiement | ⬜ | Prêt pour liaison Vercel (dossier `frontend`) |
 
 ---
 
@@ -141,29 +142,26 @@ Dernière commande : (aucune)
 | 2026-10-16 | Paiement manuel via WhatsApp en V1, Mobile Money intégré en V4 | — |
 | 2026-10-16 | Quatre formules : Découverte 0 / Essentiel 10 000 / Professionnel 30 000 / Expert 100 000 FCFA par mois (à tester dès la V1) | — |
 | 2026-10-22 | Agent de codage : Antigravity ; instructions dans `AGENTS.md` et `.agents/` | — |
+| 2026-10-22 | Nom de la plateforme retenu : **DataMboa** ; nom de domaine cible : **datamboa.com** | — |
 
 ---
 
 ## 6. Questions ouvertes
 
-1. Nom de la plateforme, nom de domaine, identité visuelle.
-2. Un front existe-t-il déjà, et comment fusionner son master prompt avec `MASTER_PROMPT.md` ?
-3. Agrégateur Mobile Money (Notch Pay, Campay, CinetPay, Flutterwave, Paystack) : frais, retrait, fiabilité, conditions pour une société camerounaise.
-4. Tableur du laboratoire Excel (choix après prototype).
-5. Hébergement : VPS + Docker recommandé (Vercel gratuit réservé aux prototypes).
-6. Qui rédige les contenus ? Au moins un rédacteur est recommandé.
-7. Aspects légaux (mentions, CGU, remboursement, protection des données) : validation juridique avant la V4.
+1. Agrégateur Mobile Money (Notch Pay, Campay, CinetPay, Flutterwave, Paystack) : frais, retrait, fiabilité, conditions pour une société camerounaise (pour V4).
+2. Tableur du laboratoire Excel (choix après prototype en V2).
+3. Hébergement : VPS + Docker recommandé (Vercel gratuit réservé aux prototypes).
+4. Qui rédige les contenus ? Au moins un rédacteur est recommandé en soutien à Laure.
+5. Aspects légaux (mentions, CGU, remboursement, protection des données) : validation juridique avant la V4.
 
 ---
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. Confirmer l'état réel (dépôt, front existant) et corriger ce fichier.
-2. Fixer nom, domaine et identité visuelle minimale.
-3. Maquettes **mobile (360 px)** des écrans V1 : catalogue, leçon, paiement WhatsApp.
-4. Revue des maquettes avec de vrais apprenants (téléphone, connexion moyenne).
-5. Initialiser le monorepo : `docker-compose.yml`, `.env.example`, CI (lint + tests + build), squelettes `frontend/` et `backend/`.
-6. F1.1 + F1.3 : comptes et rôles (`accounts`).
+1. Commiter et fusionner l'initialisation du monorepo (`chore/monorepo-setup` -> `main`).
+2. Déployer sur Vercel (connecter le dépôt GitHub, indiquer le dossier racine `frontend`).
+3. F1.4 : Implémenter le Catalogue de cours mobile-first (360 px) à partir de la maquette Stitch.
+4. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts`).
 
 ---
 
@@ -172,3 +170,5 @@ Dernière commande : (aucune)
 | Date | Exigence(s) | Ce qui a été fait | Fichiers clés | Reste à faire |
 |---|---|---|---|---|
 | 2026-10-22 | — | Master prompt v2, suivi d'avancement, kit Antigravity créés | `MASTER_PROMPT.md`, `PROJECT_STATUS.md`, `AGENTS.md`, `.agents/` | Confirmer l'état réel du projet |
+| 2026-10-22 | — | Initialisation Git (.gitignore, premier commit sur main, relié et poussé sur GitHub) ; choix du nom DataMboa (datamboa.com) | `.gitignore`, `PROJECT_STATUS.md` | Identité visuelle et maquettes 360 px |
+| 2026-10-22 | — | Maquettes mobile (docs/wireframes-v1-mobile.md) + Squelette monorepo (docker-compose, .env.example, frontend Next.js + next-intl bilingue FR/EN, backend Django REST) | `docker-compose.yml`, `.env.example`, `frontend/`, `backend/` | Commit et merge sur main |

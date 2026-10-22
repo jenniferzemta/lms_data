@@ -1,0 +1,51 @@
+{
+  "Common": {
+    "appName": "DataMboa",
+    "tagline": "Data analytics through practice, from home.",
+    "startFree": "Start for free",
+    "seeCourses": "Explore courses",
+    "pricing": "Subscription plans",
+    "lightMode": "Data-saving mode",
+    "language": "Language",
+    "minutes": "min",
+    "hours": "h"
+  },
+  "Navigation": {
+    "home": "Home",
+    "courses": "Courses",
+    "practice": "Practice",
+    "pricing": "Plans",
+    "profile": "Profile",
+    "login": "Sign In",
+    "register": "Sign Up"
+  },
+  "Catalog": {
+    "title": "Course Catalog",
+    "subtitle": "Master critical data analytics tools with real African business cases.",
+    "searchPlaceholder": "Search by tool or topic (e.g. Excel, Pivot Table, SQL)...",
+    "allTools": "All tools",
+    "allLevels": "All levels",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "freeTier": "Free",
+    "proTier": "Essential",
+    "expertTier": "Professional"
+  },
+  "Lesson": {
+    "previous": "Previous",
+    "next": "Next",
+    "takeQuiz": "Take quiz",
+    "downloadFiles": "Exercise files",
+    "lightModeNotice": "Data-saving mode enabled: video replaced by audio and summary to save mobile bandwidth."
+  },
+  "Billing": {
+    "title": "Activate subscription",
+    "currency": "FCFA",
+    "monthly": "month",
+    "manualPaymentTitle": "Secure payment via Mobile Money (MTN / Orange)",
+    "sendProofWhatsApp": "Send receipt via WhatsApp",
+    "copyNumber": "Copy number",
+    "declarePayment": "Submit payment details"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "Common": {
+    "appName": "DataMboa",
+    "tagline": "L'analyse de données par la pratique, chez nous.",
+    "startFree": "Commencer gratuitement",
+    "seeCourses": "Explorer les cours",
+    "pricing": "Formules d'abonnement",
+    "lightMode": "Mode léger",
+    "language": "Langue",
+    "minutes": "min",
+    "hours": "h"
+  },
+  "Navigation": {
+    "home": "Accueil",
+    "courses": "Cours",
+    "practice": "Pratique",
+    "pricing": "Formules",
+    "profile": "Profil",
+    "login": "Connexion",
+    "register": "Inscription"
+  },
+  "Catalog": {
+    "title": "Catalogue de formations",
+    "subtitle": "Maîtrisez les outils clés de l'analyse de données avec des cas réels africains.",
+    "searchPlaceholder": "Rechercher un outil, un sujet (ex: Excel, TCD, SQL)...",
+    "allTools": "Tous les outils",
+    "allLevels": "Tous niveaux",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "freeTier": "Gratuit",
+    "proTier": "Essentiel",
+    "expertTier": "Professionnel"
+  },
+  "Lesson": {
+    "previous": "Précédente",
+    "next": "Suivante",
+    "takeQuiz": "Passer au quiz",
+    "downloadFiles": "Fichiers d'exercice",
+    "lightModeNotice": "Mode léger activé : vidéo remplacée par l'audio et le résumé pour économiser vos données."
+  },
+  "Billing": {
+    "title": "Activer mon abonnement",
+    "currency": "FCFA",
+    "monthly": "mois",
+    "manualPaymentTitle": "Paiement sécurisé par Mobile Money (MTN / Orange)",
+    "sendProofWhatsApp": "Envoyer ma preuve sur WhatsApp",
+    "copyNumber": "Copier le numéro",
+    "declarePayment": "Déclarer mon transfert"
+  }
+}
