@@ -434,13 +434,13 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 Phase globale     : PRÉPARATION (avant V1)
 Version suivante  : V1 Socle — phase SAM : Design
 Avancement (M)    : V1 0/13 · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; dépôt Git initialisé et synchronisé avec GitHub ; nom fixé (DataMboa / datamboa.com)
-En cours          : identité visuelle minimale et maquettes mobile (360 px) des écrans V1
-Prochaine tâche   : maquettes mobile (360 px) des 3 écrans V1 (catalogue, leçon, paiement WhatsApp), puis initialisation du monorepo
+Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé (Next.js 16 + Django REST) ; premier déploiement Vercel réussi ; avertissement Turbopack/Tailwind corrigé
+En cours          : maquettes et implémentation du catalogue mobile (360 px)
+Prochaine tâche   : F1.4 : Implémenter le Catalogue de cours mobile-first (360 px)
 Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
 Dépôt             : Initialisé sur main, synchronisé avec GitHub (origin/main)
-Dernière commande : git commit -m "chore: initialize repository with project specifications and agent kit"
+Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind loader and inter font"
 ```
 
 ---

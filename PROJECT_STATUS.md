@@ -13,13 +13,13 @@
 Phase globale     : PRÉPARATION (avant V1)
 Version suivante  : V1 Socle — phase SAM : Design
 Avancement (M)    : V1 0/13 · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; dépôt Git initialisé et synchronisé avec GitHub ; nom fixé (DataMboa / datamboa.com)
-En cours          : identité visuelle minimale et maquettes mobile (360 px) des écrans V1
-Prochaine tâche   : maquettes mobile (360 px) des 3 écrans V1 (catalogue, leçon, paiement WhatsApp), puis initialisation du monorepo
+Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé (Next.js 16 + Django REST) ; premier déploiement Vercel réussi ; avertissement Turbopack/Tailwind corrigé
+En cours          : maquettes et implémentation du catalogue mobile (360 px)
+Prochaine tâche   : F1.4 : Implémenter le Catalogue de cours mobile-first (360 px)
 Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA)
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
 Dépôt             : Initialisé sur main, synchronisé avec GitHub (origin/main)
-Dernière commande : git commit -m "chore: initialize repository with project specifications and agent kit"
+Dernière commande : git commit -m "fix(frontend): configure turbopack tailwind loader and inter font"
 ```
 
 ---
@@ -128,7 +128,7 @@ Dernière commande : git commit -m "chore: initialize repository with project sp
 | `messages/fr.json` et `messages/en.json` | ✅ | Fichiers créés et branchés via middleware next-intl |
 | Contrat OpenAPI (`docs/api/`) | ⬜ | À générer après les premiers endpoints |
 | Tests (back, front, E2E) | ⬜ | À configurer |
-| Déploiement | ⬜ | Prêt pour liaison Vercel (dossier `frontend`) |
+| Déploiement | ✅ | Déployé sur Vercel (frontend relié à origin/main, build production validé) |
 
 ---
 
@@ -158,10 +158,8 @@ Dernière commande : git commit -m "chore: initialize repository with project sp
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. Commiter et fusionner l'initialisation du monorepo (`chore/monorepo-setup` -> `main`).
-2. Déployer sur Vercel (connecter le dépôt GitHub, indiquer le dossier racine `frontend`).
-3. F1.4 : Implémenter le Catalogue de cours mobile-first (360 px) à partir de la maquette Stitch.
-4. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts`).
+1. F1.4 : Implémenter le Catalogue de cours mobile-first (360 px) à partir de la maquette Stitch.
+2. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts`).
 
 ---
 
@@ -172,3 +170,4 @@ Dernière commande : git commit -m "chore: initialize repository with project sp
 | 2026-10-22 | — | Master prompt v2, suivi d'avancement, kit Antigravity créés | `MASTER_PROMPT.md`, `PROJECT_STATUS.md`, `AGENTS.md`, `.agents/` | Confirmer l'état réel du projet |
 | 2026-10-22 | — | Initialisation Git (.gitignore, premier commit sur main, relié et poussé sur GitHub) ; choix du nom DataMboa (datamboa.com) | `.gitignore`, `PROJECT_STATUS.md` | Identité visuelle et maquettes 360 px |
 | 2026-10-22 | — | Maquettes mobile (docs/wireframes-v1-mobile.md) + Squelette monorepo (docker-compose, .env.example, frontend Next.js + next-intl bilingue FR/EN, backend Django REST) | `docker-compose.yml`, `.env.example`, `frontend/`, `backend/` | Commit et merge sur main |
+| 2026-10-22 | — | Résolution avertissement Turbopack Tailwind v4, ajout police Inter optimisée, premier déploiement Vercel validé | `frontend/next.config.ts`, `frontend/app/[locale]/layout.tsx` | F1.4 Catalogue de cours |
