@@ -13,13 +13,13 @@
 Phase globale     : PRÉPARATION (avant V1)
 Version suivante  : V1 Socle — phase SAM : Développement (F1.4)
 Avancement (M)    : V1 0/13 (F1.4 en validation 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration fidèle de la maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page
-En cours          : validation visuelle par Laure du catalogue et de l'accueil
+Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles ; alignement vue PC et typographies (Outfit pour titres, Plus Jakarta Sans pour le corps) sur le style portail étudiant Université de Douala (sidebar fixe gauche, topbar, grille asymétrique et cartes statistiques), tout en préservant intacte la vue mobile validée (360px)
+En cours          : validation visuelle par Laure de la nouvelle vue PC et mobile
 Prochaine tâche   : validation visuelle F1.4, puis F1.1 + F1.3 (modélisation Django des comptes et rôles)
-Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react officielles
+Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react ; polices Outfit + Plus Jakarta Sans ; vue PC inspirée du portail étudiant Douala
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/catalog-page, build Next.js validé (8/8 pages générées avec succès)
-Dernière commande : git commit -m "feat(catalog): implement responsive datalab-styled catalog and home views"
+Dépôt             : Branche feat/catalog-page, build Next.js validé (8/8 pages compilées avec succès)
+Dernière commande : git commit -m "feat(desktop): align pc layout with student portal and outfit fonts"
 ```
 
 ---
@@ -144,6 +144,7 @@ Dernière commande : git commit -m "feat(catalog): implement responsive datalab-
 | 2026-10-22 | Agent de codage : Antigravity ; instructions dans `AGENTS.md` et `.agents/` | — |
 | 2026-10-22 | Nom de la plateforme retenu : **DataMboa** ; nom de domaine cible : **datamboa.com** | — |
 | 2026-10-22 | Design system conforme à la maquette Stitch DataLab (DataMboa), icônes officielles `lucide-react`, palette `#142b4a`, `#13b8a6`, `#f4b942` | — |
+| 2026-10-22 | Typographies de référence : Outfit pour les titres et Plus Jakarta Sans pour le corps ; vue PC inspirée du portail étudiant de l'Université de Douala (sidebar fixe, topbar de recherche, grille 2 colonnes asymétrique) tout en gardant intacte la vue mobile validée | — |
 
 ---
 
@@ -159,7 +160,7 @@ Dernière commande : git commit -m "feat(catalog): implement responsive datalab-
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. Validation visuelle de Laure sur le catalogue et l'accueil (`feat/catalog-page`).
+1. Validation visuelle de Laure sur le catalogue et l'accueil en vue PC et mobile (`feat/catalog-page`).
 2. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts`).
 
 ---
@@ -173,3 +174,5 @@ Dernière commande : git commit -m "feat(catalog): implement responsive datalab-
 | 2026-10-22 | — | Maquettes mobile (docs/wireframes-v1-mobile.md) + Squelette monorepo (docker-compose, .env.example, frontend Next.js + next-intl bilingue FR/EN, backend Django REST) | `docker-compose.yml`, `.env.example`, `frontend/`, `backend/` | Commit et merge sur main |
 | 2026-10-22 | — | Résolution avertissement Turbopack Tailwind v4, ajout police Inter optimisée, premier déploiement Vercel validé | `frontend/next.config.ts`, `frontend/app/[locale]/layout.tsx` | F1.4 Catalogue de cours |
 | 2026-10-22 | F1.4 | Intégration exacte des vues Accueil et Catalogue depuis la maquette Stitch DataLab (DataMboa), palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page | `frontend/app/[locale]/courses/page.tsx`, `frontend/features/catalog/`, `frontend/components/`, `frontend/messages/` | Validation visuelle par Laure, puis F1.1+F1.3 backend Django |
+| 2026-10-22 | F1.4 | Refonte complète de la vue PC calquée sur l'ergonomie du portail étudiant Université de Douala (sidebar navigation fixe, topbar avec recherche Ctrl+K, cartes statistiques et disposition asymétrique), typographies Outfit et Plus Jakarta Sans, tout en maintenant la vue mobile 360 px inchangée | `frontend/app/[locale]/page.tsx`, `frontend/app/[locale]/courses/page.tsx`, `frontend/components/DesktopSidebar.tsx`, `frontend/components/AppHeader.tsx`, `frontend/app/globals.css` | Validation visuelle par Laure |
+
