@@ -27,4 +27,12 @@ export const authService = {
       method: 'GET',
     });
   },
+
+  async loginWithGoogle(credential: string): Promise<User> {
+    return apiClient<User>('/auth/google/', {
+      method: 'POST',
+      body: JSON.stringify({ credential }),
+    });
+  },
 };
+

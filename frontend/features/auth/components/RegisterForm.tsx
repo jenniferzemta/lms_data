@@ -9,6 +9,7 @@ import { Input } from '@/ui/Input';
 import { Button } from '@/ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '@/lib/api-client';
+import { GoogleSignInButton } from './GoogleSignInButton';
 
 export const RegisterForm: React.FC = () => {
   const t = useTranslations('Auth');
@@ -89,6 +90,19 @@ export const RegisterForm: React.FC = () => {
           <span>{errorMessage}</span>
         </div>
       )}
+
+      {/* Google Sign Up Option */}
+      <div className="mb-4">
+        <GoogleSignInButton onErrorMessage={(msg) => setErrorMessage(msg)} />
+      </div>
+
+      <div className="relative my-4 flex items-center justify-center">
+        <div className="border-t border-brand-border w-full" />
+        <span className="bg-brand-surface px-3 text-[11px] font-semibold uppercase tracking-wider text-brand-muted shrink-0">
+          {t('orDivider')}
+        </span>
+        <div className="border-t border-brand-border w-full" />
+      </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

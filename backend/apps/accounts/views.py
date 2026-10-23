@@ -7,12 +7,17 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.serializers import (
+    GoogleAuthSerializer,
     LoginSerializer,
     RegisterLearnerSerializer,
     UpdateLearnerProfileSerializer,
     UserSerializer,
 )
-from accounts.services import register_learner, update_learner_profile
+from accounts.services import (
+    authenticate_or_register_google_user,
+    register_learner,
+    update_learner_profile,
+)
 
 
 class RegisterLearnerView(APIView):
@@ -110,3 +115,29 @@ class MeView(APIView):
             )
 
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class GoogleAuthView(APIView):
+    """
+    POST /api/v1/auth/google/
+    Authenticates or registers a learner using a verified Google OAuth credential token.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request) -> Response:
+        serializer = GoogleAuthSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        credential = serializer.validated_data['credential']
+        try:
+            user = authenticate_or_register_google_user(id_token=credential)
+        except Exception as err:
+            return Response(
+                {'credential': getattr(err, 'message', str(err))},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        login(request, user)
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+

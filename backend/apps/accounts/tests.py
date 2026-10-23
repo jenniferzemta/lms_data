@@ -1,3 +1,4 @@
+from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -353,4 +354,33 @@ class AccountsAPITests(TestCase):
 
         response = self.client.post(self.logout_url)
         self.assertEqual(response.status_code, 200)
+
+    @patch('accounts.services.verify_google_id_token')
+    def test_google_auth_api_success(self, mock_verify):
+        mock_verify.return_value = {
+            'email': 'google.learner@datamboa.com',
+            'given_name': 'Google',
+            'family_name': 'Learner',
+            'aud': 'dummy-client-id',
+        }
+        response = self.client.post(
+            '/api/v1/auth/google/',
+            {'credential': 'valid-fake-token'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['email'], 'google.learner@datamboa.com')
+        self.assertEqual(response.data['role'], 'LEARNER')
+        self.assertTrue(User.objects.filter(email='google.learner@datamboa.com').exists())
+
+    @patch('accounts.services.verify_google_id_token')
+    def test_google_auth_api_invalid_token_fails(self, mock_verify):
+        mock_verify.side_effect = ValidationError('Invalid Google token.')
+        response = self.client.post(
+            '/api/v1/auth/google/',
+            {'credential': 'invalid-token'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+
 

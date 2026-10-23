@@ -112,6 +112,9 @@
     "hasAccount": "Already have an account?",
     "registerLink": "Sign up for free",
     "loginLink": "Sign in",
+    "continueWithGoogle": "Continue with Google",
+    "orDivider": "or",
+    "googleNotConfigured": "Google sign-in requires NEXT_PUBLIC_GOOGLE_CLIENT_ID in your .env file. Please use email registration for now.",
     "genericError": "An error occurred, please verify your details."
   }
 }

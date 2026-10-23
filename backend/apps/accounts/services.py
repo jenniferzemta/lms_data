@@ -124,3 +124,71 @@ def update_learner_profile(
 
     profile.save()
     return profile
+
+
+def verify_google_id_token(id_token: str) -> dict:
+    """
+    Verifies a Google OAuth ID token using Google's public tokeninfo endpoint.
+    Returns token payload containing email and user identity.
+    Raises ValidationError if invalid.
+    """
+    import json
+    import os
+    import urllib.request
+    from urllib.error import URLError
+
+    url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+    try:
+        req = urllib.request.Request(url, headers={'User-Agent': 'DataMboa-LMS'})
+        with urllib.request.urlopen(req, timeout=5) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+    except (URLError, TimeoutError, ValueError):
+        raise ValidationError({'credential': _('Invalid or expired Google authentication token.')})
+
+    google_client_id = os.environ.get('GOOGLE_CLIENT_ID')
+    if google_client_id and payload.get('aud') != google_client_id:
+        raise ValidationError({'credential': _('Google token audience mismatch.')})
+
+    email = payload.get('email')
+    if not email:
+        raise ValidationError({'credential': _('No email returned by Google account.')})
+
+    return payload
+
+
+@transaction.atomic
+def authenticate_or_register_google_user(*, id_token: str) -> User:
+    """
+    Verifies a Google ID token and retrieves or provisions a learner User.
+    Executed in a transaction to guarantee atomic user + profile creation.
+    """
+    payload = verify_google_id_token(id_token)
+
+    email = payload['email'].strip().lower()
+    first_name = payload.get('given_name', '').strip() or 'Apprenant'
+    last_name = payload.get('family_name', '').strip() or 'Google'
+
+    user = User.objects.filter(email=email).first()
+
+    if not user:
+        # Create learner with an unusable random password
+        user = User(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            role=User.Role.LEARNER,
+        )
+        user.set_unusable_password()
+        user.save()
+
+        LearnerProfile.objects.create(
+            user=user,
+            study_level='',
+            learning_goal='',
+            whatsapp_consent=False,
+        )
+    elif not hasattr(user, 'learner_profile') and user.is_learner:
+        LearnerProfile.objects.create(user=user)
+
+    return user
+

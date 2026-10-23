@@ -107,3 +107,12 @@ class UpdateLearnerProfileSerializer(serializers.Serializer):
     study_level = serializers.CharField(max_length=100, required=False, allow_blank=True)
     learning_goal = serializers.CharField(max_length=255, required=False, allow_blank=True)
     whatsapp_consent = serializers.BooleanField(required=False)
+
+
+class GoogleAuthSerializer(serializers.Serializer):
+    """
+    Validates Google OAuth ID token credentials sent by the frontend.
+    """
+
+    credential = serializers.CharField(required=True)
+

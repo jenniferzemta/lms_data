@@ -112,6 +112,9 @@
     "hasAccount": "Vous avez déjà un compte ?",
     "registerLink": "Inscrivez-vous gratuitement",
     "loginLink": "Connectez-vous",
+    "continueWithGoogle": "Continuer avec Google",
+    "orDivider": "ou",
+    "googleNotConfigured": "La connexion Google nécessite NEXT_PUBLIC_GOOGLE_CLIENT_ID dans .env. Utilisez pour l'instant l'inscription par email.",
     "genericError": "Une erreur est survenue, veuillez vérifier vos informations."
   }
 }

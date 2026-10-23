@@ -52,6 +52,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   login: (payload: LoginPayload) => Promise<User>;
   register: (payload: RegisterLearnerPayload) => Promise<User>;
+  loginWithGoogle: (credential: string) => Promise<User>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
