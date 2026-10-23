@@ -66,9 +66,9 @@ export const DesktopSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col justify-between w-64 xl:w-72 fixed inset-y-0 left-0 bg-white border-r border-brand-border z-40 select-none shadow-xs">
+    <aside className="hidden lg:flex flex-col justify-between w-64 xl:w-72 fixed inset-y-0 left-0 bg-white border-r border-brand-border z-40 select-none shadow-xs overflow-y-auto">
       {/* Top Branding Section */}
-      <div className="flex flex-col">
+      <div className="flex flex-col shrink-0">
         {/* Brand Header */}
         <div className="h-16 px-6 flex items-center gap-3 border-b border-brand-border/60">
           <Link href="/" className="flex items-center gap-2.5">
@@ -124,7 +124,7 @@ export const DesktopSidebar: React.FC = () => {
       </div>
 
       {/* Bottom Area: Help Card & User Profile Footer */}
-      <div className="p-4 space-y-3 border-t border-brand-border/60">
+      <div className="p-4 space-y-3 border-t border-brand-border/60 shrink-0 mt-auto bg-white">
         {/* Support Card */}
         <div className="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/60 text-xs">
           <div className="flex items-center gap-2 mb-1.5 text-teal-900 font-bold">
