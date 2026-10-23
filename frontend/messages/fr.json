@@ -23,7 +23,7 @@
     "register": "Inscription"
   },
   "Home": {
-    "greeting": "Bonjour, Laure 👋",
+    "greeting": "Bonjour, Laure",
     "greetingSubtitle": "Prête à progresser aujourd'hui ?",
     "syncLightMode": "Synchronisé · Mode léger actif",
     "daysStreak": "jours",
