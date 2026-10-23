@@ -3,6 +3,7 @@ import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import { routing } from '@/i18n/routing';
+import { AuthProvider } from '@/features/auth';
 import '../globals.css';
 
 const outfit = Outfit({
@@ -42,7 +43,9 @@ export default async function LocaleLayout({
     <html lang={locale} className={`${outfit.variable} ${plusJakartaSans.variable}`}>
       <body className="bg-brand-canvas text-brand-text antialiased min-h-screen">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <AuthProvider>
+            {children}
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>

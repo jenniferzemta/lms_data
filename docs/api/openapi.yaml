@@ -1,0 +1,252 @@
+openapi: 3.1.0
+info:
+  title: DataMboa LMS API
+  version: 1.0.0
+  description: Official REST API specification for DataMboa e-learning platform.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development server
+paths:
+  /auth/register/:
+    post:
+      summary: Register a new learner
+      description: Creates a user account with the LEARNER role, establishes an authenticated session, and creates the associated LearnerProfile.
+      operationId: registerLearner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterLearnerRequest'
+      responses:
+        '201':
+          description: Learner registered and session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Validation error (duplicate email, weak password, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login/:
+    post:
+      summary: Log in with credentials
+      description: Authenticates user credentials via email and password, establishing an HTTP-only secure session cookie.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout/:
+    post:
+      summary: Log out
+      description: Clears the current user session cookie.
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out.
+        '401':
+          description: Authentication credentials were not provided.
+
+  /auth/me/:
+    get:
+      summary: Get current authenticated user
+      description: Returns the user profile of the currently logged-in account.
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Authenticated user profile data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '403':
+          description: Authentication credentials were not provided.
+    patch:
+      summary: Update current learner profile
+      description: Updates editable personal details and learner profile goals.
+      operationId: updateCurrentUserProfile
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Updated user profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '403':
+          description: Authentication credentials were not provided.
+
+components:
+  schemas:
+    RegisterLearnerRequest:
+      type: object
+      required:
+        - email
+        - password
+        - first_name
+        - last_name
+      properties:
+        email:
+          type: string
+          format: email
+          example: laure@exemple.cm
+        password:
+          type: string
+          format: password
+          minLength: 8
+          example: SecurePass123
+        first_name:
+          type: string
+          example: Laure
+        last_name:
+          type: string
+          example: Kamga
+        phone_number:
+          type: string
+          example: "+237657546259"
+        study_level:
+          type: string
+          example: Licence 3
+        learning_goal:
+          type: string
+          example: Reconversion Data Analyst
+        whatsapp_consent:
+          type: boolean
+          default: false
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: laure@exemple.cm
+        password:
+          type: string
+          format: password
+          example: SecurePass123
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone_number:
+          type: string
+        study_level:
+          type: string
+        learning_goal:
+          type: string
+        whatsapp_consent:
+          type: boolean
+
+    LearnerProfileResponse:
+      type: object
+      properties:
+        study_level:
+          type: string
+        learning_goal:
+          type: string
+        whatsapp_consent:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - email
+        - first_name
+        - last_name
+        - full_name
+        - role
+        - is_learner
+        - is_instructor
+        - is_admin_role
+        - created_at
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: laure@exemple.cm
+        first_name:
+          type: string
+          example: Laure
+        last_name:
+          type: string
+          example: Kamga
+        full_name:
+          type: string
+          example: Laure Kamga
+        phone_number:
+          type: string
+          example: "+237657546259"
+        role:
+          type: string
+          enum: [LEARNER, INSTRUCTOR, ADMIN]
+          example: LEARNER
+        is_learner:
+          type: boolean
+        is_instructor:
+          type: boolean
+        is_admin_role:
+          type: boolean
+        learner_profile:
+          $ref: '#/components/schemas/LearnerProfileResponse'
+        created_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object

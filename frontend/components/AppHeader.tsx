@@ -5,11 +5,13 @@ import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { User, Search, Bell } from 'lucide-react';
+import { useAuth } from '@/features/auth';
 
 export const AppHeader: React.FC = () => {
   const tCommon = useTranslations('Common');
   const tNav = useTranslations('Navigation');
   const tCatalog = useTranslations('Catalog');
+  const { user } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-2xs transition-all lg:pl-64 xl:pl-72">
@@ -67,24 +69,34 @@ export const AppHeader: React.FC = () => {
             <span className="w-2 h-2 rounded-full bg-brand-amber absolute top-2 right-2 ring-2 ring-white" />
           </button>
 
-          {/* User Profile Chip */}
-          <Link
-            href="/profile"
-            aria-label={tNav('profile')}
-            className="flex items-center gap-2.5 min-h-[44px] p-1 sm:px-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent sm:border-brand-border/60"
-          >
-            <div className="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-2xs">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="hidden md:flex flex-col text-left">
-              <span className="text-xs font-bold text-brand-primary leading-tight">
-                Laure
-              </span>
-              <span className="text-[10px] text-brand-muted">
-                Étudiante
-              </span>
-            </div>
-          </Link>
+          {/* User Profile / Auth Link */}
+          {user ? (
+            <Link
+              href="/profile"
+              aria-label={tNav('profile')}
+              className="flex items-center gap-2.5 min-h-[44px] p-1 sm:px-2 rounded-xl hover:bg-slate-50 transition-colors border border-transparent sm:border-brand-border/60"
+            >
+              <div className="w-8 h-8 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-2xs">
+                {user.first_name ? user.first_name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+              </div>
+              <div className="hidden md:flex flex-col text-left">
+                <span className="text-xs font-bold text-brand-primary leading-tight truncate max-w-[120px]">
+                  {user.first_name || user.email.split('@')[0]}
+                </span>
+                <span className="text-[10px] text-brand-muted">
+                  {user.is_learner ? 'Apprenant' : user.role}
+                </span>
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="min-h-[40px] px-3.5 py-1.5 rounded-xl bg-brand-primary text-white font-semibold text-xs flex items-center gap-1.5 shadow-2xs hover:bg-brand-primary-dark transition-colors"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>{tNav('login')}</span>
+            </Link>
+          )}
         </div>
       </div>
     </header>

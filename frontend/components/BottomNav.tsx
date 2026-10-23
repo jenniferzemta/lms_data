@@ -4,10 +4,12 @@ import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { Home, Compass, BookOpen, TrendingUp, User } from 'lucide-react';
+import { useAuth } from '@/features/auth';
 
 export const BottomNav: React.FC = () => {
   const tNav = useTranslations('Navigation');
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const navItems = [
     {
@@ -40,10 +42,10 @@ export const BottomNav: React.FC = () => {
     },
     {
       key: 'profile',
-      label: tNav('profile'),
-      href: '/profile',
+      label: user ? tNav('profile') : tNav('login'),
+      href: user ? '/profile' : '/login',
       icon: User,
-      isActive: pathname.startsWith('/profile')
+      isActive: pathname.startsWith('/profile') || pathname.startsWith('/login') || pathname.startsWith('/register')
     }
   ];
 
