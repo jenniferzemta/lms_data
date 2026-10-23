@@ -233,3 +233,124 @@ class AccountPermissionsTests(TestCase):
 
         request.user = self.learner
         self.assertFalse(perm.has_permission(request, None))
+
+
+class AccountsAPITests(TestCase):
+    def setUp(self):
+        self.register_url = '/api/v1/auth/register/'
+        self.login_url = '/api/v1/auth/login/'
+        self.logout_url = '/api/v1/auth/logout/'
+        self.me_url = '/api/v1/auth/me/'
+
+    def test_register_learner_api_success(self):
+        payload = {
+            'email': 'api.learner@datamboa.com',
+            'password': 'SecurePassword123',
+            'first_name': 'Suzanne',
+            'last_name': 'Mballa',
+            'phone_number': '+237699112233',
+            'study_level': 'Master 2',
+            'learning_goal': 'Reconversion Data Analyst',
+            'whatsapp_consent': True,
+        }
+        response = self.client.post(self.register_url, payload, content_type='application/json')
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['email'], 'api.learner@datamboa.com')
+        self.assertEqual(response.data['first_name'], 'Suzanne')
+        self.assertEqual(response.data['role'], 'LEARNER')
+        self.assertEqual(response.data['learner_profile']['study_level'], 'Master 2')
+
+    def test_register_learner_api_duplicate_email_fails(self):
+        register_learner(
+            email='already.exists@datamboa.com',
+            password='Password123',
+            first_name='Existing',
+            last_name='User',
+        )
+        payload = {
+            'email': 'already.exists@datamboa.com',
+            'password': 'Password123',
+            'first_name': 'Duplicate',
+            'last_name': 'User',
+        }
+        response = self.client.post(self.register_url, payload, content_type='application/json')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('email', response.data)
+
+    def test_login_api_success(self):
+        register_learner(
+            email='login.test@datamboa.com',
+            password='CorrectPassword123',
+            first_name='Eric',
+            last_name='Njoya',
+        )
+        response = self.client.post(
+            self.login_url,
+            {'email': 'login.test@datamboa.com', 'password': 'CorrectPassword123'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['email'], 'login.test@datamboa.com')
+
+    def test_login_api_wrong_password_fails(self):
+        register_learner(
+            email='wrong.pass@datamboa.com',
+            password='CorrectPassword123',
+            first_name='Eric',
+            last_name='Njoya',
+        )
+        response = self.client.post(
+            self.login_url,
+            {'email': 'wrong.pass@datamboa.com', 'password': 'WrongPassword123'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_me_api_authenticated(self):
+        user = register_learner(
+            email='me.user@datamboa.com',
+            password='Password123',
+            first_name='Marthe',
+            last_name='Ewandje',
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(self.me_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['email'], 'me.user@datamboa.com')
+        self.assertEqual(response.data['full_name'], 'Marthe Ewandje')
+
+    def test_me_api_unauthenticated_fails(self):
+        response = self.client.get(self.me_url)
+        self.assertEqual(response.status_code, 403)
+
+    def test_me_api_patch_profile(self):
+        user = register_learner(
+            email='patch.me@datamboa.com',
+            password='Password123',
+            first_name='Original',
+            last_name='Name',
+        )
+        self.client.force_login(user)
+
+        response = self.client.patch(
+            self.me_url,
+            {'first_name': 'UpdatedFirst', 'study_level': 'Doctorat'},
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['first_name'], 'UpdatedFirst')
+        self.assertEqual(response.data['learner_profile']['study_level'], 'Doctorat')
+
+    def test_logout_api_success(self):
+        user = register_learner(
+            email='logout.user@datamboa.com',
+            password='Password123',
+            first_name='Logout',
+            last_name='User',
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(self.logout_url)
+        self.assertEqual(response.status_code, 200)
+
