@@ -13,13 +13,16 @@ import {
   User, 
   LogOut,
   Sparkles,
-  ExternalLink
+  ExternalLink,
+  LogIn
 } from 'lucide-react';
+import { useAuth } from '@/features/auth';
 
 export const DesktopSidebar: React.FC = () => {
   const tNav = useTranslations('Navigation');
   const tCommon = useTranslations('Common');
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const isHome = pathname === '/';
   const isCourses = pathname.startsWith('/courses');
@@ -63,9 +66,9 @@ export const DesktopSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden lg:flex flex-col justify-between w-64 xl:w-72 fixed inset-y-0 left-0 bg-white border-r border-brand-border z-40 select-none shadow-xs">
+    <aside className="hidden lg:flex flex-col justify-between w-64 xl:w-72 fixed inset-y-0 left-0 bg-white border-r border-brand-border z-40 select-none shadow-xs overflow-y-auto">
       {/* Top Branding Section */}
-      <div className="flex flex-col">
+      <div className="flex flex-col shrink-0">
         {/* Brand Header */}
         <div className="h-16 px-6 flex items-center gap-3 border-b border-brand-border/60">
           <Link href="/" className="flex items-center gap-2.5">
@@ -121,7 +124,7 @@ export const DesktopSidebar: React.FC = () => {
       </div>
 
       {/* Bottom Area: Help Card & User Profile Footer */}
-      <div className="p-4 space-y-3 border-t border-brand-border/60">
+      <div className="p-4 space-y-3 border-t border-brand-border/60 shrink-0 mt-auto bg-white">
         {/* Support Card */}
         <div className="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/60 text-xs">
           <div className="flex items-center gap-2 mb-1.5 text-teal-900 font-bold">
@@ -142,30 +145,50 @@ export const DesktopSidebar: React.FC = () => {
           </a>
         </div>
 
-        {/* User Profile Mini Bar */}
-        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-brand-border/40">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-full bg-brand-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
-              <User className="w-4 h-4" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="font-bold text-xs text-brand-primary truncate">
-                Laure
-              </span>
-              <span className="text-[10px] text-brand-muted truncate">
-                Apprenante · Douala
-              </span>
-            </div>
-          </div>
+        {/* User Profile Mini Bar / Auth Links */}
+        {user ? (
+          <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-brand-border/40">
+            <Link href="/profile" className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity">
+              <div className="w-9 h-9 rounded-full bg-brand-primary text-white flex items-center justify-center font-bold text-xs shrink-0">
+                {user.first_name ? user.first_name.charAt(0).toUpperCase() : <User className="w-4 h-4" />}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="font-bold text-xs text-brand-primary truncate">
+                  {user.first_name || user.email.split('@')[0]}
+                </span>
+                <span className="text-[10px] text-brand-muted truncate">
+                  {user.is_learner ? 'Apprenant' : user.role}
+                </span>
+              </div>
+            </Link>
 
-          <button
-            type="button"
-            aria-label="Déconnexion"
-            className="p-1.5 rounded-lg text-brand-muted hover:text-red-600 hover:bg-red-50 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={() => logout()}
+              aria-label="Déconnexion"
+              title="Déconnexion"
+              className="p-1.5 rounded-lg text-brand-muted hover:text-red-600 hover:bg-red-50 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Link
+              href="/login"
+              className="w-full min-h-[38px] px-3 py-1.5 rounded-xl bg-brand-primary text-white text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-brand-primary-dark transition-colors shadow-2xs"
+            >
+              <LogIn className="w-3.5 h-3.5" />
+              <span>{tNav('login')}</span>
+            </Link>
+            <Link
+              href="/register"
+              className="w-full min-h-[36px] px-3 py-1 rounded-xl bg-brand-canvas text-brand-primary border border-brand-border text-xs font-semibold flex items-center justify-center hover:bg-slate-100 transition-colors"
+            >
+              <span>{tNav('register')}</span>
+            </Link>
+          </div>
+        )}
       </div>
     </aside>
   );

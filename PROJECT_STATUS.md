@@ -9,17 +9,17 @@
 ## 1. Bloc de reprise (à copier dans la section 16 du `MASTER_PROMPT.md` pour une IA sans accès au dépôt)
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-22]
-Phase globale     : PRÉPARATION (avant V1)
-Version suivante  : V1 Socle — phase SAM : Développement (F1.1 & F1.3)
-Avancement (M)    : V1 0/13 (F1.4 validé visuellement 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles ; alignement vue PC et typographies (Outfit pour titres, Plus Jakarta Sans pour le corps) sur le style portail étudiant Université de Douala (sidebar fixe gauche, topbar, grille asymétrique et cartes statistiques), tout en préservant intacte la vue mobile validée (360px) ; validation visuelle approuvée par Laure
-En cours          : fin de session / prêt pour F1.1 + F1.3
-Prochaine tâche   : F1.1 + F1.3 (modélisation Django des comptes et rôles `backend/apps/accounts` + merge de `feat/catalog-page` sur `main`)
-Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react ; polices Outfit + Plus Jakarta Sans ; vue PC inspirée du portail étudiant Douala
+[BLOC DE REPRISE — mis à jour le 2026-10-23]
+Phase globale     : PRÉPARATION / V1 SOCLE
+Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
+Avancement (M)    : V1 1/13 validé (F1.4 ✅, F1.1 🔎, F1.3 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ni navigation mobile ; Intégration bouton Google Sign-in ; Correction responsivité tablette 768px (iPad Mini) et défilement sidebar PC
+En cours          : Fusion de feat/accounts-and-roles sur main
+Prochaine tâche   : F1.5 (Structure de parcours d'apprentissage vers leçon : texte riche, vidéo, quiz, code)
+Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/catalog-page propre et à jour sur GitHub, build Next.js validé (8/8 pages compilées avec succès)
-Dernière commande : git commit -m "feat(desktop): align pc layout with university student portal and outfit fonts"
+Dépôt             : Branche feat/accounts-and-roles propre, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
+Dernière commande : git merge feat/accounts-and-roles && git push origin main
 ```
 
 ---
@@ -51,14 +51,14 @@ Dernière commande : git commit -m "feat(desktop): align pc layout with universi
 
 ## 3. Exigences par version
 
-### V1 — Socle · avancement M : 0/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
+### V1 — Socle · avancement M : 1/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
 
 | ID | Exigence | Prio | Statut | Notes / fichiers clés |
 |---|---|---|---|---|
-| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ⬜ | |
-| F1.2 | Interface et contenus bilingues FR/EN | M | ⬜ | |
-| F1.3 | Rôles et droits côté serveur | M | ⬜ | |
-| F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | 🔎 | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, branche feat/catalog-page |
+| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | 🔎 | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 25 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1 |
+| F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil et authentification |
+| F1.3 | Rôles et droits côté serveur | M | 🔎 | Modèle User rôles (LEARNER, INSTRUCTOR, ADMIN), LearnerProfile, InstructorProfile, permissions IsLearner/IsInstructor/IsAdminUserRole testées |
+| F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | ✅ | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, validé et fusionné sur main |
 | F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ⬜ | |
 | F1.6 | Fichiers téléchargeables par leçon | M | ⬜ | |
 | F1.7 | Quiz (unique, multiple, V/F, numérique) + note de passage | M | ⬜ | |
@@ -176,4 +176,5 @@ Dernière commande : git commit -m "feat(desktop): align pc layout with universi
 | 2026-10-22 | — | Résolution avertissement Turbopack Tailwind v4, ajout police Inter optimisée, premier déploiement Vercel validé | `frontend/next.config.ts`, `frontend/app/[locale]/layout.tsx` | F1.4 Catalogue de cours |
 | 2026-10-22 | F1.4 | Intégration exacte des vues Accueil et Catalogue depuis la maquette Stitch DataLab (DataMboa), palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page | `frontend/app/[locale]/courses/page.tsx`, `frontend/features/catalog/`, `frontend/components/`, `frontend/messages/` | Validation visuelle par Laure, puis F1.1+F1.3 backend Django |
 | 2026-10-22 | F1.4 | Refonte complète de la vue PC calquée sur l'ergonomie du portail étudiant Université de Douala (sidebar navigation fixe, topbar avec recherche Ctrl+K, cartes statistiques et disposition asymétrique), typographies Outfit et Plus Jakarta Sans, tout en maintenant la vue mobile 360 px inchangée | `frontend/app/[locale]/page.tsx`, `frontend/app/[locale]/courses/page.tsx`, `frontend/components/DesktopSidebar.tsx`, `frontend/components/AppHeader.tsx`, `frontend/app/globals.css` | Validation visuelle par Laure |
+| 2026-10-23 | F1.1, F1.3 | Implémentation complète de l'authentification et des rôles serveur : modèle User email-first avec rôles (LEARNER, INSTRUCTOR, ADMIN), profils LearnerProfile/InstructorProfile, services d'authentification par session et Google OAuth, sérialiseurs et vues Django REST (/api/v1/auth/), permissions d'accès, 25 tests unitaires et d'API passants sur PostgreSQL local, contrat OpenAPI 3.1, pages Next.js dédiées /login et /register sans sidebar, correction responsivité tablette 768px (BottomNav lg:hidden) et correction défilement DesktopSidebar | `backend/apps/accounts/`, `frontend/features/auth/`, `frontend/app/[locale]/login/`, `frontend/app/[locale]/register/`, `docs/api/openapi.yaml`, `frontend/components/BottomNav.tsx` | Fusion sur main et passage à F1.5 (Structure de cours) |
 

@@ -1,0 +1,47 @@
+import React from 'react';
+import { Link } from '@/i18n/routing';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { LoginForm } from '@/features/auth';
+import { ArrowLeft } from 'lucide-react';
+
+export default function LoginPage() {
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-brand-text">
+      {/* Minimal Auth Header: Back link + Brand Logo + Language Switcher */}
+      <header className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+        <Link
+          href="/"
+          className="flex items-center gap-2 min-h-[44px] text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors focus:outline-none"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Accueil</span>
+        </Link>
+
+        {/* Center Brand */}
+        <Link href="/" className="flex items-center gap-2.5 min-h-[44px] focus:outline-none">
+          <div className="w-9 h-9 rounded-xl bg-brand-primary flex items-center justify-center text-white font-black text-xs shadow-xs">
+            DM
+          </div>
+          <span className="font-extrabold text-lg text-brand-primary tracking-tight font-heading">
+            DataMboa
+          </span>
+        </Link>
+
+        {/* Language Switcher */}
+        <div className="flex items-center">
+          <LanguageSwitcher />
+        </div>
+      </header>
+
+      {/* Centered Form */}
+      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-10">
+        <LoginForm />
+      </main>
+
+      {/* Minimal Footer */}
+      <footer className="w-full py-4 text-center text-[11px] text-brand-muted">
+        <p>© {new Date().getFullYear()} DataMboa · L'analyse de données par la pratique</p>
+      </footer>
+    </div>
+  );
+}

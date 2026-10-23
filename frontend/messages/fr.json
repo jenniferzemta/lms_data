@@ -23,7 +23,7 @@
     "register": "Inscription"
   },
   "Home": {
-    "greeting": "Bonjour, Laure 👋",
+    "greeting": "Bonjour, Laure",
     "greetingSubtitle": "Prête à progresser aujourd'hui ?",
     "syncLightMode": "Synchronisé · Mode léger actif",
     "daysStreak": "jours",
@@ -82,5 +82,39 @@
     "sendProofWhatsApp": "Envoyer ma preuve sur WhatsApp",
     "copyNumber": "Copier le numéro",
     "declarePayment": "Déclarer mon transfert"
+  },
+  "Auth": {
+    "loginTitle": "Connexion à DataMboa",
+    "loginSubtitle": "Retrouvez vos cours, vos laboratoires et votre progression.",
+    "registerTitle": "Créer mon compte apprenant",
+    "registerSubtitle": "Rejoignez la communauté et apprenez la data par la pratique.",
+    "emailLabel": "Adresse email",
+    "emailPlaceholder": "ex. laure@exemple.cm",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Au moins 8 caractères",
+    "firstNameLabel": "Prénom",
+    "firstNamePlaceholder": "ex. Laure",
+    "lastNameLabel": "Nom",
+    "lastNamePlaceholder": "ex. Kamga",
+    "phoneLabel": "Numéro WhatsApp / Téléphone",
+    "phonePlaceholder": "ex. +237 657 54 62 59",
+    "phoneHelp": "Pour vos rappels de leçons et l'entraide WhatsApp",
+    "studyLevelLabel": "Niveau d'études",
+    "studyLevelPlaceholder": "ex. Licence, Master, Professionnel...",
+    "learningGoalLabel": "Votre objectif principal",
+    "learningGoalPlaceholder": "ex. Devenir Data Analyst, Trouver un emploi...",
+    "whatsappConsent": "J'accepte de recevoir des rappels d'exercices et de l'aide sur WhatsApp",
+    "loginButton": "Se connecter",
+    "loggingIn": "Connexion en cours...",
+    "registerButton": "Créer mon compte",
+    "registering": "Création du compte...",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Vous avez déjà un compte ?",
+    "registerLink": "Inscrivez-vous gratuitement",
+    "loginLink": "Connectez-vous",
+    "continueWithGoogle": "Continuer avec Google",
+    "orDivider": "ou",
+    "googleNotConfigured": "La connexion Google nécessite NEXT_PUBLIC_GOOGLE_CLIENT_ID dans .env. Utilisez pour l'instant l'inscription par email.",
+    "genericError": "Une erreur est survenue, veuillez vérifier vos informations."
   }
 }

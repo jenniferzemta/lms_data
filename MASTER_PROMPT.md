@@ -430,17 +430,17 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 > **Pour une IA sans accès au dépôt** (chat web, autre assistant) : ce bloc doit être remplacé à chaque session par celui du haut de `PROJECT_STATUS.md`, avant de coller le master prompt.
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-22]
-Phase globale     : PRÉPARATION (avant V1)
-Version suivante  : V1 Socle — phase SAM : Développement (F1.4)
-Avancement (M)    : V1 0/13 (F1.4 en validation 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : cahier des charges ; kit Antigravity ; monorepo initialisé ; déploiement initial Vercel réussi ; intégration fidèle de la maquette DataLab (DataMboa) avec palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page
-En cours          : validation visuelle par Laure du catalogue et de l'accueil
-Prochaine tâche   : validation visuelle F1.4, puis F1.1 + F1.3 (modélisation Django des comptes et rôles)
-Décisions         : Nom "DataMboa" (datamboa.com) ; Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; palette exacte DataLab (#142b4a, #13b8a6, #f4b942) ; icônes lucide-react officielles
+[BLOC DE REPRISE — mis à jour le 2026-10-23]
+Phase globale     : PRÉPARATION / V1 SOCLE
+Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
+Avancement (M)    : V1 1/13 validé (F1.4 ✅, F1.1 🔎, F1.3 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ni navigation mobile ; Intégration bouton Google Sign-in ; Correction responsivité tablette 768px (iPad Mini) et défilement sidebar PC
+En cours          : Fusion de feat/accounts-and-roles sur main
+Prochaine tâche   : F1.5 (Structure de parcours d'apprentissage vers leçon : texte riche, vidéo, quiz, code)
+Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/catalog-page, build Next.js validé (8/8 pages générées avec succès)
-Dernière commande : git commit -m "feat(catalog): implement responsive datalab-styled catalog and home views"
+Dépôt             : Branche feat/accounts-and-roles propre, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
+Dernière commande : git merge feat/accounts-and-roles && git push origin main
 ```
 
 ---
