@@ -27,6 +27,7 @@ class RegisterLearnerView(APIView):
     """
 
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request: Request) -> Response:
         serializer = RegisterLearnerSerializer(data=request.data)
@@ -55,6 +56,7 @@ class LoginView(APIView):
     """
 
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data, context={'request': request})
@@ -124,6 +126,7 @@ class GoogleAuthView(APIView):
     """
 
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request: Request) -> Response:
         serializer = GoogleAuthSerializer(data=request.data)
