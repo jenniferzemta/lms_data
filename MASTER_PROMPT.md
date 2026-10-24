@@ -434,12 +434,12 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 Phase globale     : V1 SOCLE
 Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
 Avancement (M)    : V1 3/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ; Polish i18n & AuthContext ; Fusionné et validé sur main
-En cours          : Démarrage de F1.5 (Structure de cours et leçons)
-Prochaine tâche   : F1.5 (Structure de parcours d'apprentissage vers leçon : texte riche, vidéo, quiz, code)
+Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Comptes et rôles Django (27 tests passants), auth session + Google (/api/v1/auth/), pages /login, /register et /profile (paramètres compte, application, sécurité mot de passe et déconnexion tactile multi-écrans) ; Contrat OpenAPI 3.1 mis à jour ; Build Next.js 14/14 validé et mergé sur main
+En cours          : F1.5 (Structure de parcours d'apprentissage vers leçon sur feat/course-structure)
+Prochaine tâche   : F1.5 (Modélisation Track -> Course -> Module -> Lesson -> LessonTranslation et lecteur de leçon)
 Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche main synchronisée avec origin/main, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
+Dépôt             : Branche main synchronisée avec origin/main, 27/27 tests Django passants, build Next.js validé (14/14 pages compilées)
 Dernière commande : git push origin main
 ```
 
