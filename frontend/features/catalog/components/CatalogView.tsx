@@ -139,7 +139,7 @@ export const CatalogView: React.FC = () => {
               {tCatalog('noResults')}
             </p>
             <p className="text-xs text-brand-muted mb-4 max-w-xs">
-              Essaie avec un autre terme ou réinitialise les filtres d'outils et de niveaux.
+              {tCatalog('noResultsSubtitle')}
             </p>
             <button
               type="button"

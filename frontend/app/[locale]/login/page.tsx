@@ -1,10 +1,14 @@
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LoginForm } from '@/features/auth';
 import { ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
+  const tNav = useTranslations('Navigation');
+  const tCommon = useTranslations('Common');
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between text-brand-text">
       {/* Minimal Auth Header: Back link + Brand Logo + Language Switcher */}
@@ -14,7 +18,7 @@ export default function LoginPage() {
           className="flex items-center gap-2 min-h-[44px] text-xs font-semibold text-brand-muted hover:text-brand-primary transition-colors focus:outline-none"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Accueil</span>
+          <span className="hidden sm:inline">{tNav('home')}</span>
         </Link>
 
         {/* Center Brand */}
@@ -23,7 +27,7 @@ export default function LoginPage() {
             DM
           </div>
           <span className="font-extrabold text-lg text-brand-primary tracking-tight font-heading">
-            DataMboa
+            {tCommon('appName')}
           </span>
         </Link>
 
@@ -40,7 +44,7 @@ export default function LoginPage() {
 
       {/* Minimal Footer */}
       <footer className="w-full py-4 text-center text-[11px] text-brand-muted">
-        <p>© {new Date().getFullYear()} DataMboa · L'analyse de données par la pratique</p>
+        <p>{tCommon('footerCopyright', { year: new Date().getFullYear() })}</p>
       </footer>
     </div>
   );

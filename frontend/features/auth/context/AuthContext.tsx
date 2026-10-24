@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { authService } from '../services/auth.service';
 import { AuthContextType, LoginPayload, RegisterLearnerPayload, User } from '../types';
 
@@ -10,7 +10,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
+    setIsLoading(true);
     try {
       const currentUser = await authService.getMe();
       setUser(currentUser);
@@ -19,10 +20,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    refreshUser();
+    let isMounted = true;
+
+    authService
+      .getMe()
+      .then((currentUser) => {
+        if (isMounted) {
+          setUser(currentUser);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setUser(null);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (payload: LoginPayload): Promise<User> => {

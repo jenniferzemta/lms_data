@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useAuth } from '../context/AuthContext';
-import { useRouter, useParams } from 'next/navigation';
 
 export interface GoogleSignInButtonProps {
   onErrorMessage?: (msg: string) => void;
@@ -11,10 +9,6 @@ export interface GoogleSignInButtonProps {
 
 export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({ onErrorMessage }) => {
   const t = useTranslations('Auth');
-  const router = useRouter();
-  const params = useParams();
-  const locale = (params?.locale as string) || 'fr';
-  const { loginWithGoogle } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleClick = async () => {

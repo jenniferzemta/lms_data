@@ -2,6 +2,7 @@
   "Common": {
     "appName": "DataMboa",
     "tagline": "L'analyse de données par la pratique, chez nous.",
+    "footerCopyright": "© {year} DataMboa · L'analyse de données par la pratique",
     "startFree": "Commencer gratuitement",
     "seeCourses": "Explorer les cours",
     "pricing": "Formules d'abonnement",
@@ -30,6 +31,8 @@
     "streakTitle": "Série en cours",
     "lessonsFinished": "Leçons finies",
     "quizzesPassed": "Quiz validés",
+    "studyTime": "Temps d'étude",
+    "total": "total",
     "weeklyPace": "Rythme cette semaine",
     "weeklyGoal": "Objectif : 5 leçons",
     "currentCourseTitle": "Excel — Les bases de l'analyse",
@@ -65,6 +68,7 @@
     "proTier": "Essentiel",
     "expertTier": "Professionnel",
     "noResults": "Aucune formation trouvée pour cette recherche.",
+    "noResultsSubtitle": "Essaie avec un autre terme ou réinitialise les filtres d'outils et de niveaux.",
     "resetFilters": "Réinitialiser les filtres"
   },
   "Lesson": {
