@@ -4,4 +4,6 @@ export * from './context/AuthContext';
 export * from './components/LoginForm';
 export * from './components/RegisterForm';
 export * from './components/GoogleSignInButton';
+export * from './components/ProfileView';
+
 

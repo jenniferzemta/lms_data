@@ -141,6 +141,50 @@ paths:
         '403':
           description: Authentication credentials were not provided.
 
+  /auth/change-password/:
+    post:
+      summary: Change password
+      description: Allows an authenticated user to change their account password.
+      operationId: changePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - new_password
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                  example: OldSecurePass123
+                new_password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: NewSecurePass456
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password changed successfully.
+        '400':
+          description: Current password is incorrect or new password does not meet requirements
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Authentication credentials were not provided.
+
 components:
   schemas:
     RegisterLearnerRequest:

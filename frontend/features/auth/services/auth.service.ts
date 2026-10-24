@@ -1,5 +1,11 @@
 import { apiClient } from '@/lib/api-client';
-import { LoginPayload, RegisterLearnerPayload, User } from '../types';
+import {
+  ChangePasswordPayload,
+  LoginPayload,
+  RegisterLearnerPayload,
+  UpdateProfilePayload,
+  User,
+} from '../types';
 
 export const authService = {
   async register(payload: RegisterLearnerPayload): Promise<User> {
@@ -25,6 +31,20 @@ export const authService = {
   async getMe(): Promise<User> {
     return apiClient<User>('/auth/me/', {
       method: 'GET',
+    });
+  },
+
+  async updateProfile(payload: UpdateProfilePayload): Promise<User> {
+    return apiClient<User>('/auth/me/', {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async changePassword(payload: ChangePasswordPayload): Promise<{ message: string }> {
+    return apiClient<{ message: string }>('/auth/change-password/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
     });
   },
 

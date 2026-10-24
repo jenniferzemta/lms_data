@@ -383,4 +383,46 @@ class AccountsAPITests(TestCase):
         )
         self.assertEqual(response.status_code, 400)
 
+    def test_change_password_api_success(self):
+        user = register_learner(
+            email='change.pwd@datamboa.com',
+            password='OldPassword123!',
+            first_name='Change',
+            last_name='Password',
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            '/api/v1/auth/change-password/',
+            {
+                'current_password': 'OldPassword123!',
+                'new_password': 'NewPassword12345!',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertTrue(user.check_password('NewPassword12345!'))
+
+    def test_change_password_api_wrong_current_fails(self):
+        user = register_learner(
+            email='wrong.pwd@datamboa.com',
+            password='OldPassword123!',
+            first_name='Wrong',
+            last_name='Pwd',
+        )
+        self.client.force_login(user)
+
+        response = self.client.post(
+            '/api/v1/auth/change-password/',
+            {
+                'current_password': 'IncorrectPassword!',
+                'new_password': 'NewPassword12345!',
+            },
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('current_password', response.data)
+
+
 

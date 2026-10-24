@@ -81,6 +81,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const updateProfile = async (payload: import('../types').UpdateProfilePayload): Promise<User> => {
+    setIsLoading(true);
+    try {
+      const updatedUser = await authService.updateProfile(payload);
+      setUser(updatedUser);
+      return updatedUser;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const changePassword = async (payload: import('../types').ChangePasswordPayload): Promise<void> => {
+    setIsLoading(true);
+    try {
+      await authService.changePassword(payload);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
@@ -100,6 +120,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         login,
         register,
         loginWithGoogle,
+        updateProfile,
+        changePassword,
         logout,
         refreshUser,
       }}

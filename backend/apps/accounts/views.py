@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.serializers import (
+    ChangePasswordSerializer,
     GoogleAuthSerializer,
     LoginSerializer,
     RegisterLearnerSerializer,
@@ -143,4 +144,37 @@ class GoogleAuthView(APIView):
 
         login(request, user)
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class ChangePasswordView(APIView):
+    """
+    POST /api/v1/auth/change-password/
+    Allows an authenticated user to change their password securely.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        serializer = ChangePasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+        current_password = serializer.validated_data['current_password']
+        new_password = serializer.validated_data['new_password']
+
+        if not user.check_password(current_password):
+            return Response(
+                {'current_password': [_('Current password is incorrect.')]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(new_password)
+        user.save()
+        update_session_auth_hash(request, user)
+
+        return Response(
+            {'message': _('Password changed successfully.')},
+            status=status.HTTP_200_OK,
+        )
+
 

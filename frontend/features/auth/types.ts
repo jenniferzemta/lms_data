@@ -46,6 +46,20 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface UpdateProfilePayload {
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  study_level?: string;
+  learning_goal?: string;
+  whatsapp_consent?: boolean;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
 export interface AuthContextType {
   user: User | null;
   isLoading: boolean;
@@ -53,6 +67,8 @@ export interface AuthContextType {
   login: (payload: LoginPayload) => Promise<User>;
   register: (payload: RegisterLearnerPayload) => Promise<User>;
   loginWithGoogle: (credential: string) => Promise<User>;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<User>;
+  changePassword: (payload: ChangePasswordPayload) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
