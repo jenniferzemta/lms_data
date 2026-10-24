@@ -9,17 +9,17 @@
 ## 1. Bloc de reprise (à copier dans la section 16 du `MASTER_PROMPT.md` pour une IA sans accès au dépôt)
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-23]
-Phase globale     : PRÉPARATION / V1 SOCLE
+[BLOC DE REPRISE — mis à jour le 2026-10-24]
+Phase globale     : V1 SOCLE
 Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
-Avancement (M)    : V1 1/13 validé (F1.4 ✅, F1.1 🔎, F1.3 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ni navigation mobile ; Intégration bouton Google Sign-in ; Correction responsivité tablette 768px (iPad Mini) et défilement sidebar PC
-En cours          : Fusion de feat/accounts-and-roles sur main
+Avancement (M)    : V1 3/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ; Polish i18n & AuthContext ; Fusionné et validé sur main
+En cours          : Démarrage de F1.5 (Structure de cours et leçons)
 Prochaine tâche   : F1.5 (Structure de parcours d'apprentissage vers leçon : texte riche, vidéo, quiz, code)
 Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/accounts-and-roles propre, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
-Dernière commande : git merge feat/accounts-and-roles && git push origin main
+Dépôt             : Branche main synchronisée avec origin/main, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
+Dernière commande : git push origin main
 ```
 
 ---
@@ -28,10 +28,10 @@ Dernière commande : git merge feat/accounts-and-roles && git push origin main
 
 | Élément | Valeur |
 |---|---|
-| Phase globale | PRÉPARATION (avant V1) |
+| Phase globale | V1 — Socle |
 | Version cible suivante | V1 — Socle |
-| Phase SAM de la version cible | Design |
-| Dernière mise à jour | 2026-10-22 |
+| Phase SAM de la version cible | Développement (F1.5) |
+| Dernière mise à jour | 2026-10-24 |
 | Dépôt | Initialisé sur `main`, synchronisé avec GitHub (`origin/main`) |
 
 ### Jalons de préparation
@@ -51,13 +51,13 @@ Dernière commande : git merge feat/accounts-and-roles && git push origin main
 
 ## 3. Exigences par version
 
-### V1 — Socle · avancement M : 1/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
+### V1 — Socle · avancement M : 3/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
 
 | ID | Exigence | Prio | Statut | Notes / fichiers clés |
 |---|---|---|---|---|
-| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | 🔎 | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 25 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1 |
+| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ✅ | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 25 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1, mergé sur main |
 | F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil et authentification |
-| F1.3 | Rôles et droits côté serveur | M | 🔎 | Modèle User rôles (LEARNER, INSTRUCTOR, ADMIN), LearnerProfile, InstructorProfile, permissions IsLearner/IsInstructor/IsAdminUserRole testées |
+| F1.3 | Rôles et droits côté serveur | M | ✅ | Modèle User rôles (LEARNER, INSTRUCTOR, ADMIN), LearnerProfile, InstructorProfile, permissions IsLearner/IsInstructor/IsAdminUserRole testées, mergé sur main |
 | F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | ✅ | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, validé et fusionné sur main |
 | F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ⬜ | |
 | F1.6 | Fichiers téléchargeables par leçon | M | ⬜ | |
@@ -160,9 +160,10 @@ Dernière commande : git merge feat/accounts-and-roles && git push origin main
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. Merge de `feat/catalog-page` vers `main` (ou création d'une PR sur GitHub).
-2. F1.1 + F1.3 : Modélisation des comptes et des rôles côté Django (`backend/apps/accounts` : User custom, LearnerProfile, InstructorProfile, permissions).
-3. F1.2 : Compléter les dictionnaires de traduction FR/EN pour les nouveaux formulaires et vues.
+1. F1.5 : Modélisation des cours, modules, leçons et types de contenus côté Django (`backend/apps/courses` : Track, Course, Module, Lesson, ContentBlock, LessonTranslation).
+2. F1.5 : Contrat OpenAPI 3.1 et endpoints REST pour la consultation d'un cours et de ses leçons.
+3. F1.5 : Vues d'apprentissage Next.js (lecteur de leçon avec texte riche, vidéo, quiz, code, mobile-first 360 px, navigation au pouce).
+4. F1.8 : Suivi de progression de l'apprenant et reprise après interruption.
 
 ---
 
@@ -177,4 +178,6 @@ Dernière commande : git merge feat/accounts-and-roles && git push origin main
 | 2026-10-22 | F1.4 | Intégration exacte des vues Accueil et Catalogue depuis la maquette Stitch DataLab (DataMboa), palette exacte, icônes Lucide officielles, 100% responsive (360px -> desktop) sur branche feat/catalog-page | `frontend/app/[locale]/courses/page.tsx`, `frontend/features/catalog/`, `frontend/components/`, `frontend/messages/` | Validation visuelle par Laure, puis F1.1+F1.3 backend Django |
 | 2026-10-22 | F1.4 | Refonte complète de la vue PC calquée sur l'ergonomie du portail étudiant Université de Douala (sidebar navigation fixe, topbar avec recherche Ctrl+K, cartes statistiques et disposition asymétrique), typographies Outfit et Plus Jakarta Sans, tout en maintenant la vue mobile 360 px inchangée | `frontend/app/[locale]/page.tsx`, `frontend/app/[locale]/courses/page.tsx`, `frontend/components/DesktopSidebar.tsx`, `frontend/components/AppHeader.tsx`, `frontend/app/globals.css` | Validation visuelle par Laure |
 | 2026-10-23 | F1.1, F1.3 | Implémentation complète de l'authentification et des rôles serveur : modèle User email-first avec rôles (LEARNER, INSTRUCTOR, ADMIN), profils LearnerProfile/InstructorProfile, services d'authentification par session et Google OAuth, sérialiseurs et vues Django REST (/api/v1/auth/), permissions d'accès, 25 tests unitaires et d'API passants sur PostgreSQL local, contrat OpenAPI 3.1, pages Next.js dédiées /login et /register sans sidebar, correction responsivité tablette 768px (BottomNav lg:hidden) et correction défilement DesktopSidebar | `backend/apps/accounts/`, `frontend/features/auth/`, `frontend/app/[locale]/login/`, `frontend/app/[locale]/register/`, `docs/api/openapi.yaml`, `frontend/components/BottomNav.tsx` | Fusion sur main et passage à F1.5 (Structure de cours) |
+| 2026-10-24 | F1.1, F1.3 | Polish traductions i18n et nettoyage AuthContext (montage/démontage sécurisé), tests unitaires Django 25/25 passants, compilation Next.js 12/12 pages validée, validation et fusion complète de feat/accounts-and-roles sur main, synchronisation avec origin/main | `frontend/messages/`, `frontend/features/auth/`, `frontend/app/[locale]/`, `PROJECT_STATUS.md` | Lancer F1.5 (Structure de parcours, modules, leçons) |
+
 

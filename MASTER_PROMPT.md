@@ -430,17 +430,17 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 > **Pour une IA sans accès au dépôt** (chat web, autre assistant) : ce bloc doit être remplacé à chaque session par celui du haut de `PROJECT_STATUS.md`, avant de coller le master prompt.
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-23]
-Phase globale     : PRÉPARATION / V1 SOCLE
+[BLOC DE REPRISE — mis à jour le 2026-10-24]
+Phase globale     : V1 SOCLE
 Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
-Avancement (M)    : V1 1/13 validé (F1.4 ✅, F1.1 🔎, F1.3 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ni navigation mobile ; Intégration bouton Google Sign-in ; Correction responsivité tablette 768px (iPad Mini) et défilement sidebar PC
-En cours          : Fusion de feat/accounts-and-roles sur main
+Avancement (M)    : V1 3/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Modélisation complète comptes et rôles Django (Custom User email login, LearnerProfile, InstructorProfile, permissions par rôle, 25 tests unitaires passants sur PostgreSQL local) ; Endpoints auth session + Google OAuth (/api/v1/auth/) ; Contrat OpenAPI 3.1 docs/api/openapi.yaml ; Vues front Next.js dédiées /login et /register sans sidebar ; Polish i18n & AuthContext ; Fusionné et validé sur main
+En cours          : Démarrage de F1.5 (Structure de cours et leçons)
 Prochaine tâche   : F1.5 (Structure de parcours d'apprentissage vers leçon : texte riche, vidéo, quiz, code)
 Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/accounts-and-roles propre, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
-Dernière commande : git merge feat/accounts-and-roles && git push origin main
+Dépôt             : Branche main synchronisée avec origin/main, 25/25 tests Django passants, build Next.js validé (12/12 pages compilées)
+Dernière commande : git push origin main
 ```
 
 ---
