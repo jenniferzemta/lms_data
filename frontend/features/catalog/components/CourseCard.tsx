@@ -61,6 +61,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
       <div className="flex gap-3 mb-3">
         {/* Visual Thumbnail */}
         <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-brand-canvas-alt overflow-hidden shrink-0 relative border border-brand-border/60">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={course.imageUrl}
             alt={course.imageAlt}

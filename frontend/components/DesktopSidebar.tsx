@@ -12,7 +12,6 @@ import {
   MessageSquare, 
   User, 
   LogOut,
-  Sparkles,
   ExternalLink,
   LogIn
 } from 'lucide-react';

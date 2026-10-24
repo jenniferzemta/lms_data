@@ -19,14 +19,11 @@ import {
   Clock, 
   Award,
   BookOpen,
-  TrendingUp,
-  ShieldCheck,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 
 export default function HomePage() {
   const tHome = useTranslations('Home');
-  const tCommon = useTranslations('Common');
 
   return (
     <div className="flex min-h-screen bg-brand-canvas text-brand-text">
@@ -110,14 +107,14 @@ export default function HomePage() {
                 </div>
                 <div>
                   <span className="text-xs text-brand-muted font-medium block">
-                    Temps d'étude
+                    {tHome('studyTime')}
                   </span>
                   <div className="flex items-baseline gap-1">
                     <span className="text-lg sm:text-xl font-bold text-brand-primary tabular-nums">
                       7h45
                     </span>
                     <span className="text-[11px] text-brand-muted">
-                      total
+                      {tHome('total')}
                     </span>
                   </div>
                 </div>

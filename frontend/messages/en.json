@@ -2,6 +2,7 @@
   "Common": {
     "appName": "DataMboa",
     "tagline": "Data analytics through practice, from home.",
+    "footerCopyright": "© {year} DataMboa · Data analytics through practice",
     "startFree": "Start for free",
     "seeCourses": "Explore courses",
     "pricing": "Subscription plans",
@@ -30,6 +31,8 @@
     "streakTitle": "Current streak",
     "lessonsFinished": "Lessons finished",
     "quizzesPassed": "Quizzes passed",
+    "studyTime": "Study time",
+    "total": "total",
     "weeklyPace": "This week's pace",
     "weeklyGoal": "Goal: 5 lessons",
     "currentCourseTitle": "Excel — Core Data Analysis",
@@ -65,6 +68,7 @@
     "proTier": "Essential",
     "expertTier": "Professional",
     "noResults": "No courses found for this search.",
+    "noResultsSubtitle": "Try another keyword or reset the tool and level filters.",
     "resetFilters": "Reset filters"
   },
   "Lesson": {
