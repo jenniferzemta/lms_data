@@ -71,12 +71,40 @@
     "noResultsSubtitle": "Try another keyword or reset the tool and level filters.",
     "resetFilters": "Reset filters"
   },
+  "Course": {
+    "backToCatalog": "Back to courses",
+    "freeBadge": "Free",
+    "essentialBadge": "Essential Plan",
+    "proBadge": "Pro Plan",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "estimatedDuration": "total",
+    "lessonsTotal": "practical lessons",
+    "modulesTotal": "modules",
+    "startLearningNow": "Start learning now",
+    "aboutThisCourse": "About this course",
+    "curriculumTitle": "Course curriculum",
+    "curriculumSubtitle": "{modules} modules · {lessons} practical lessons"
+  },
   "Lesson": {
     "previous": "Previous",
     "next": "Next",
     "takeQuiz": "Take quiz",
     "downloadFiles": "Exercise files",
-    "lightModeNotice": "Data-saving mode enabled: video replaced by audio and summary to save mobile bandwidth."
+    "lightModeNotice": "Data-saving mode enabled: video replaced by audio and summary to save mobile bandwidth.",
+    "freePreviewBadge": "Free preview",
+    "noLessonsYet": "No lessons in this module yet.",
+    "syllabusDrawerButton": "Syllabus",
+    "syllabusDrawerTitle": "Course syllabus",
+    "finishCourse": "Finish course",
+    "fallbackBannerTitle": "Translation in progress",
+    "fallbackBannerText": "This lesson is not yet reviewed in your language. Temporarily displaying the {lang} version.",
+    "showVideoAnyway": "Show video anyway (uses mobile data)",
+    "audioVersionTitle": "Condensed audio version",
+    "codeSnippetTitle": "Formula / Code to apply",
+    "copyCode": "Copy",
+    "codeCopied": "Copied!"
   },
   "Billing": {
     "title": "Activate subscription",

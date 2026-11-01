@@ -185,6 +185,92 @@ paths:
         '403':
           description: Authentication credentials were not provided.
 
+  /courses/:
+    get:
+      summary: List published courses
+      description: Returns a list of published courses with optional filters (tool, level, price_tier).
+      operationId: listCourses
+      parameters:
+        - name: tool
+          in: query
+          schema:
+            type: string
+            enum: [EXCEL, POWERBI, SQL, PYTHON, GITHUB]
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [BEGINNER, INTERMEDIATE, ADVANCED]
+      responses:
+        '200':
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CourseSummary'
+
+  /courses/{slug}/:
+    get:
+      summary: Get course detail and syllabus
+      description: Returns detailed course metadata and its full curriculum (modules and lessons).
+      operationId: getCourseDetail
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: excel-bases-analyse
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum: [fr, en]
+      responses:
+        '200':
+          description: Course details and modules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CourseDetail'
+        '404':
+          description: Course not found
+
+  /courses/{course_slug}/lessons/{lesson_slug}/:
+    get:
+      summary: Get lesson detail and content
+      description: Returns full localized lesson content, rich markdown, media URLs, and sequential navigation.
+      operationId: getLessonDetail
+      parameters:
+        - name: course_slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: excel-bases-analyse
+        - name: lesson_slug
+          in: path
+          required: true
+          schema:
+            type: string
+            example: nettoyer-donnees-ventes-douala
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum: [fr, en]
+      responses:
+        '200':
+          description: Detailed lesson content
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LessonDetail'
+        '404':
+          description: Lesson not found
+
 components:
   schemas:
     RegisterLearnerRequest:

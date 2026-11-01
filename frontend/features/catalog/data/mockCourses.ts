@@ -3,7 +3,7 @@ import { Course } from '../types';
 export const mockCourses: Course[] = [
   {
     id: 'course-excel-1',
-    slug: 'excel-fondamentaux',
+    slug: 'excel-bases-analyse',
     title: 'Excel : les fondamentaux',
     tool: 'excel',
     level: 'debutant',

@@ -213,7 +213,7 @@ export default function HomePage() {
 
                   <div className="mt-5 pt-1">
                     <Link
-                      href="/courses/excel-fondamentaux"
+                      href="/courses/excel-bases-analyse/lessons/nettoyer-donnees-ventes-douala"
                       className="w-full min-h-[48px] px-5 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all shadow-xs active:scale-[0.99]"
                     >
                       <Play className="w-4 h-4" />

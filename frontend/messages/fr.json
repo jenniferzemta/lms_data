@@ -71,12 +71,40 @@
     "noResultsSubtitle": "Essaie avec un autre terme ou réinitialise les filtres d'outils et de niveaux.",
     "resetFilters": "Réinitialiser les filtres"
   },
+  "Course": {
+    "backToCatalog": "Retour aux formations",
+    "freeBadge": "Gratuit",
+    "essentialBadge": "Formule Essentiel",
+    "proBadge": "Formule Pro",
+    "beginner": "Débutant",
+    "intermediate": "Intermédiaire",
+    "advanced": "Avancé",
+    "estimatedDuration": "au total",
+    "lessonsTotal": "leçons pratiques",
+    "modulesTotal": "modules",
+    "startLearningNow": "Commencer la formation",
+    "aboutThisCourse": "À propos de cette formation",
+    "curriculumTitle": "Programme de la formation",
+    "curriculumSubtitle": "{modules} modules · {lessons} leçons pratiques"
+  },
   "Lesson": {
     "previous": "Précédente",
     "next": "Suivante",
     "takeQuiz": "Passer au quiz",
     "downloadFiles": "Fichiers d'exercice",
-    "lightModeNotice": "Mode léger activé : vidéo remplacée par l'audio et le résumé pour économiser vos données."
+    "lightModeNotice": "Mode léger activé : vidéo remplacée par l'audio et le résumé pour économiser vos données.",
+    "freePreviewBadge": "Aperçu gratuit",
+    "noLessonsYet": "Aucune leçon dans ce module pour le moment.",
+    "syllabusDrawerButton": "Sommaire",
+    "syllabusDrawerTitle": "Sommaire du cours",
+    "finishCourse": "Terminer le cours",
+    "fallbackBannerTitle": "Contenu en cours de traduction",
+    "fallbackBannerText": "Cette leçon n'est pas encore validée dans votre langue. Affichage temporaire de la version {lang}.",
+    "showVideoAnyway": "Afficher la vidéo quand même (consomme des données)",
+    "audioVersionTitle": "Version audio condensée",
+    "codeSnippetTitle": "Formule / Code à appliquer",
+    "copyCode": "Copier",
+    "codeCopied": "Copié !"
   },
   "Billing": {
     "title": "Activer mon abonnement",

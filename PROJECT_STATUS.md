@@ -11,15 +11,15 @@
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-10-24]
 Phase globale     : V1 SOCLE
-Version suivante  : V1 Socle — phase SAM : Développement (F1.5 & F1.8)
-Avancement (M)    : V1 3/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.4 Catalogue validé visuellement et mergé ; F1.1 & F1.3 Comptes et rôles Django (27 tests passants), auth session + Google (/api/v1/auth/), pages /login, /register et /profile (paramètres compte, application, sécurité mot de passe et déconnexion tactile multi-écrans) ; Contrat OpenAPI 3.1 mis à jour ; Build Next.js 14/14 validé et mergé sur main
-En cours          : F1.5 (Structure de parcours d'apprentissage vers leçon sur feat/course-structure)
-Prochaine tâche   : F1.5 (Modélisation Track -> Course -> Module -> Lesson -> LessonTranslation et lecteur de leçon)
-Décisions         : PostgreSQL local natif via pgAdmin 4 (lms_db) ; Auth par sessions cookies Django sécurisées HttpOnly + CSRF ; Rôles Django stricts côté serveur (LEARNER, INSTRUCTOR, ADMIN) ; Contrat OpenAPI 3.1 synchrone
+Version suivante  : V1 Socle — phase SAM : Développement (F1.6 & F1.8)
+Avancement (M)    : V1 4/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.5 Structure complète parcours → cours → module → leçon : backend Django (Track, Course, Module, Lesson, LessonTranslation bilingue FR/EN avec fallback automatique), seed cours Excel Douala, endpoints /api/v1/courses/, contrat OpenAPI 3.1, feature courses Next.js (CourseSyllabus, LessonReader avec vidéo/audio/Markdown/copie code/téléchargement/mode léger, barre tactile au pouce), pages /courses/[slug] et /courses/[slug]/lessons/[lessonSlug], 36/36 tests Django passants, 0 erreur lint, 14/14 routes Next.js compilées
+En cours          : Validation et fusion de feat/course-structure sur main
+Prochaine tâche   : F1.6 (Fichiers d'exercices téléchargeables et pièces jointes) ou F1.8 (Progression et reprise apprenant)
+Décisions         : Modélisation en cascades avec ordonnancement strict ; fallback bilingue transparent si traduction manquante ; barre de navigation au pouce ≥ 44px
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche main synchronisée avec origin/main, 27/27 tests Django passants, build Next.js validé (14/14 pages compilées)
-Dernière commande : git push origin main
+Dépôt             : Branche feat/course-structure prête pour merge, 36/36 tests Django passants, build Next.js validé (14/14 pages compilées)
+Dernière commande : npm run lint && npx next build --webpack
 ```
 
 ---
@@ -51,15 +51,15 @@ Dernière commande : git push origin main
 
 ## 3. Exigences par version
 
-### V1 — Socle · avancement M : 3/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
+### V1 — Socle · avancement M : 4/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
 
 | ID | Exigence | Prio | Statut | Notes / fichiers clés |
 |---|---|---|---|---|
-| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ✅ | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 25 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1, mergé sur main |
-| F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil et authentification |
+| F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ✅ | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 27 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1, mergé sur main |
+| F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil, auth, cours et leçons avec mécanisme de fallback automatique |
 | F1.3 | Rôles et droits côté serveur | M | ✅ | Modèle User rôles (LEARNER, INSTRUCTOR, ADMIN), LearnerProfile, InstructorProfile, permissions IsLearner/IsInstructor/IsAdminUserRole testées, mergé sur main |
 | F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | ✅ | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, validé et fusionné sur main |
-| F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ⬜ | |
+| F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ✅ | Modèles Track/Course/Module/Lesson/LessonTranslation, seed cours Excel Douala, endpoints /api/v1/courses/, vue /courses/[slug] et lecteur immersif /courses/[slug]/lessons/[lessonSlug], barre au pouce, 36/36 tests passants, 0 erreur lint |
 | F1.6 | Fichiers téléchargeables par leçon | M | ⬜ | |
 | F1.7 | Quiz (unique, multiple, V/F, numérique) + note de passage | M | ⬜ | |
 | F1.8 | Progression et reprise | M | ⬜ | |
@@ -180,6 +180,7 @@ Dernière commande : git push origin main
 | 2026-10-23 | F1.1, F1.3 | Implémentation complète de l'authentification et des rôles serveur : modèle User email-first avec rôles (LEARNER, INSTRUCTOR, ADMIN), profils LearnerProfile/InstructorProfile, services d'authentification par session et Google OAuth, sérialiseurs et vues Django REST (/api/v1/auth/), permissions d'accès, 25 tests unitaires et d'API passants sur PostgreSQL local, contrat OpenAPI 3.1, pages Next.js dédiées /login et /register sans sidebar, correction responsivité tablette 768px (BottomNav lg:hidden) et correction défilement DesktopSidebar | `backend/apps/accounts/`, `frontend/features/auth/`, `frontend/app/[locale]/login/`, `frontend/app/[locale]/register/`, `docs/api/openapi.yaml`, `frontend/components/BottomNav.tsx` | Fusion sur main et passage à F1.5 (Structure de cours) |
 | 2026-10-24 | F1.1, F1.3 | Polish traductions i18n et nettoyage AuthContext (montage/démontage sécurisé), tests unitaires Django 25/25 passants, compilation Next.js 12/12 pages validée, validation et fusion complète de feat/accounts-and-roles sur main, synchronisation avec origin/main | `frontend/messages/`, `frontend/features/auth/`, `frontend/app/[locale]/`, `PROJECT_STATUS.md` | Lancer F1.5 (Structure de parcours, modules, leçons) |
 | 2026-10-24 | F1.1, F1.14 | Page complète /profile (paramètres compte, application, mode léger, sécurité mot de passe, déconnexion tactile multi-écrans), endpoint Django change-password, 27/27 tests passants, compilation 14/14 routes validée, mergé sur main | `frontend/app/[locale]/profile/`, `frontend/components/AppHeader.tsx`, `backend/apps/accounts/`, `docs/api/openapi.yaml` | Démarrer F1.5 (Structure de parcours et leçons) |
+| 2026-10-24 | F1.5 | Structure complète parcours → cours → module → leçon (Track/Course/Module/Lesson/LessonTranslation bilingue FR/EN), seed cours Excel avec cas pratique Douala, endpoints /api/v1/courses/, spec OpenAPI 3.1, feature courses Next.js (CourseSyllabus, LessonReader avec mode léger, vidéo, audio, code et téléchargements, barre au pouce), routes /courses/[slug] et /courses/[slug]/lessons/[lessonSlug], 36/36 tests Django passants, 0 erreur lint, build 14/14 validé | `backend/apps/courses/`, `docs/api/openapi.yaml`, `frontend/features/courses/`, `frontend/app/[locale]/courses/`, `frontend/messages/` | Valider et fusionner feat/course-structure sur main, puis aborder F1.6 ou F1.8 |
 
 
 

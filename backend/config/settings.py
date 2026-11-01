@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     # Local apps
     'accounts.apps.AccountsConfig',
+    'courses.apps.CoursesConfig',
 ]
 
 MIDDLEWARE = [
