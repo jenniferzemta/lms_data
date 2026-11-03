@@ -1,65 +1,69 @@
+from decimal import Decimal
 from django.core.management.base import BaseCommand
 from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
 
 
 class Command(BaseCommand):
-    help = "Seeds the complete Excel Data Analyst roadmap (Beginner to TCD & Dashboards) based on the YITA Data Analyst Roadmap."
+    help = "Seeds the Excel curriculum aligned with the YITA Data Analyst Roadmap and real video media."
 
     def handle(self, *args, **options):
-        self.stdout.write("Seeding Excel Track and Roadmap Courses...")
+        self.stdout.write("Seeding Excel Data Analyst course with real video integration...")
 
-        # 1. Create Track
-        track, _ = Track.objects.get_or_create(
-            slug='excel',
+        # -------------------------------------------------------------
+        # TRACK
+        # -------------------------------------------------------------
+        track, _ = Track.objects.update_or_create(
+            tool=Track.Tool.EXCEL,
             defaults={
-                'name': "Excel & Analyse de Données",
-                'description': "Maîtriser Excel pour la gestion, la finance, les TCD et les tableaux de bord décisionnels en entreprise.",
-                'tool': Track.Tool.EXCEL,
-                'icon': 'table',
+                'name': "Excel pour l'Analyse de Données",
+                'description': "Du tableur classique aux modèles de données avancés Power Query & DAX.",
+                'icon': "FileSpreadsheet",
                 'order': 1,
-                'is_published': True,
-            },
-        )
-
-        # 2. Level 1 Course: Intermédiaire / Les bases solides
-        course, _ = Course.objects.update_or_create(
-            slug='excel-bases-analyse',
-            defaults={
-                'track': track,
-                'title': "Excel : Les bases solides pour manipuler vos données",
-                'subtitle': "Maîtrisez les formules avancées, le nettoyage, les TCD et construisez un tableau de bord complet.",
-                'description': (
-                    "Ce parcours pratique vous forme sur des cas concrets de distribution et de commerce à Douala et Yaoundé. "
-                    "Vous apprendrez à structurer vos données, appliquer les formules de calcul et de recherche (RECHERCHEX, SI), "
-                    "construire des Tableaux Croisés Dynamiques (TCD) et concevoir un tableau de bord prêt pour la direction."
-                ),
-                'level': Course.Level.BEGINNER,
-                'duration_hours': 10,
-                'price_tier': Course.PriceTier.FREE,
-                'order': 1,
-                'is_published': True,
+                'is_active': True,
             },
         )
 
         # -------------------------------------------------------------
-        # MODULE 1: Formules et fonctions avancées
+        # COURSE: NIVEAU 1 — INTERMÉDIAIRE
+        # -------------------------------------------------------------
+        course, _ = Course.objects.update_or_create(
+            slug='excel-bases-analyse',
+            defaults={
+                'track': track,
+                'title': "Excel — Niveau 1 : Fondamentaux & Tableaux de Bord",
+                'description': (
+                    "Maîtrisez les formules avancées, le nettoyage de données réelles en FCFA, "
+                    "les Tableaux Croisés Dynamiques (TCD) et construisez votre premier tableau de bord décisionnel."
+                ),
+                'level': Course.Level.BEGINNER,
+                'price_tier': Course.PriceTier.FREE,
+                'price_fcfa': Decimal('0.00'),
+                'duration_hours': 12,
+                'is_published': True,
+                'order': 1,
+            },
+        )
+
+        # -------------------------------------------------------------
+        # MODULE 1: Formules et fonctions fondamentales
         # -------------------------------------------------------------
         m1, _ = Module.objects.update_or_create(
             course=course,
             order=1,
             defaults={
-                'title': "Module 1 : Formules et fonctions essentielles",
-                'description': "SI, SI.CONDITIONS, ET, OU, gestion des erreurs et fonctions de calcul.",
+                'title': "Module 1 : Formules et fonctions fondamentales",
+                'description': "Types de données rigoureux, formatage FCFA, SOMME, MOYENNE et formules conditionnelles.",
                 'is_published': True,
             },
         )
 
+        # Lesson 1.1: Environnement et types de données
         l1, _ = Lesson.objects.update_or_create(
             module=m1,
             slug='environnement-et-types-de-donnees',
             defaults={
-                'title': "Typage rigoureux et saisie des montants en FCFA",
-                'lesson_type': Lesson.LessonType.TEXT,
+                'title': "Environnement et types de données (Texte, Nombres, FCFA, Dates)",
+                'lesson_type': Lesson.LessonType.VIDEO,
                 'duration_minutes': 10,
                 'is_free_preview': True,
                 'order': 1,
@@ -71,23 +75,24 @@ class Command(BaseCommand):
             lesson=l1,
             language=LessonTranslation.Language.FR,
             defaults={
-                'title': "Typage rigoureux et saisie des montants en FCFA",
-                'summary': "Distinguer le texte, les nombres, les devises FCFA et les dates pour fiabiliser vos calculs.",
+                'title': "Environnement et types de données (Texte, Nombres, FCFA, Dates)",
+                'summary': "Distinguer le texte, les nombres, les devises FCFA et les dates pour fiabiliser les calculs.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/jenafg.mp4",
                 'content': (
-                    "# Typage des données et format monétaire FCFA\n\n"
+                    "# Rigueur des données et environnement de travail\n\n"
                     "Bienvenue dans votre premier cours d'analyse de données sur **DataMboa** !\n\n"
-                    "## 1. Mini-cours : La rigueur des types\n"
-                    "Un bon analyste ne commence pas par des formules complexes, mais par **la propreté des types de données**. "
-                    "Dans un tableur professionnel, chaque colonne possède une nature stricte :\n\n"
+                    "## 1. Mini-cours : La propreté des types de données\n"
+                    "Un bon analyste ne commence pas par des formules complexes, mais par **la rigueur des types de données**. "
+                    "Dans un tableau professionnel, chaque colonne possède une nature stricte :\n\n"
                     "- **Le Texte** : Noms de clients, points de vente à Douala (Akwa, Bonanjo, Deido), codes articles.\n"
                     "- **Les Nombres entiers ou décimaux** : Volumes de stock, quantités vendues en caisses ou palettes.\n"
-                    "- **Les Devises (FCFA)** : Chiffre d'affaires hors taxes, prix de vente unitaire, marge brute.\n"
+                    "- **Les Devises (FCFA)** : Chiffre d'affaires hors taxes, prix de vente unitaire, marge commerciale.\n"
                     "- **Les Dates** : Format standard francophone `JJ/MM/AAAA` impératif pour les analyses temporelles.\n\n"
-                    "> **Règle d'or** : Ne tapez jamais `FCFA` manuellement dans une cellule numérique ! "
-                    "Le tableur convertit immédiatement le nombre en texte, ce qui bloque toutes les formules d'addition et de moyenne.\n\n"
+                    "> **Règle d'or** : Ne tapez jamais `FCFA` à la main dans une cellule contenant un montant ! "
+                    "Cela transforme votre nombre en texte et rend toute somme ou moyenne impossible.\n\n"
                     "## 2. Exemple concret : Boutique de distribution à Akwa\n"
-                    "Pour afficher correctement `2 500 000 FCFA` sans corrompre vos calculs :\n\n"
-                    "1. Saisissez la valeur brute `2500000` sans espace ni lettre.\n"
+                    "Pour afficher proprement `2 500 000 FCFA` tout en conservant la capacité de calcul :\n\n"
+                    "1. Saisissez la valeur brute `2500000` sans espace ni devise.\n"
                     "2. Ouvrez le format de cellule (`Ctrl + 1` ou clic droit > Format de cellule).\n"
                     "3. Choisissez Personnalisé et appliquez le masque : `# ##0 \"FCFA\"`.\n\n"
                     "## 3. Défi pratique : À vous de jouer !\n"
@@ -105,6 +110,7 @@ class Command(BaseCommand):
             defaults={
                 'title': "Data Types and Currency Formatting in FCFA",
                 'summary': "Distinguish text, numbers, FCFA currency, and dates to ensure formula integrity.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/jenafg.mp4",
                 'content': (
                     "# Data Types and FCFA Currency Formatting\n\n"
                     "Welcome to your data analysis journey on **DataMboa**!\n\n"
@@ -117,13 +123,72 @@ class Command(BaseCommand):
                     "- **Dates**: Standard date format `DD/MM/YYYY` essential for time intelligence.\n\n"
                     "> **Golden Rule**: Never type `FCFA` manually into a numeric cell! "
                     "Excel immediately treats it as text, which breaks all arithmetic calculations.\n\n"
-                    "## 2. Real Business Scenario: Distribution Store in Akwa\n"
+                    "## 2. Practical Business Scenario: Distribution Store in Akwa\n"
                     "To display `2 500 000 FCFA` cleanly while preserving calculations:\n\n"
                     "1. Type the raw integer `2500000` without spaces or currency tags.\n"
                     "2. Open Format Cells (`Ctrl + 1`).\n"
                     "3. Select Custom and apply `# ##0 \"FCFA\"`."
                 ),
                 'code_snippet': '# ##0 "FCFA"',
+                'status': LessonTranslation.Status.REVIEWED,
+            },
+        )
+
+        # Lesson 1.2: Formules fondamentales SOMME et MOYENNE
+        l1_2, _ = Lesson.objects.update_or_create(
+            module=m1,
+            slug='formules-fondamentales-somme-et-moyenne',
+            defaults={
+                'title': "Les formules fondamentales : SOMME et MOYENNE",
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 12,
+                'is_free_preview': True,
+                'order': 2,
+                'is_published': True,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l1_2,
+            language=LessonTranslation.Language.FR,
+            defaults={
+                'title': "Les formules fondamentales : SOMME et MOYENNE",
+                'summary': "Calculer le chiffre d'affaires et le panier moyen sur des transactions commerciales en FCFA.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/CREANCE%201.mp4",
+                'content': (
+                    "# Calcul du chiffre d'affaires et du panier moyen\n\n"
+                    "## 1. Mini-cours : Agréger les ventes sans erreur\n"
+                    "Dans les entreprises camerounaises et d'Afrique Centrale, l'analyse des bilans quotidiens de caisse "
+                    "nécessite d'agréger rapidement les volumes vendus sans erreurs manuelles de calculatrice.\n\n"
+                    "- **Syntaxe SOMME** : `=SOMME(C2:C25)` additionne les montants monétaires de la colonne C.\n"
+                    "- **Syntaxe MOYENNE** : `=MOYENNE(D2:D25)` calcule la valeur moyenne par panier.\n\n"
+                    "> **Attention au séparateur régional !** : Sur Excel paramétré en français (Cameroun/France), "
+                    "utilisez toujours le point-virgule (`;`) pour séparer les arguments disjoints, et non la virgule anglo-saxonne.\n\n"
+                    "## 2. Exemple concret : Rapprochement Douala\n"
+                    "Boutique Akwa (1 450 000 FCFA), Dépôt Bonabéri (890 000 FCFA), Agence Bafoussam (1 120 000 FCFA) : "
+                    "le total consolidé s'élève à 3 460 000 FCFA."
+                ),
+                'code_snippet': "=SOMME(C2:C25)",
+                'status': LessonTranslation.Status.REVIEWED,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l1_2,
+            language=LessonTranslation.Language.EN,
+            defaults={
+                'title': "Fundamental Formulas: SUM and AVERAGE",
+                'summary': "Aggregate revenue and average transaction values for Central African retail stores.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/CREANCE%201.mp4",
+                'content': (
+                    "# Revenue and Average Basket Aggregation\n\n"
+                    "## 1. Mini-course: Reliable Sales Aggregation\n"
+                    "In retail operations across Douala and Yaoundé, daily cash settlement requires instant aggregation.\n\n"
+                    "- **SUM syntax**: `=SUM(C2:C25)` computes total revenue.\n"
+                    "- **AVERAGE syntax**: `=AVERAGE(D2:D25)` computes the basket benchmark.\n\n"
+                    "> **Regional Separator Note**: For French Excel configurations, use semicolons (`;`) to separate arguments."
+                ),
+                'code_snippet': "=SUM(C2:C25)",
                 'status': LessonTranslation.Status.REVIEWED,
             },
         )
@@ -136,7 +201,7 @@ class Command(BaseCommand):
             order=2,
             defaults={
                 'title': "Module 2 : Recherche et conversion de données",
-                'description': "RECHERCHEX vs RECHERCHEV, INDEX/EQUIV et nettoyage des anomalies textuelles.",
+                'description': "RECHERCHEX vs RECHERCHEV, INDEX/EQUIV et normalisation textuelle avec SUPPRESPACE.",
                 'is_published': True,
             },
         )
@@ -146,8 +211,8 @@ class Command(BaseCommand):
             slug='nettoyer-donnees-ventes-douala',
             defaults={
                 'title': "Nettoyer et normaliser des données de ventes (Douala)",
-                'lesson_type': Lesson.LessonType.CODE,
-                'duration_minutes': 12,
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 14,
                 'is_free_preview': True,
                 'order': 1,
                 'is_published': True,
@@ -160,18 +225,19 @@ class Command(BaseCommand):
             defaults={
                 'title': "Nettoyer et normaliser des données de ventes (Douala)",
                 'summary': "Cas pratique d'entreprise : supprimer les espaces parasites avec SUPPRESPACE et MAJUSCULE.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/exo1.mp4",
                 'content': (
                     "# Normalisation des données commerciales à Douala\n\n"
                     "## 1. Mini-cours : La fonction SUPPRESPACE\n"
                     "Lors de l'exportation des données de caisses des points de vente à Bonabéri, Bonanjo et Bassa, "
                     "des espaces involontaires s'insèrent souvent en début ou fin de texte. Ces espaces invisibles "
                     "faussent les recherches avec `RECHERCHEX` et doublent artificiellement les lignes de synthèse.\n\n"
-                    "> **Point de vigilance** : Pour Excel, `'Akwa'` et `' Akwa '` sont deux villes totalement différentes ! "
+                    "> **Point de vigilance** : Pour Excel, `'Akwa'` et `' Akwa '` sont deux entités totalement différentes ! "
                     "Le nettoyage préalable est obligatoire avant tout croisement de données.\n\n"
-                    "## 2. Exemple concret : La combinaison gagnante\n"
+                    "## 2. Exemple concret : La formule combinée\n"
                     "Pour assainir une colonne contenant des noms de magasins disparates :\n\n"
-                    "1. Utilisez `SUPPRESPACE(A2)` (en anglais `TRIM`) pour éliminer tous les espaces superflus.\n"
-                    "2. Enveloppez la formule dans `MAJUSCULE` (en anglais `UPPER`) pour uniformiser la casse.\n\n"
+                    "1. Utilisez `SUPPRESPACE(A2)` pour éliminer tous les espaces superflus.\n"
+                    "2. Enveloppez la formule dans `MAJUSCULE` pour uniformiser la casse.\n\n"
                     "## 3. Défi pratique : À vous de jouer !\n"
                     "Ouvrez le dataset brut fourni ci-dessous. Vous devez nettoyer les 50 enregistrements "
                     "de livraison avant de calculer le chiffre d'affaires consolidé par secteur géographique."
@@ -187,6 +253,7 @@ class Command(BaseCommand):
             defaults={
                 'title': "Cleaning and Standardizing Sales Records (Douala)",
                 'summary': "Business case study: trim accidental whitespaces using TRIM and UPPER.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/exo1.mp4",
                 'content': (
                     "# Data Standardization for Douala Retail Stores\n\n"
                     "## 1. Mini-course: The TRIM function\n"
@@ -213,8 +280,8 @@ class Command(BaseCommand):
             course=course,
             order=3,
             defaults={
-                'title': "Module 3 : Tableaux structurés et mise en forme conditionnelle",
-                'description': "Convertir en tableau structuré, filtres dynamiques, gestion des doublons et règles visuelles.",
+                'title': "Module 3 : Tableaux structurés et alertes visuelles",
+                'description': "Convertir en tableau structuré, filtres dynamiques, gestion des doublons et règles MFC.",
                 'is_published': True,
             },
         )
@@ -224,7 +291,7 @@ class Command(BaseCommand):
             slug='tableaux-structures-et-mfc',
             defaults={
                 'title': "Tableaux structurés et mise en forme conditionnelle",
-                'lesson_type': Lesson.LessonType.TEXT,
+                'lesson_type': Lesson.LessonType.VIDEO,
                 'duration_minutes': 15,
                 'is_free_preview': True,
                 'order': 1,
@@ -238,6 +305,7 @@ class Command(BaseCommand):
             defaults={
                 'title': "Tableaux structurés et mise en forme conditionnelle",
                 'summary': "Automatiser l'extension des formules et surligner instantanément les valeurs critiques.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/CREANCE%202.mp4",
                 'content': (
                     "# Tableaux structurés et alertes visuelles\n\n"
                     "## 1. Mini-cours : Le pouvoir du tableau structuré\n"
@@ -248,11 +316,31 @@ class Command(BaseCommand):
                     "- **Bandes de couleurs** : Lisibilité immédiate sur grand écran comme sur smartphone.\n\n"
                     "> **Conseil pratique** : Donnez toujours un nom clair à votre tableau (ex: `t_Ventes2026`) "
                     "dans l'onglet *Création de tableau*. Cela facilitera grandement vos futurs TCD et requêtes Power Query.\n\n"
-                    "## 2. Exemple concret : Alertes de stock critique\n"
+                    "## 2. Exemple concret : Alertes de créances et stock critique\n"
                     "Grâce à la **Mise en Forme Conditionnelle (MFC)**, vous pouvez colorer automatiquement en rouge "
-                    "les articles dont le stock en entrepôt passe sous le seuil d'alerte de 50 unités."
+                    "les factures impayées dont l'échéance dépasse 30 jours."
                 ),
                 'code_snippet': "=[@Quantité]*[@Prix_Unitaire_FCFA]",
+                'status': LessonTranslation.Status.REVIEWED,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l3,
+            language=LessonTranslation.Language.EN,
+            defaults={
+                'title': "Structured Tables and Conditional Formatting",
+                'summary': "Automate formula propagation and highlight critical thresholds visually.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/CREANCE%202.mp4",
+                'content': (
+                    "# Structured Tables and Visual Alerts\n\n"
+                    "## 1. Mini-course: The Power of Excel Tables\n"
+                    "Transforming raw ranges into structured tables (`Ctrl + T`) unlocks instant calculated columns "
+                    "and intuitive formula syntax.\n\n"
+                    "## 2. Real Business Scenario: Overdue Invoices Alert\n"
+                    "Highlight invoices exceeding 30 days overdue in bold red using conditional rules."
+                ),
+                'code_snippet': "=[@Quantity]*[@Unit_Price_FCFA]",
                 'status': LessonTranslation.Status.REVIEWED,
             },
         )
@@ -270,8 +358,41 @@ class Command(BaseCommand):
             },
         )
 
+        l4, _ = Lesson.objects.update_or_create(
+            module=m4,
+            slug='dates-et-temps-calcul-echeances',
+            defaults={
+                'title': "Calculer les délais et retards de créances clients",
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 14,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l4,
+            language=LessonTranslation.Language.FR,
+            defaults={
+                'title': "Calculer les délais et retards de créances clients",
+                'summary': "Maîtriser les fonctions de dates pour identifier les créances échues et planifier les relances.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/creance%203.mp4",
+                'content': (
+                    "# Suivi des délais de paiement et créances clients\n\n"
+                    "## 1. Mini-cours : La fonction AUJOURD'HUI et les écarts de dates\n"
+                    "Pour calculer automatiquement le nombre de jours de retard d'une facture client :\n"
+                    "On soustrait la date d'échéance à la date du jour : `=AUJOURD'HUI() - [@Date_Echéance]`.\n\n"
+                    "## 2. Exemple concret : Relance des débiteurs à Douala\n"
+                    "Classer les retards par tranche (0-30 jours, 31-60 jours, >60 jours) pour prioriser les appels de recouvrement."
+                ),
+                'code_snippet': "=SI(AUJOURD'HUI()>[@Echeance]; AUJOURD'HUI()-[@Echeance]; 0)",
+                'status': LessonTranslation.Status.REVIEWED,
+            },
+        )
+
         # -------------------------------------------------------------
-        # MODULE 5: Tableaux Croisés Dynamiques (TCD) - bases
+        # MODULE 5: Tableaux Croisés Dynamiques (TCD) – Les bases
         # -------------------------------------------------------------
         m5, _ = Module.objects.update_or_create(
             course=course,
@@ -280,6 +401,38 @@ class Command(BaseCommand):
                 'title': "Module 5 : Tableaux Croisés Dynamiques (TCD) – Les bases",
                 'description': "Création, synthèses croisées, pourcentages, segments et chronologies interactives.",
                 'is_published': True,
+            },
+        )
+
+        l5, _ = Lesson.objects.update_or_create(
+            module=m5,
+            slug='tcd-fondamentaux-synthese-douala',
+            defaults={
+                'title': "Créer votre premier Tableau Croisé Dynamique de ventes",
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 16,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l5,
+            language=LessonTranslation.Language.FR,
+            defaults={
+                'title': "Créer votre premier Tableau Croisé Dynamique de ventes",
+                'summary': "Générer un rapport de synthèse multidimensionnel en quelques clics sans écrire de formule.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/exo2.mp4",
+                'content': (
+                    "# Synthèse commerciale avec les Tableaux Croisés Dynamiques\n\n"
+                    "## 1. Mini-cours : Les 4 zones du TCD\n"
+                    "Filtres, Colonnes, Lignes, Valeurs : découvrez comment faire pivoter vos données instantanément.\n\n"
+                    "## 2. Exemple concret : CA par point de vente et famille de produits\n"
+                    "Croisez les ventes d'Akwa, Bonanjo et Bassa avec les gammes Alimentation, Cosmétiques et Électronique."
+                ),
+                'code_snippet': "=SOMME([Montant_Vente_FCFA])",
+                'status': LessonTranslation.Status.REVIEWED,
             },
         )
 
@@ -293,6 +446,38 @@ class Command(BaseCommand):
                 'title': "Module 6 : Visualisation & Tableau de Bord Commercial",
                 'description': "Graphiques croisés dynamiques, indicateurs KPI et assemblage du dashboard final.",
                 'is_published': True,
+            },
+        )
+
+        l6, _ = Lesson.objects.update_or_create(
+            module=m6,
+            slug='dashboard-synthese-intermediaire',
+            defaults={
+                'title': "Assemblage du Tableau de Bord Commercial Final",
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 20,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        LessonTranslation.objects.update_or_create(
+            lesson=l6,
+            language=LessonTranslation.Language.FR,
+            defaults={
+                'title': "Assemblage du Tableau de Bord Commercial Final",
+                'summary': "Projet final : concevoir un dashboard exécutif interactif avec segments et KPI en FCFA.",
+                'video_url': "http://localhost:8000/api/v1/courses/videos/KPI2.mp4",
+                'content': (
+                    "# Dashboard de Synthèse Commerciale (Douala & Régions)\n\n"
+                    "## 1. Mini-cours : Principes du dashboarding épuré\n"
+                    "Agencer les KPI clés (CA Global, Panier Moyen, Taux d'atteinte) en haut de page, suivis des tendances graphiques.\n\n"
+                    "## 2. Défi d'intégration finale\n"
+                    "Assemblez les segments interactifs pour filtrer en direct par ville, commercial et période."
+                ),
+                'code_snippet': "=SOMME.SI.ENS(Ventes; Mois; \"Janvier\"; Région; \"Littoral\")",
+                'status': LessonTranslation.Status.REVIEWED,
             },
         )
 
@@ -322,6 +507,34 @@ class Command(BaseCommand):
                 'file_format': 'pdf',
                 'file_size_bytes': 452000,
                 'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/guides/memo_formats_fcfa.pdf',
+                'is_free_preview': True,
+                'order': 2,
+            },
+        )
+
+        LessonAttachment.objects.update_or_create(
+            lesson=l1_2,
+            title="Cas_Pratique_Ventes_Douala.xlsx",
+            defaults={
+                'description': "Excel • 48 Ko • Données brutes de caisse Akwa, Bonabéri, Bafoussam.",
+                'attachment_type': LessonAttachment.AttachmentType.STARTER,
+                'file_format': 'xlsx',
+                'file_size_bytes': 49152,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/datasets/Cas_Pratique_Ventes_Douala.xlsx',
+                'is_free_preview': True,
+                'order': 1,
+            },
+        )
+
+        LessonAttachment.objects.update_or_create(
+            lesson=l1_2,
+            title="Fiche_Synthese_Formules.pdf",
+            defaults={
+                'description': "PDF • 180 Ko • Mémento imprimable des syntaxes SOMME & MOYENNE.",
+                'attachment_type': LessonAttachment.AttachmentType.CHEATSHEET,
+                'file_format': 'pdf',
+                'file_size_bytes': 184320,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/guides/Fiche_Synthese_Formules.pdf',
                 'is_free_preview': True,
                 'order': 2,
             },

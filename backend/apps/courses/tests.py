@@ -1,3 +1,4 @@
+import os
 from django.test import TestCase
 from rest_framework.test import APIClient
 
@@ -280,3 +281,50 @@ class AttachmentServicesAndAPITests(TestCase):
     def test_download_endpoint_not_found(self):
         response = self.client.get('/api/v1/courses/attachments/99999/download/')
         self.assertEqual(response.status_code, 404)
+
+
+import tempfile
+from django.test import override_settings
+
+class VideoStreamViewTests(TestCase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.client = APIClient()
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.video_filename = 'test_sample.mp4'
+        self.video_path = os.path.join(self.temp_dir.name, self.video_filename)
+        # Create a dummy 100-byte video file
+        with open(self.video_path, 'wb') as f:
+            f.write(b'X' * 100)
+
+    def tearDown(self):
+        try:
+            self.temp_dir.cleanup()
+        except Exception:
+            pass
+
+    def test_stream_video_full(self):
+        with override_settings(LOCAL_VIDEOS_DIR=self.temp_dir.name):
+            url = f'/api/v1/courses/videos/{self.video_filename}/'
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            response.close()
+            self.assertEqual(response['Content-Length'], '100')
+            self.assertEqual(response['Accept-Ranges'], 'bytes')
+
+    def test_stream_video_partial_range(self):
+        with override_settings(LOCAL_VIDEOS_DIR=self.temp_dir.name):
+            url = f'/api/v1/courses/videos/{self.video_filename}/'
+            response = self.client.get(url, HTTP_RANGE='bytes=0-49')
+            self.assertEqual(response.status_code, 206)
+            self.assertEqual(response['Content-Range'], 'bytes 0-49/100')
+            self.assertEqual(response['Content-Length'], '50')
+            content = b''.join(response.streaming_content)
+            self.assertEqual(len(content), 50)
+
+    def test_stream_video_not_found(self):
+        with override_settings(LOCAL_VIDEOS_DIR=self.temp_dir.name):
+            url = '/api/v1/courses/videos/non_existent.mp4/'
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 404)

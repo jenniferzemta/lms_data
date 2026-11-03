@@ -168,3 +168,5 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOCAL_VIDEOS_DIR = os.environ.get('LOCAL_VIDEOS_DIR', r'D:\videoschariow')

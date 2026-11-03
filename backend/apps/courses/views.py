@@ -119,3 +119,64 @@ class LessonAttachmentDownloadView(APIView):
             {'detail': 'No downloadable resource configured.'},
             status=status.HTTP_404_NOT_FOUND,
         )
+
+
+import mimetypes
+import re
+from django.conf import settings
+from django.http import Http404, StreamingHttpResponse
+
+class VideoStreamView(APIView):
+    """
+    GET /api/v1/courses/videos/<filename>/
+    Streams local video files with HTTP 206 Partial Content support for mobile-first scrubbing.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, filename: str):
+        clean_name = os.path.basename(filename)
+        video_dir = getattr(settings, 'LOCAL_VIDEOS_DIR', r'D:\videoschariow')
+        file_path = os.path.join(video_dir, clean_name)
+
+        if not os.path.isfile(file_path):
+            raise Http404('Video file not found.')
+
+        file_size = os.path.getsize(file_path)
+        content_type, _ = mimetypes.guess_type(file_path)
+        content_type = content_type or 'video/mp4'
+
+        range_header = request.META.get('HTTP_RANGE', '').strip()
+        range_match = re.match(r'bytes=(\d+)-(\d*)', range_header) if range_header else None
+
+        if range_match:
+            first_byte = int(range_match.group(1))
+            last_byte = int(range_match.group(2)) if range_match.group(2) else file_size - 1
+            if last_byte >= file_size:
+                last_byte = file_size - 1
+            length = last_byte - first_byte + 1
+
+            def file_iterator(path, offset, length, chunk_size=65536):
+                with open(path, 'rb') as f:
+                    f.seek(offset)
+                    remaining = length
+                    while remaining > 0:
+                        chunk = f.read(min(chunk_size, remaining))
+                        if not chunk:
+                            break
+                        remaining -= len(chunk)
+                        yield chunk
+
+            response = StreamingHttpResponse(
+                file_iterator(file_path, first_byte, length),
+                status=206,
+                content_type=content_type,
+            )
+            response['Content-Range'] = f'bytes {first_byte}-{last_byte}/{file_size}'
+            response['Content-Length'] = str(length)
+            response['Accept-Ranges'] = 'bytes'
+            return response
+        else:
+            response = FileResponse(open(file_path, 'rb'), content_type=content_type)
+            response['Content-Length'] = str(file_size)
+            response['Accept-Ranges'] = 'bytes'
+            return response
