@@ -62,11 +62,9 @@ class LessonSummarySerializer(serializers.ModelSerializer):
         )
 
     def get_title(self, obj: Lesson) -> str:
-        # If language requested in context, prioritize translation title
         language = self.context.get('language', 'fr')
         translation = obj.translations.filter(language=language, status=LessonTranslation.Status.REVIEWED).first()
         if not translation:
-            # Fallback to any reviewed translation or default title
             translation = obj.translations.filter(status=LessonTranslation.Status.REVIEWED).first()
         return translation.title if translation else obj.title
 
@@ -156,8 +154,19 @@ class LessonDetailSerializer(serializers.Serializer):
     lesson_type = serializers.CharField()
     duration_minutes = serializers.IntegerField()
     is_free_preview = serializers.BooleanField()
+    is_completed = serializers.BooleanField(default=False)
     translation = LessonTranslationSerializer()
     is_fallback_language = serializers.BooleanField()
     attachments = LessonAttachmentSerializer(many=True)
     previous_lesson = NavigationLessonSerializer(allow_null=True)
     next_lesson = NavigationLessonSerializer(allow_null=True)
+
+
+class CourseProgressSerializer(serializers.Serializer):
+    is_enrolled = serializers.BooleanField()
+    status = serializers.CharField()
+    progress_percentage = serializers.IntegerField()
+    completed_lessons_count = serializers.IntegerField()
+    total_lessons_count = serializers.IntegerField()
+    completed_lesson_slugs = serializers.ListField(child=serializers.CharField())
+    resume_lesson = serializers.DictField(allow_null=True)

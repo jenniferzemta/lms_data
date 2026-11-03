@@ -1,5 +1,14 @@
 from django.contrib import admin
-from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.models import (
+    Course,
+    CourseEnrollment,
+    Lesson,
+    LessonAttachment,
+    LessonProgress,
+    LessonTranslation,
+    Module,
+    Track,
+)
 
 
 class LessonTranslationInline(admin.StackedInline):
@@ -70,3 +79,17 @@ class LessonAttachmentAdmin(admin.ModelAdmin):
     list_display = ('title', 'lesson', 'attachment_type', 'file_format', 'file_size_bytes', 'is_free_preview', 'download_count', 'created_at')
     list_filter = ('attachment_type', 'is_free_preview', 'file_format')
     search_fields = ('title', 'description', 'lesson__title')
+
+
+@admin.register(CourseEnrollment)
+class CourseEnrollmentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'course', 'status', 'progress_percentage', 'last_lesson', 'enrolled_at', 'completed_at')
+    list_filter = ('status', 'course')
+    search_fields = ('user__email', 'user__first_name', 'user__last_name', 'course__title')
+
+
+@admin.register(LessonProgress)
+class LessonProgressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'lesson', 'is_completed', 'completed_at', 'last_accessed_at')
+    list_filter = ('is_completed', 'lesson__module__course')
+    search_fields = ('user__email', 'lesson__title')

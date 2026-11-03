@@ -282,3 +282,100 @@ class LessonAttachment(models.Model):
             if len(ext) <= 6:
                 self.file_format = ext
         super().save(*args, **kwargs)
+
+
+from django.conf import settings
+
+
+class CourseEnrollment(models.Model):
+    """
+    Enrolls a learner in a course, tracks overall completion status and last accessed lesson.
+    """
+    class Status(models.TextChoices):
+        ACTIVE = 'ACTIVE', _('En cours')
+        COMPLETED = 'COMPLETED', _('Terminé')
+        PAUSED = 'PAUSED', _('En pause')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='course_enrollments',
+        verbose_name=_('Apprenant'),
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='enrollments',
+        verbose_name=_('Cours'),
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        verbose_name=_('Statut'),
+    )
+    last_lesson = models.ForeignKey(
+        'Lesson',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='+',
+        verbose_name=_('Dernière leçon consultée'),
+    )
+    progress_percentage = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Progression (%)'),
+    )
+    enrolled_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Date d'inscription"))
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Date d'achèvement"))
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Inscription au cours')
+        verbose_name_plural = _('Inscriptions aux cours')
+        unique_together = ('user', 'course')
+        ordering = ('-updated_at',)
+
+    def __str__(self) -> str:
+        return f"{self.user} - {self.course} ({self.progress_percentage}%)"
+
+
+class LessonProgress(models.Model):
+    """
+    Tracks completion and time spent on a specific lesson by an enrolled learner.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='lesson_progresses',
+        verbose_name=_('Apprenant'),
+    )
+    lesson = models.ForeignKey(
+        'Lesson',
+        on_delete=models.CASCADE,
+        related_name='progresses',
+        verbose_name=_('Leçon'),
+    )
+    is_completed = models.BooleanField(
+        default=False,
+        verbose_name=_('Terminée'),
+    )
+    completed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_('Terminée le'),
+    )
+    last_accessed_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Dernier accès'),
+    )
+
+    class Meta:
+        verbose_name = _('Progression de leçon')
+        verbose_name_plural = _('Progressions de leçons')
+        unique_together = ('user', 'lesson')
+        ordering = ('-last_accessed_at',)
+
+    def __str__(self) -> str:
+        status_str = "Terminée" if self.is_completed else "En cours"
+        return f"{self.user} - {self.lesson.title} [{status_str}]"

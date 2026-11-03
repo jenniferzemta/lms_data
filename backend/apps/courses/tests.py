@@ -328,3 +328,95 @@ class VideoStreamViewTests(TestCase):
             url = '/api/v1/courses/videos/non_existent.mp4/'
             response = self.client.get(url)
             self.assertEqual(response.status_code, 404)
+
+
+
+class CourseProgressAndEnrollmentTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        from accounts.models import User
+        self.user = User.objects.create_user(
+            email='learner@example.cm',
+            password='Password123!',
+            first_name='Mireille',
+            last_name='Ngo',
+        )
+        self.track = Track.objects.create(
+            name='Excel Track',
+            slug='excel-track',
+            tool=Track.Tool.EXCEL,
+            order=1,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Analytics',
+            slug='excel-analytics',
+            level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
+            order=1,
+            is_published=True,
+        )
+        self.module = Module.objects.create(
+            course=self.course,
+            title='Module 1',
+            order=1,
+            is_published=True,
+        )
+        self.l1 = Lesson.objects.create(
+            module=self.module,
+            title='Lesson 1',
+            slug='lesson-1',
+            lesson_type=Lesson.LessonType.TEXT,
+            order=1,
+            is_published=True,
+        )
+        self.l2 = Lesson.objects.create(
+            module=self.module,
+            title='Lesson 2',
+            slug='lesson-2',
+            lesson_type=Lesson.LessonType.TEXT,
+            order=2,
+            is_published=True,
+        )
+
+    def test_anonymous_progress_summary(self):
+        url = f'/api/v1/courses/{self.course.slug}/progress/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data['is_enrolled'])
+        self.assertEqual(response.data['progress_percentage'], 0)
+        self.assertEqual(response.data['total_lessons_count'], 2)
+        self.assertEqual(response.data['resume_lesson']['slug'], 'lesson-1')
+
+    def test_authenticated_enrollment(self):
+        self.client.force_authenticate(user=self.user)
+        url = f'/api/v1/courses/{self.course.slug}/enroll/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data['is_enrolled'])
+        self.assertEqual(response.data['status'], 'ACTIVE')
+
+    def test_mark_lesson_complete(self):
+        self.client.force_authenticate(user=self.user)
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.l1.slug}/complete/'
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data['is_completed'])
+        self.assertEqual(response.data['progress_percentage'], 50)
+        self.assertEqual(response.data['status'], 'ACTIVE')
+
+        # Check progress summary after completing lesson 1
+        summary_url = f'/api/v1/courses/{self.course.slug}/progress/'
+        summary_res = self.client.get(summary_url)
+        self.assertEqual(summary_res.status_code, 200)
+        self.assertEqual(summary_res.data['completed_lessons_count'], 1)
+        self.assertEqual(summary_res.data['progress_percentage'], 50)
+        self.assertIn('lesson-1', summary_res.data['completed_lesson_slugs'])
+        self.assertEqual(summary_res.data['resume_lesson']['slug'], 'lesson-2')
+
+        # Complete lesson 2 -> 100% and COMPLETED
+        url2 = f'/api/v1/courses/{self.course.slug}/lessons/{self.l2.slug}/complete/'
+        res2 = self.client.post(url2)
+        self.assertEqual(res2.status_code, 200)
+        self.assertEqual(res2.data['progress_percentage'], 100)
+        self.assertEqual(res2.data['status'], 'COMPLETED')

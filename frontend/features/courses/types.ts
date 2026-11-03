@@ -46,6 +46,7 @@ export interface LessonSummary {
   duration_minutes: number;
   is_free_preview: boolean;
   order: number;
+  is_completed?: boolean;
 }
 
 export interface ModuleCurriculum {
@@ -107,9 +108,31 @@ export interface LessonDetail {
   lesson_type: LessonType;
   duration_minutes: number;
   is_free_preview: boolean;
+  is_completed?: boolean;
   translation: LessonTranslation;
   is_fallback_language: boolean;
   attachments: LessonAttachment[];
   previous_lesson: NavigationLesson | null;
   next_lesson: NavigationLesson | null;
+}
+
+export interface CourseProgress {
+  is_enrolled: boolean;
+  status: 'ACTIVE' | 'COMPLETED' | 'PAUSED' | 'NOT_ENROLLED';
+  progress_percentage: number;
+  completed_lessons_count: number;
+  total_lessons_count: number;
+  completed_lesson_slugs: string[];
+  resume_lesson: {
+    slug: string;
+    title: string;
+  } | null;
+}
+
+export interface LessonCompleteResponse {
+  success: boolean;
+  is_completed: boolean;
+  progress_percentage: number;
+  status: string;
+  summary: CourseProgress;
 }

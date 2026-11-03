@@ -1,5 +1,11 @@
 import { apiClient, ApiError } from '@/lib/api-client';
-import { CourseSummary, CourseDetail, LessonDetail } from '../types';
+import {
+  CourseSummary,
+  CourseDetail,
+  LessonDetail,
+  CourseProgress,
+  LessonCompleteResponse,
+} from '../types';
 
 export const coursesService = {
   /**
@@ -53,6 +59,47 @@ export const coursesService = {
       }
       throw new Error(`Impossible de charger la leçon ${lessonSlug}.`);
     }
+  },
+
+  /**
+   * Fetch learner course progression metrics and resume target (F1.8)
+   */
+  async getCourseProgress(courseSlug: string): Promise<CourseProgress> {
+    try {
+      return await apiClient<CourseProgress>(
+        `/courses/${encodeURIComponent(courseSlug)}/progress/`
+      );
+    } catch {
+      return {
+        is_enrolled: false,
+        status: 'NOT_ENROLLED',
+        progress_percentage: 0,
+        completed_lessons_count: 0,
+        total_lessons_count: 0,
+        completed_lesson_slugs: [],
+        resume_lesson: null,
+      };
+    }
+  },
+
+  /**
+   * Enrolls the current authenticated learner in the course (F1.8)
+   */
+  async enrollInCourse(courseSlug: string): Promise<CourseProgress> {
+    return await apiClient<CourseProgress>(
+      `/courses/${encodeURIComponent(courseSlug)}/enroll/`,
+      { method: 'POST' }
+    );
+  },
+
+  /**
+   * Marks a lesson as completed for the current learner (F1.8)
+   */
+  async completeLesson(courseSlug: string, lessonSlug: string): Promise<LessonCompleteResponse> {
+    return await apiClient<LessonCompleteResponse>(
+      `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/complete/`,
+      { method: 'POST' }
+    );
   },
 
   /**

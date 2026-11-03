@@ -2,8 +2,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link } from '@/i18n/routing';
-import { LessonDetail, ModuleCurriculum } from '../types';
+import { Link, useRouter } from '@/i18n/routing';
+import { LessonDetail, ModuleCurriculum, CourseProgress } from '../types';
+import { coursesService } from '../services/courses.service';
 import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
 import { LessonAttachmentsList } from './LessonAttachmentsList';
@@ -32,6 +33,7 @@ import {
   Send,
   HelpCircle,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 
 interface LessonReaderProps {
@@ -45,6 +47,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   modules = [],
   locale,
 }) => {
+  const router = useRouter();
   const tLesson = useTranslations('Lesson');
   const tCommon = useTranslations('Common');
 
@@ -67,7 +70,9 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     }
   });
 
-  // UI state
+  // UI state & Progression
+  const [progress, setProgress] = useState<CourseProgress | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [isSyllabusDrawerOpen, setIsSyllabusDrawerOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -78,6 +83,13 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [newNoteInput, setNewNoteInput] = useState('');
   const [quizStarted, setQuizStarted] = useState(false);
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
+
+  // Fetch course progression on mount
+  useEffect(() => {
+    coursesService.getCourseProgress(lesson.course_slug).then((prog) => {
+      setProgress(prog);
+    });
+  }, [lesson.course_slug]);
 
   const translation = lesson.translation || {
     language: locale,
@@ -184,8 +196,30 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     setNewNoteInput('');
   };
 
-  // Calculate approximate completion percentage
-  const lessonProgressPercent = 68;
+  const handleCompleteAndNext = async () => {
+    setIsCompleting(true);
+    try {
+      const res = await coursesService.completeLesson(lesson.course_slug, lesson.slug);
+      setProgress(res.summary);
+      if (lesson.next_lesson) {
+        router.push(`/courses/${lesson.course_slug}/lessons/${lesson.next_lesson.slug}`);
+      } else {
+        router.push(`/courses/${lesson.course_slug}`);
+      }
+    } catch {
+      // Fallback navigation
+      if (lesson.next_lesson) {
+        router.push(`/courses/${lesson.course_slug}/lessons/${lesson.next_lesson.slug}`);
+      } else {
+        router.push(`/courses/${lesson.course_slug}`);
+      }
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  // Progression display
+  const currentProgressPercent = progress?.progress_percentage ?? (lesson.is_completed ? 100 : 42);
 
   return (
     <div className="relative min-h-screen bg-[#f8f9ff] text-[#121c2a] flex flex-col font-sans pb-28">
@@ -210,13 +244,13 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                 {translation.title || lesson.title}
               </span>
               <span className="text-xs font-bold text-[#006b5f] shrink-0">
-                {lessonProgressPercent}%
+                {currentProgressPercent}%
               </span>
             </div>
             <div className="w-full bg-[#dee9fc] h-1 rounded-full overflow-hidden mt-1">
               <div
                 className="bg-[#13b8a6] h-full rounded-full transition-all duration-300"
-                style={{ width: `${lessonProgressPercent}%` }}
+                style={{ width: `${currentProgressPercent}%` }}
               />
             </div>
           </div>
@@ -294,11 +328,11 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
             <div className="w-full bg-[#dee9fc] h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-[#13b8a6] h-full rounded-full transition-all duration-300"
-                style={{ width: '42%' }}
+                style={{ width: `${currentProgressPercent}%` }}
               />
             </div>
             <span className="text-xs text-slate-500 shrink-0 font-medium">
-              42% global
+              {currentProgressPercent}% global
             </span>
           </div>
         </section>
@@ -859,36 +893,49 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
             <div className="w-12 shrink-0" />
           )}
 
-          {lesson.next_lesson ? (
-            <Link
-              href={`/courses/${lesson.course_slug}/lessons/${lesson.next_lesson.slug}`}
-              aria-label="Terminer et passer à la leçon suivante"
-              className="flex-1 min-h-[48px] px-4 rounded-xl bg-[#13b8a6] hover:bg-[#006b5f] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all"
-            >
-              <span>Terminer &amp; Suivante</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          ) : (
-            <Link
-              href={`/courses/${lesson.course_slug}`}
-              aria-label="Terminer le cours"
-              className="flex-1 min-h-[48px] px-4 rounded-xl bg-[#006b5f] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Terminer le cours</span>
-            </Link>
-          )}
+          {/* Primary Action Button: Complete & Next (F1.8) */}
+          <button
+            type="button"
+            onClick={handleCompleteAndNext}
+            disabled={isCompleting}
+            aria-label={lesson.next_lesson ? 'Terminer et passer à la suite' : 'Terminer le cours'}
+            className="flex-1 min-h-[48px] px-4 rounded-xl bg-[#13b8a6] hover:bg-[#006b5f] text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all disabled:opacity-75"
+          >
+            {isCompleting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Enregistrement...</span>
+              </>
+            ) : lesson.next_lesson ? (
+              <>
+                <span>Terminer &amp; Suivante</span>
+                <ChevronRight className="w-4 h-4" />
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                <span>Terminer le cours</span>
+              </>
+            )}
+          </button>
         </div>
       </footer>
 
-      {/* Curriculum Syllabus Drawer Modal */}
+      {/* Curriculum Syllabus Drawer Modal with completion checkmarks */}
       {isSyllabusDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="w-full max-w-md h-full bg-white shadow-2xl flex flex-col">
             <div className="p-4 border-b border-slate-200 flex items-center justify-between">
-              <h2 className="font-bold text-sm text-slate-900">
-                Sommaire du cours
-              </h2>
+              <div>
+                <h2 className="font-bold text-sm text-slate-900">
+                  Sommaire du cours
+                </h2>
+                {progress && (
+                  <p className="text-xs text-[#006b5f] font-semibold mt-0.5">
+                    {progress.completed_lessons_count} sur {progress.total_lessons_count} leçons terminées ({progress.progress_percentage}%)
+                  </p>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => setIsSyllabusDrawerOpen(false)}
@@ -902,6 +949,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                 modules={modules}
                 courseSlug={lesson.course_slug}
                 activeLessonSlug={lesson.slug}
+                completedLessonSlugs={progress?.completed_lesson_slugs || []}
               />
             </div>
           </div>

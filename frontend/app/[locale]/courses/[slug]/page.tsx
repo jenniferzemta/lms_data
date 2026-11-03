@@ -6,7 +6,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { Badge } from '@/ui/Badge';
-import { coursesService, CourseSyllabus, CourseDetail } from '@/features/courses';
+import { coursesService, CourseSyllabus, CourseDetail, CourseProgress } from '@/features/courses';
 import {
   Clock,
   BookOpen,
@@ -15,6 +15,8 @@ import {
   Award,
   ChevronLeft,
   Layers,
+  CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 
 interface CoursePageProps {
@@ -29,10 +31,16 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
   const tCourse = await getTranslations({ locale, namespace: 'Course' });
 
   let course: CourseDetail | null = null;
+  let progress: CourseProgress | null = null;
+
   try {
-    course = await coursesService.getCourseBySlug(slug, locale);
+    const [courseData, progressData] = await Promise.all([
+      coursesService.getCourseBySlug(slug, locale),
+      coursesService.getCourseProgress(slug),
+    ]);
+    course = courseData;
+    progress = progressData;
   } catch {
-    // If backend isn't ready or course slug not found
     course = null;
   }
 
@@ -40,14 +48,18 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
     notFound();
   }
 
-  // Find the first lesson to start the course
+  // Find the lesson to start or resume
   const firstModule = course.modules?.[0];
   const firstLesson = firstModule?.lessons?.[0];
-  const startLessonUrl = firstLesson
-    ? `/courses/${course.slug}/lessons/${firstLesson.slug}`
+
+  const targetLessonSlug = progress?.resume_lesson?.slug || firstLesson?.slug;
+  const startLessonUrl = targetLessonSlug
+    ? `/courses/${course.slug}/lessons/${targetLessonSlug}`
     : `/courses/${course.slug}`;
 
   const isFree = course.price_tier === 'free';
+  const isEnrolled = progress?.is_enrolled ?? false;
+  const isCompleted = progress?.status === 'COMPLETED';
 
   return (
     <div className="flex min-h-screen bg-brand-canvas text-brand-text">
@@ -98,6 +110,13 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                   {course.track.name}
                 </span>
               )}
+
+              {isEnrolled && (
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  {isCompleted ? 'Cours terminé' : `En cours (${progress?.progress_percentage}%)`}
+                </span>
+              )}
             </div>
 
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-primary leading-tight mb-3">
@@ -131,14 +150,43 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
               </div>
             </div>
 
-            {/* CTA Start Course Button */}
+            {/* Learner Progress Bar if enrolled (F1.8) */}
+            {isEnrolled && progress && (
+              <div className="mb-6 p-4 rounded-2xl bg-[#f8f9ff] border border-slate-200/80 space-y-2">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="font-bold text-slate-900">
+                    Progression globale
+                  </span>
+                  <span className="font-bold text-[#006b5f]">
+                    {progress.completed_lessons_count} / {progress.total_lessons_count} leçons ({progress.progress_percentage}%)
+                  </span>
+                </div>
+                <div className="w-full bg-[#dee9fc] h-2 rounded-full overflow-hidden">
+                  <div
+                    className="bg-[#13b8a6] h-full rounded-full transition-all duration-500"
+                    style={{ width: `${progress.progress_percentage}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* CTA Button: Start or Resume Course (F1.8) */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
               <Link
                 href={startLessonUrl}
                 className="min-h-[50px] px-6 rounded-2xl bg-brand-primary hover:bg-brand-primary-dark text-white font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] shadow-xs"
               >
-                <Play className="w-4 h-4 fill-current" />
-                <span>{tCourse('startLearningNow')}</span>
+                {isEnrolled ? (
+                  <>
+                    <RotateCcw className="w-4 h-4" />
+                    <span>Reprendre le cours</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-4 h-4 fill-current" />
+                    <span>{tCourse('startLearningNow')}</span>
+                  </>
+                )}
               </Link>
             </div>
           </div>
@@ -155,7 +203,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             </div>
           )}
 
-          {/* Syllabus Section */}
+          {/* Syllabus Section with completed lesson checkmarks */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -174,6 +222,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             <CourseSyllabus
               courseSlug={course.slug}
               modules={course.modules || []}
+              completedLessonSlugs={progress?.completed_lesson_slugs || []}
             />
           </div>
         </main>

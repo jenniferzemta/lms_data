@@ -22,6 +22,7 @@ interface CourseSyllabusProps {
   modules: ModuleCurriculum[];
   activeLessonSlug?: string;
   isCompact?: boolean;
+  completedLessonSlugs?: string[];
 }
 
 const getLessonIcon = (type: LessonType) => {
@@ -45,6 +46,7 @@ export const CourseSyllabus: React.FC<CourseSyllabusProps> = ({
   modules,
   activeLessonSlug,
   isCompact = false,
+  completedLessonSlugs = [],
 }) => {
   const tLesson = useTranslations('Lesson');
   const tCommon = useTranslations('Common');
@@ -53,7 +55,6 @@ export const CourseSyllabus: React.FC<CourseSyllabusProps> = ({
   const [expandedModules, setExpandedModules] = useState<Record<number, boolean>>(() => {
     const initialState: Record<number, boolean> = {};
     modules.forEach((mod) => {
-      // expand if active or default to true for the first 2 modules
       const hasActive = mod.lessons.some((l) => l.slug === activeLessonSlug);
       initialState[mod.id] = hasActive || mod.order <= 2;
     });
@@ -98,38 +99,39 @@ export const CourseSyllabus: React.FC<CourseSyllabusProps> = ({
                     {moduleItem.title}
                   </h3>
                   {moduleItem.description && !isCompact && (
-                    <p className="text-xs text-brand-muted mt-0.5 line-clamp-1">
+                    <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
                       {moduleItem.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-3 text-[11px] text-brand-muted font-medium mt-1">
-                    <span>
-                      {moduleItem.lessons.length} {moduleItem.lessons.length > 1 ? 'leçons' : 'leçon'}
-                    </span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {totalDuration} {tCommon('minutes')}
-                    </span>
-                  </div>
                 </div>
               </div>
 
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-brand-muted hover:text-brand-primary shrink-0">
-                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              <div className="flex items-center gap-2 shrink-0 text-slate-400">
+                <span className="hidden sm:inline-flex items-center gap-1 text-xs text-slate-500">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>
+                    {totalDuration} {tCommon('minutes')}
+                  </span>
+                </span>
+                {isExpanded ? (
+                  <ChevronDown className="w-5 h-5 text-slate-500" />
+                ) : (
+                  <ChevronRight className="w-5 h-5 text-slate-500" />
+                )}
               </div>
             </button>
 
             {/* Lessons List inside Module */}
             {isExpanded && (
-              <div className="px-2 pb-2 sm:px-3 sm:pb-3 pt-1 border-t border-slate-100 divide-y divide-slate-100">
+              <div className="px-2 pb-2.5 pt-1 space-y-1 border-t border-slate-100">
                 {moduleItem.lessons.length === 0 ? (
-                  <p className="p-3 text-xs text-brand-muted text-center italic">
-                    {tLesson('noLessonsYet')}
+                  <p className="text-xs text-slate-400 italic py-2 px-3">
+                    {tLesson('noLessonsInModule')}
                   </p>
                 ) : (
                   moduleItem.lessons.map((lesson) => {
                     const isActive = lesson.slug === activeLessonSlug;
+                    const isCompleted = completedLessonSlugs.includes(lesson.slug);
 
                     return (
                       <Link
@@ -144,12 +146,18 @@ export const CourseSyllabus: React.FC<CourseSyllabusProps> = ({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <div
                             className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                              isActive
+                              isCompleted
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : isActive
                                 ? 'bg-brand-teal text-white'
                                 : 'bg-slate-100 text-slate-600 group-hover:bg-slate-200'
                             }`}
                           >
-                            {getLessonIcon(lesson.lesson_type)}
+                            {isCompleted ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            ) : (
+                              getLessonIcon(lesson.lesson_type)
+                            )}
                           </div>
 
                           <div className="min-w-0">
@@ -175,9 +183,11 @@ export const CourseSyllabus: React.FC<CourseSyllabusProps> = ({
                             {lesson.duration_minutes} {tCommon('minutes')}
                           </span>
 
-                          {isActive && (
-                            <CheckCircle2 className="w-4 h-4 text-brand-teal shrink-0" />
-                          )}
+                          {isCompleted ? (
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                          ) : isActive ? (
+                            <span className="w-2 h-2 rounded-full bg-brand-teal shrink-0" />
+                          ) : null}
                         </div>
                       </Link>
                     );

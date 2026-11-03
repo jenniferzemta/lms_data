@@ -1,13 +1,18 @@
+import mimetypes
 import os
-from django.http import FileResponse, HttpResponseRedirect
+import re
+from django.conf import settings
+from django.http import FileResponse, Http404, HttpResponseRedirect, StreamingHttpResponse
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from courses.models import Course, Lesson
 from courses.selectors import (
     get_course_by_slug,
+    get_course_progress_summary,
     get_lesson_attachment_by_id,
     get_lesson_detail,
     list_published_courses,
@@ -15,9 +20,15 @@ from courses.selectors import (
 from courses.serializers import (
     CourseDetailSerializer,
     CourseListSerializer,
+    CourseProgressSerializer,
     LessonDetailSerializer,
 )
-from courses.services import can_access_attachment, record_attachment_download
+from courses.services import (
+    can_access_attachment,
+    enroll_user_in_course,
+    mark_lesson_completed,
+    record_attachment_download,
+)
 
 
 class CourseListView(APIView):
@@ -59,10 +70,55 @@ class CourseDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class CourseProgressView(APIView):
+    """
+    GET /api/v1/courses/{slug}/progress/
+    Retrieves current user course completion metrics, finished lesson slugs,
+    and automatic pickup resume target (F1.8).
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug)
+        if not course:
+            return Response(
+                {'detail': 'Course not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        summary = get_course_progress_summary(request.user, course)
+        serializer = CourseProgressSerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CourseEnrollView(APIView):
+    """
+    POST /api/v1/courses/{slug}/enroll/
+    Enrolls the current authenticated learner in the course (F1.8).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug)
+        if not course:
+            return Response(
+                {'detail': 'Course not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        enrollment = enroll_user_in_course(request.user, course)
+        summary = get_course_progress_summary(request.user, course)
+        serializer = CourseProgressSerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class LessonDetailView(APIView):
     """
     GET /api/v1/courses/{course_slug}/lessons/{lesson_slug}/
-    Retrieves full lesson content, localized translation, attachments, and previous/next navigation.
+    Retrieves full lesson content, localized translation, attachments, learner progress,
+    and previous/next navigation.
     """
 
     permission_classes = [AllowAny]
@@ -73,6 +129,7 @@ class LessonDetailView(APIView):
             course_slug=course_slug,
             lesson_slug=lesson_slug,
             language=language,
+            user=request.user,
         )
         if not lesson_data:
             return Response(
@@ -82,6 +139,46 @@ class LessonDetailView(APIView):
 
         serializer = LessonDetailSerializer(lesson_data)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LessonCompleteView(APIView):
+    """
+    POST /api/v1/courses/{course_slug}/lessons/{lesson_slug}/complete/
+    Marks a lesson as completed by the learner, updates progress percentage,
+    and returns updated metrics (F1.8).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        lesson = (
+            Lesson.objects.filter(
+                module__course__slug=course_slug,
+                slug=lesson_slug,
+                is_published=True,
+            )
+            .select_related('module__course')
+            .first()
+        )
+        if not lesson:
+            return Response(
+                {'detail': 'Lesson not found.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        progress, enrollment = mark_lesson_completed(request.user, lesson)
+        summary = get_course_progress_summary(request.user, lesson.module.course)
+
+        return Response(
+            {
+                'success': True,
+                'is_completed': progress.is_completed,
+                'progress_percentage': enrollment.progress_percentage,
+                'status': enrollment.status,
+                'summary': CourseProgressSerializer(summary).data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class LessonAttachmentDownloadView(APIView):
@@ -121,16 +218,12 @@ class LessonAttachmentDownloadView(APIView):
         )
 
 
-import mimetypes
-import re
-from django.conf import settings
-from django.http import Http404, StreamingHttpResponse
-
 class VideoStreamView(APIView):
     """
     GET /api/v1/courses/videos/<filename>/
     Streams local video files with HTTP 206 Partial Content support for mobile-first scrubbing.
     """
+
     permission_classes = [AllowAny]
 
     def get(self, request: Request, filename: str):

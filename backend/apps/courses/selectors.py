@@ -1,5 +1,14 @@
 from typing import Optional
-from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.models import (
+    Course,
+    CourseEnrollment,
+    Lesson,
+    LessonAttachment,
+    LessonProgress,
+    LessonTranslation,
+    Module,
+    Track,
+)
 
 
 def list_published_courses(*, tool: Optional[str] = None, level: Optional[str] = None, price_tier: Optional[str] = None):
@@ -41,10 +50,92 @@ def get_course_curriculum_lessons(course: Course):
     )
 
 
-def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr') -> Optional[dict]:
+def get_user_course_enrollment(user, course: Course) -> Optional[CourseEnrollment]:
+    """
+    Retrieves course enrollment for a given user if authenticated.
+    """
+    if not user or not user.is_authenticated:
+        return None
+    return CourseEnrollment.objects.filter(user=user, course=course).first()
+
+
+def get_course_progress_summary(user, course: Course) -> dict:
+    """
+    Computes course progression metrics for an learner:
+    - completion percentage
+    - number of completed lessons
+    - list of completed lesson slugs
+    - resume target lesson for automatic pickup (F1.8)
+    """
+    all_lessons = get_course_curriculum_lessons(course)
+    total_count = len(all_lessons)
+
+    if not user or not user.is_authenticated:
+        return {
+            'is_enrolled': False,
+            'status': 'NOT_ENROLLED',
+            'progress_percentage': 0,
+            'completed_lessons_count': 0,
+            'total_lessons_count': total_count,
+            'completed_lesson_slugs': [],
+            'resume_lesson': {
+                'slug': all_lessons[0].slug if all_lessons else '',
+                'title': all_lessons[0].title if all_lessons else '',
+            } if all_lessons else None,
+        }
+
+    enrollment = CourseEnrollment.objects.filter(user=user, course=course).first()
+    completed_slugs = set(
+        LessonProgress.objects.filter(
+            user=user,
+            lesson__module__course=course,
+            is_completed=True,
+        ).values_list('lesson__slug', flat=True)
+    )
+
+    completed_count = len(completed_slugs)
+    percentage = (
+        enrollment.progress_percentage
+        if enrollment
+        else (int((completed_count / total_count) * 100) if total_count > 0 else 0)
+    )
+
+    # Determine resume lesson (first uncompleted lesson or last accessed)
+    resume_lesson = None
+    for item in all_lessons:
+        if item.slug not in completed_slugs:
+            resume_lesson = {
+                'slug': item.slug,
+                'title': item.title,
+            }
+            break
+
+    if not resume_lesson and all_lessons:
+        target = (
+            enrollment.last_lesson
+            if (enrollment and enrollment.last_lesson)
+            else all_lessons[-1]
+        )
+        resume_lesson = {
+            'slug': target.slug,
+            'title': target.title,
+        }
+
+    return {
+        'is_enrolled': enrollment is not None,
+        'status': enrollment.status if enrollment else 'NOT_ENROLLED',
+        'progress_percentage': percentage,
+        'completed_lessons_count': completed_count,
+        'total_lessons_count': total_count,
+        'completed_lesson_slugs': list(completed_slugs),
+        'resume_lesson': resume_lesson,
+    }
+
+
+def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr', user=None) -> Optional[dict]:
     """
     Retrieves full lesson content, localized translation with bilingual fallback,
-    downloadable attachments, and previous/next navigation metadata.
+    downloadable attachments, previous/next navigation metadata, and learner completion state.
     """
     course = Course.objects.filter(slug=course_slug, is_published=True).first()
     if not course:
@@ -58,6 +149,18 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
     )
     if not lesson:
         return None
+
+    # Track user access if authenticated
+    is_completed = False
+    if user and user.is_authenticated:
+        progress, _ = LessonProgress.objects.get_or_create(user=user, lesson=lesson)
+        is_completed = progress.is_completed
+
+        # Update last_lesson on enrollment if enrolled
+        enrollment = CourseEnrollment.objects.filter(user=user, course=course).first()
+        if enrollment and enrollment.last_lesson_id != lesson.id:
+            enrollment.last_lesson = lesson
+            enrollment.save(update_fields=['last_lesson', 'updated_at'])
 
     # Find translation for requested language
     preferred_lang = language.lower() if language else 'fr'
@@ -131,6 +234,7 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
         'lesson_type': lesson.lesson_type,
         'duration_minutes': lesson.duration_minutes,
         'is_free_preview': lesson.is_free_preview,
+        'is_completed': is_completed,
         'translation': translation,
         'is_fallback_language': is_fallback,
         'attachments': attachments,
@@ -139,12 +243,5 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
     }
 
 
-def get_lesson_attachment_by_id(attachment_id: int) -> Optional[LessonAttachment]:
-    """
-    Retrieves a single attachment by ID with its related lesson, module, and course.
-    """
-    return (
-        LessonAttachment.objects.filter(pk=attachment_id)
-        .select_related('lesson', 'lesson__module', 'lesson__module__course')
-        .first()
-    )
+def get_lesson_attachment_by_id(pk: int) -> Optional[LessonAttachment]:
+    return LessonAttachment.objects.filter(pk=pk).select_related('lesson', 'lesson__module__course').first()
