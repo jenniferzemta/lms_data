@@ -10,6 +10,22 @@ export interface Track {
 
 export type LessonType = 'text' | 'video' | 'exercise' | 'quiz' | 'project';
 
+export type AttachmentType = 'STARTER' | 'SOLUTION' | 'DATASET' | 'CHEATSHEET' | 'OTHER';
+
+export interface LessonAttachment {
+  id: number;
+  title: string;
+  description: string;
+  attachment_type: AttachmentType;
+  file_format: string;
+  file_size_bytes: number;
+  file_size_display: string;
+  download_url: string;
+  is_free_preview: boolean;
+  download_count: number;
+  order: number;
+}
+
 export interface LessonTranslation {
   language: string;
   title: string;
@@ -93,6 +109,7 @@ export interface LessonDetail {
   is_free_preview: boolean;
   translation: LessonTranslation;
   is_fallback_language: boolean;
+  attachments: LessonAttachment[];
   previous_lesson: NavigationLesson | null;
   next_lesson: NavigationLesson | null;
 }

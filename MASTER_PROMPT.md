@@ -430,17 +430,17 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 > **Pour une IA sans accès au dépôt** (chat web, autre assistant) : ce bloc doit être remplacé à chaque session par celui du haut de `PROJECT_STATUS.md`, avant de coller le master prompt.
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-24]
+[BLOC DE REPRISE — mis à jour le 2026-11-03]
 Phase globale     : V1 SOCLE
-Version suivante  : V1 Socle — phase SAM : Développement (F1.6 & F1.8)
-Avancement (M)    : V1 4/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.5 Structure complète parcours → cours → module → leçon : backend Django (Track, Course, Module, Lesson, LessonTranslation bilingue FR/EN avec fallback automatique), seed cours Excel Douala, endpoints /api/v1/courses/, contrat OpenAPI 3.1, feature courses Next.js (CourseSyllabus, LessonReader avec vidéo/audio/Markdown/copie code/téléchargement/mode léger, barre tactile au pouce), pages /courses/[slug] et /courses/[slug]/lessons/[lessonSlug], 36/36 tests Django passants, 0 erreur lint, 14/14 routes Next.js compilées
-En cours          : Validation et fusion de feat/course-structure sur main
-Prochaine tâche   : F1.6 (Fichiers d'exercices téléchargeables et pièces jointes) ou F1.8 (Progression et reprise apprenant)
-Décisions         : Modélisation en cascades avec ordonnancement strict ; fallback bilingue transparent si traduction manquante ; barre de navigation au pouce ≥ 44px
+Version suivante  : V1 Socle — phase SAM : Développement (F1.8 & F1.7)
+Avancement (M)    : V1 5/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.6 Fichiers téléchargeables et pièces jointes par leçon : modèle Django LessonAttachment (formats xlsx, csv, pbix, sql, py, pdf, zip), calcul de taille lisible (Ko/Mo) adapté aux forfaits data mobiles, contrôle d'accès serveur (permissions abonnement / free preview), endpoint /api/v1/courses/attachments/<id>/download/ avec traçage atomique, enrichissement seed Excel Douala (starter, solution, cheatsheet, dataset), composant Next.js LessonAttachmentsList (cibles tactiles ≥ 44px, badges typés, formatage data), intégration dans LessonReader, clés i18n FR/EN, spec OpenAPI 3.1, 42/42 tests Django passants, 0 erreur lint, build 14/14 validé
+En cours          : Préparation de F1.8 (Progression et reprise apprenant) ou F1.7 (Quiz)
+Prochaine tâche   : F1.8 (Progression et reprise apprenant) ou F1.7 (Quiz)
+Décisions         : Modélisation serveur des pièces jointes avec calcul et affichage explicite Ko/Mo pour protéger le forfait mobile africain ; téléchargement sécurisé contrôlé côté Django ; typage fort des ressources (exercice initial, corrigé, dataset brut, aide-mémoire)
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/course-structure prête pour merge, 36/36 tests Django passants, build Next.js validé (14/14 pages compilées)
-Dernière commande : npm run lint && npx next build --webpack
+Dépôt             : Branche main à jour, 42/42 tests Django passants, build Next.js validé (14/14 pages compilées, 0 erreur lint)
+Dernière commande : cd frontend && npm run lint && npx next build --webpack
 ```
 
 ---

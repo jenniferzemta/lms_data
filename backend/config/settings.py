@@ -105,8 +105,16 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # PostgreSQL is the official and primary database for DataMboa LMS
 DATABASE_URL = os.environ.get('DATABASE_URL')
+USE_SQLITE = os.environ.get('USE_SQLITE', '').lower() in ('true', '1', 'yes')
 
-if DATABASE_URL:
+if 'test' in sys.argv or USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+elif DATABASE_URL:
     url = urllib.parse.urlparse(DATABASE_URL)
     DATABASES = {
         'default': {

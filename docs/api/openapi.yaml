@@ -271,8 +271,136 @@ paths:
         '404':
           description: Lesson not found
 
+  /courses/attachments/{id}/download/:
+    get:
+      summary: Download a lesson attachment / exercise file (F1.6)
+      description: Safely streams or redirects to the requested file, increments download analytics, and validates access rights.
+      operationId: downloadLessonAttachment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Binary file stream with Content-Disposition
+        '302':
+          description: Redirect to external storage URL
+        '403':
+          description: Access denied (requires active subscription)
+        '404':
+          description: Attachment not found
+
 components:
   schemas:
+    LessonAttachment:
+      type: object
+      required:
+        - id
+        - title
+        - attachment_type
+        - file_format
+        - file_size_bytes
+        - file_size_display
+        - download_url
+        - is_free_preview
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: "Tableau d'exercice — Découverte des types (Douala)"
+        description:
+          type: string
+        attachment_type:
+          type: string
+          enum: [STARTER, SOLUTION, DATASET, CHEATSHEET, OTHER]
+          example: STARTER
+        file_format:
+          type: string
+          example: xlsx
+        file_size_bytes:
+          type: integer
+          example: 128500
+        file_size_display:
+          type: string
+          example: 125.5 Ko
+        download_url:
+          type: string
+        is_free_preview:
+          type: boolean
+          example: true
+        download_count:
+          type: integer
+          example: 42
+        order:
+          type: integer
+          example: 1
+
+    LessonTranslation:
+      type: object
+      properties:
+        language:
+          type: string
+          example: fr
+        title:
+          type: string
+        summary:
+          type: string
+        content:
+          type: string
+        video_url:
+          type: string
+        audio_url:
+          type: string
+        pdf_url:
+          type: string
+        code_snippet:
+          type: string
+        status:
+          type: string
+
+    LessonDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        course_slug:
+          type: string
+        course_title:
+          type: string
+        module_id:
+          type: integer
+        module_title:
+          type: string
+        title:
+          type: string
+        slug:
+          type: string
+        lesson_type:
+          type: string
+        duration_minutes:
+          type: integer
+        is_free_preview:
+          type: boolean
+        translation:
+          $ref: '#/components/schemas/LessonTranslation'
+        is_fallback_language:
+          type: boolean
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/LessonAttachment'
+        previous_lesson:
+          type: object
+          nullable: true
+        next_lesson:
+          type: object
+          nullable: true
+
     RegisterLearnerRequest:
       type: object
       required:

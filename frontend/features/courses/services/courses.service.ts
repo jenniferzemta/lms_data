@@ -54,4 +54,12 @@ export const coursesService = {
       throw new Error(`Impossible de charger la leçon ${lessonSlug}.`);
     }
   },
+
+  /**
+   * Helper to construct the tracked download URL for a lesson attachment
+   */
+  getAttachmentDownloadUrl(attachmentId: number): string {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+    return `${apiBase}/courses/attachments/${attachmentId}/download/`;
+  },
 };

@@ -1,10 +1,16 @@
 from django.contrib import admin
-from courses.models import Course, Lesson, LessonTranslation, Module, Track
+from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
 
 
 class LessonTranslationInline(admin.StackedInline):
     model = LessonTranslation
     extra = 1
+
+
+class LessonAttachmentInline(admin.TabularInline):
+    model = LessonAttachment
+    extra = 1
+    fields = ('order', 'title', 'attachment_type', 'file', 'external_url', 'file_format', 'file_size_bytes', 'is_free_preview', 'download_count')
 
 
 class LessonInline(admin.TabularInline):
@@ -49,7 +55,7 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ('title', 'module', 'lesson_type', 'duration_minutes', 'is_free_preview', 'order', 'is_published')
     list_filter = ('lesson_type', 'is_free_preview', 'is_published', 'module__course')
     search_fields = ('title', 'slug', 'module__title')
-    inlines = [LessonTranslationInline]
+    inlines = [LessonTranslationInline, LessonAttachmentInline]
 
 
 @admin.register(LessonTranslation)
@@ -57,3 +63,10 @@ class LessonTranslationAdmin(admin.ModelAdmin):
     list_display = ('title', 'lesson', 'language', 'status', 'created_at')
     list_filter = ('language', 'status')
     search_fields = ('title', 'content', 'lesson__title')
+
+
+@admin.register(LessonAttachment)
+class LessonAttachmentAdmin(admin.ModelAdmin):
+    list_display = ('title', 'lesson', 'attachment_type', 'file_format', 'file_size_bytes', 'is_free_preview', 'download_count', 'created_at')
+    list_filter = ('attachment_type', 'is_free_preview', 'file_format')
+    search_fields = ('title', 'description', 'lesson__title')

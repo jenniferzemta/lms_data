@@ -104,7 +104,18 @@
     "audioVersionTitle": "Condensed audio version",
     "codeSnippetTitle": "Formula / Code to apply",
     "copyCode": "Copy",
-    "codeCopied": "Copied!"
+    "codeCopied": "Copied!",
+    "downloadableResourcesTitle": "Practice Files & Resources",
+    "downloadableResourcesSubtitle": "Downloadable exercises, datasets, and solutions to practice offline.",
+    "downloadAction": "Download",
+    "typeStarter": "Starter file",
+    "typeSolution": "Official solution",
+    "typeDataset": "Raw dataset",
+    "typeCheatsheet": "Cheatsheet",
+    "typeOther": "Resource",
+    "supportDocumentDesc": "Course handout and practical guide.",
+    "filesCountSingular": "file",
+    "filesCountPlural": "files"
   },
   "Billing": {
     "title": "Activate subscription",

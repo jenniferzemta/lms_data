@@ -7,11 +7,11 @@ import { LessonDetail, ModuleCurriculum } from '../types';
 import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
 import { LessonBottomBar } from './LessonBottomBar';
+import { LessonAttachmentsList } from './LessonAttachmentsList';
 import {
   Clock,
   Sparkles,
   BookOpen,
-  FileDown,
   Copy,
   Check,
   Zap,
@@ -298,35 +298,11 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
           </section>
         )}
 
-        {/* Downloadable Exercise Files / PDF */}
-        {translation.pdf_url && (
-          <section className="mb-8 p-4 sm:p-5 rounded-2xl bg-white border border-brand-border shadow-2xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-xl bg-brand-primary-light text-brand-primary flex items-center justify-center shrink-0">
-                <FileDown className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <h4 className="font-bold text-sm text-brand-primary">
-                  {tLesson('downloadFiles')}
-                </h4>
-                <p className="text-xs text-brand-muted">
-                  Fichier d&apos;exercice au format pratique (Excel / PDF)
-                </p>
-              </div>
-            </div>
-
-            <a
-              href={translation.pdf_url}
-              download
-              target="_blank"
-              rel="noopener noreferrer"
-              className="min-h-[44px] px-4 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold text-xs inline-flex items-center gap-2 transition-all active:scale-95 shadow-2xs"
-            >
-              <FileDown className="w-4 h-4" />
-              <span>Télécharger</span>
-            </a>
-          </section>
-        )}
+        {/* Downloadable Exercise Files & Attachments (F1.6) */}
+        <LessonAttachmentsList
+          attachments={lesson.attachments || []}
+          fallbackPdfUrl={translation.pdf_url}
+        />
       </main>
 
       {/* Slide-over Syllabus Drawer for Course Modules */}

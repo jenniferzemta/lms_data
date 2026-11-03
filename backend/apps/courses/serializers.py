@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from courses.models import Course, Lesson, LessonTranslation, Module, Track
+from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
 
 
 class TrackSerializer(serializers.ModelSerializer):
@@ -22,6 +22,27 @@ class LessonTranslationSerializer(serializers.ModelSerializer):
             'pdf_url',
             'code_snippet',
             'status',
+        )
+
+
+class LessonAttachmentSerializer(serializers.ModelSerializer):
+    file_size_display = serializers.CharField(read_only=True)
+    download_url = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = LessonAttachment
+        fields = (
+            'id',
+            'title',
+            'description',
+            'attachment_type',
+            'file_format',
+            'file_size_bytes',
+            'file_size_display',
+            'download_url',
+            'is_free_preview',
+            'download_count',
+            'order',
         )
 
 
@@ -137,5 +158,6 @@ class LessonDetailSerializer(serializers.Serializer):
     is_free_preview = serializers.BooleanField()
     translation = LessonTranslationSerializer()
     is_fallback_language = serializers.BooleanField()
+    attachments = LessonAttachmentSerializer(many=True)
     previous_lesson = NavigationLessonSerializer(allow_null=True)
     next_lesson = NavigationLessonSerializer(allow_null=True)

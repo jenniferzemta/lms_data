@@ -9,17 +9,17 @@
 ## 1. Bloc de reprise (à copier dans la section 16 du `MASTER_PROMPT.md` pour une IA sans accès au dépôt)
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-10-24]
+[BLOC DE REPRISE — mis à jour le 2026-11-03]
 Phase globale     : V1 SOCLE
-Version suivante  : V1 Socle — phase SAM : Développement (F1.6 & F1.8)
-Avancement (M)    : V1 4/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
-Fait              : F1.5 Structure complète parcours → cours → module → leçon : backend Django (Track, Course, Module, Lesson, LessonTranslation bilingue FR/EN avec fallback automatique), seed cours Excel Douala, endpoints /api/v1/courses/, contrat OpenAPI 3.1, feature courses Next.js (CourseSyllabus, LessonReader avec vidéo/audio/Markdown/copie code/téléchargement/mode léger, barre tactile au pouce), pages /courses/[slug] et /courses/[slug]/lessons/[lessonSlug], 36/36 tests Django passants, 0 erreur lint, 14/14 routes Next.js compilées
-En cours          : Validation et fusion de feat/course-structure sur main
-Prochaine tâche   : F1.6 (Fichiers d'exercices téléchargeables et pièces jointes) ou F1.8 (Progression et reprise apprenant)
-Décisions         : Modélisation en cascades avec ordonnancement strict ; fallback bilingue transparent si traduction manquante ; barre de navigation au pouce ≥ 44px
+Version suivante  : V1 Socle — phase SAM : Développement (F1.8 & F1.7)
+Avancement (M)    : V1 5/13 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.2 🔎) · V2 0/10 · V3 0/7 · V4 0/4
+Fait              : F1.6 Fichiers téléchargeables et pièces jointes par leçon : modèle Django LessonAttachment (formats xlsx, csv, pbix, sql, py, pdf, zip), calcul de taille lisible (Ko/Mo) adapté aux forfaits data mobiles, contrôle d'accès serveur (permissions abonnement / free preview), endpoint /api/v1/courses/attachments/<id>/download/ avec traçage atomique, enrichissement seed Excel Douala (starter, solution, cheatsheet, dataset), composant Next.js LessonAttachmentsList (cibles tactiles ≥ 44px, badges typés, formatage data), intégration dans LessonReader, clés i18n FR/EN, spec OpenAPI 3.1, 42/42 tests Django passants, 0 erreur lint, build 14/14 validé
+En cours          : Préparation de F1.8 (Progression et reprise apprenant) ou F1.7 (Quiz)
+Prochaine tâche   : F1.8 (Progression et reprise apprenant) ou F1.7 (Quiz)
+Décisions         : Modélisation serveur des pièces jointes avec calcul et affichage explicite Ko/Mo pour protéger le forfait mobile africain ; téléchargement sécurisé contrôlé côté Django ; typage fort des ressources (exercice initial, corrigé, dataset brut, aide-mémoire)
 Questions ouvertes: agrégateur de paiement V4 ; tableur du labo Excel (V2) ; hébergement VPS+Docker ; rédaction des contenus
-Dépôt             : Branche feat/course-structure prête pour merge, 36/36 tests Django passants, build Next.js validé (14/14 pages compilées)
-Dernière commande : npm run lint && npx next build --webpack
+Dépôt             : Branche main à jour, 42/42 tests Django passants, build Next.js validé (14/14 pages compilées, 0 erreur lint)
+Dernière commande : cd frontend && npm run lint && npx next build --webpack
 ```
 
 ---
@@ -30,8 +30,8 @@ Dernière commande : npm run lint && npx next build --webpack
 |---|---|
 | Phase globale | V1 — Socle |
 | Version cible suivante | V1 — Socle |
-| Phase SAM de la version cible | Développement (F1.5) |
-| Dernière mise à jour | 2026-10-24 |
+| Phase SAM de la version cible | Développement (F1.8 / F1.7) |
+| Dernière mise à jour | 2026-11-03 |
 | Dépôt | Initialisé sur `main`, synchronisé avec GitHub (`origin/main`) |
 
 ### Jalons de préparation
@@ -51,16 +51,16 @@ Dernière commande : npm run lint && npx next build --webpack
 
 ## 3. Exigences par version
 
-### V1 — Socle · avancement M : 4/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
+### V1 — Socle · avancement M : 5/13 · critère de passage : un groupe termine un module + ≥ 1 paiement manuel validé de bout en bout
 
 | ID | Exigence | Prio | Statut | Notes / fichiers clés |
 |---|---|---|---|---|
 | F1.1 | Inscription, connexion, mot de passe oublié, Google | M | ✅ | Endpoints Django /api/v1/auth/ (register, login, google, logout, me), 27 tests passants, pages /login et /register Next.js, contrat OpenAPI 3.1, mergé sur main |
-| F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil, auth, cours et leçons avec mécanisme de fallback automatique |
+| F1.2 | Interface et contenus bilingues FR/EN | M | 🔎 | Dictionnaires FR/EN complets pour navigation, catalogue, accueil, auth, cours, leçons et pièces jointes avec mécanisme de fallback automatique |
 | F1.3 | Rôles et droits côté serveur | M | ✅ | Modèle User rôles (LEARNER, INSTRUCTOR, ADMIN), LearnerProfile, InstructorProfile, permissions IsLearner/IsInstructor/IsAdminUserRole testées, mergé sur main |
 | F1.4 | Catalogue + recherche/filtres (outil, niveau, langue, formule) | M | ✅ | Vues Accueil & Catalogue conformes Stitch DataLab, 100% responsive, bilingue FR/EN, validé et fusionné sur main |
 | F1.5 | Structure parcours → leçon (texte riche, vidéo, audio, PDF, code) | M | ✅ | Modèles Track/Course/Module/Lesson/LessonTranslation, seed cours Excel Douala, endpoints /api/v1/courses/, vue /courses/[slug] et lecteur immersif /courses/[slug]/lessons/[lessonSlug], barre au pouce, 36/36 tests passants, 0 erreur lint |
-| F1.6 | Fichiers téléchargeables par leçon | M | ⬜ | |
+| F1.6 | Fichiers téléchargeables par leçon | M | ✅ | Modèle LessonAttachment (starter, solution, dataset, cheatsheet, formats xlsx/csv/pdf/pbix/sql/py/zip), calcul Ko/Mo data-saving, permissions serveur Django (contrôle d'accès abonnement/free preview), endpoint /api/v1/courses/attachments/<id>/download/ avec traçage atomique, composant LessonAttachmentsList tactile mobile-first 360 px, 42 tests passants, 0 erreur lint |
 | F1.7 | Quiz (unique, multiple, V/F, numérique) + note de passage | M | ⬜ | |
 | F1.8 | Progression et reprise | M | ⬜ | |
 | F1.9 | Formules et accès par niveau, activation manuelle | M | ⬜ | `billing/services.compute_access` |
@@ -123,11 +123,11 @@ Dernière commande : npm run lint && npx next build --webpack
 | Zone | État | Notes |
 |---|---|---|
 | Monorepo, `docker-compose.yml`, `.env.example`, CI | 🟨 | `docker-compose.yml` et `.env.example` créés |
-| `backend/` (Django) — applications créées | 🟨 | Projet `config` initialisé, structure `apps/` prête, check OK |
-| `frontend/` (Next.js) — design system `ui/` et catalogue | 🟨 | Vues Accueil et Catalogue fidèles à la maquette DataLab, icônes Lucide, responsive 360px à desktop, build validé |
-| `messages/fr.json` et `messages/en.json` | ✅ | Fichiers créés et branchés via middleware next-intl |
-| Contrat OpenAPI (`docs/api/`) | ⬜ | À générer après les premiers endpoints |
-| Tests (back, front, E2E) | ⬜ | À configurer |
+| `backend/` (Django) — applications créées | ✅ | Applications `accounts` et `courses` prêtes, modèles, selectors, services, API REST, 42 tests unitaires passants |
+| `frontend/` (Next.js) — design system `ui/` et catalogue | ✅ | Vues Accueil, Catalogue, Auth, Profil, Sommaire de cours et Lecteur immersif de leçon avec gestion des pièces jointes, 100% responsive 360px, build validé |
+| `messages/fr.json` et `messages/en.json` | ✅ | Dictionnaires bilingues synchronisés avec fallback automatique |
+| Contrat OpenAPI (`docs/api/`) | ✅ | Contrat OpenAPI 3.1 à jour avec Auth, Courses, Lessons et Attachments |
+| Tests (back, front, E2E) | 🟨 | Tests Django 42/42 passants, lint front ESLint 0 erreur, compilation Next.js 14/14 routes |
 | Déploiement | ✅ | Déployé sur Vercel (frontend relié à origin/main, build production validé) |
 
 ---
@@ -145,6 +145,7 @@ Dernière commande : npm run lint && npx next build --webpack
 | 2026-10-22 | Nom de la plateforme retenu : **DataMboa** ; nom de domaine cible : **datamboa.com** | — |
 | 2026-10-22 | Design system conforme à la maquette Stitch DataLab (DataMboa), icônes officielles `lucide-react`, palette `#142b4a`, `#13b8a6`, `#f4b942` | — |
 | 2026-10-22 | Typographies de référence : Outfit pour les titres et Plus Jakarta Sans pour le corps ; vue PC inspirée du portail étudiant de l'Université de Douala (sidebar fixe, topbar de recherche, grille 2 colonnes asymétrique) tout en gardant intacte la vue mobile validée | — |
+| 2026-11-03 | Modélisation des pièces jointes de leçons avec taille en octets et affichage human-friendly (Ko/Mo) adapté aux connexions mobiles africaines, typage fort des ressources (STARTER, SOLUTION, DATASET, CHEATSHEET), contrôle d'accès côté serveur Django | — |
 
 ---
 
@@ -160,10 +161,10 @@ Dernière commande : npm run lint && npx next build --webpack
 
 ## 7. Prochaines tâches proposées (ordre de priorité)
 
-1. F1.5 : Modélisation des cours, modules, leçons et types de contenus côté Django (`backend/apps/courses` : Track, Course, Module, Lesson, ContentBlock, LessonTranslation).
-2. F1.5 : Contrat OpenAPI 3.1 et endpoints REST pour la consultation d'un cours et de ses leçons.
-3. F1.5 : Vues d'apprentissage Next.js (lecteur de leçon avec texte riche, vidéo, quiz, code, mobile-first 360 px, navigation au pouce).
-4. F1.8 : Suivi de progression de l'apprenant et reprise après interruption.
+1. F1.8 : Suivi de progression de l'apprenant (marquer une leçon terminée, reprise automatique après déconnexion ou coupure réseau).
+2. F1.7 : Quiz par module (questions uniques, multiples, V/F, numériques, note de passage).
+3. F1.9 : Formules et règles d'accès serveur (`billing/services.compute_access`).
+4. F1.10 : Déclaration de paiement manuel WhatsApp et file d'attente d'activation.
 
 ---
 
@@ -181,6 +182,4 @@ Dernière commande : npm run lint && npx next build --webpack
 | 2026-10-24 | F1.1, F1.3 | Polish traductions i18n et nettoyage AuthContext (montage/démontage sécurisé), tests unitaires Django 25/25 passants, compilation Next.js 12/12 pages validée, validation et fusion complète de feat/accounts-and-roles sur main, synchronisation avec origin/main | `frontend/messages/`, `frontend/features/auth/`, `frontend/app/[locale]/`, `PROJECT_STATUS.md` | Lancer F1.5 (Structure de parcours, modules, leçons) |
 | 2026-10-24 | F1.1, F1.14 | Page complète /profile (paramètres compte, application, mode léger, sécurité mot de passe, déconnexion tactile multi-écrans), endpoint Django change-password, 27/27 tests passants, compilation 14/14 routes validée, mergé sur main | `frontend/app/[locale]/profile/`, `frontend/components/AppHeader.tsx`, `backend/apps/accounts/`, `docs/api/openapi.yaml` | Démarrer F1.5 (Structure de parcours et leçons) |
 | 2026-10-24 | F1.5 | Structure complète parcours → cours → module → leçon (Track/Course/Module/Lesson/LessonTranslation bilingue FR/EN), seed cours Excel avec cas pratique Douala, endpoints /api/v1/courses/, spec OpenAPI 3.1, feature courses Next.js (CourseSyllabus, LessonReader avec mode léger, vidéo, audio, code et téléchargements, barre au pouce), routes /courses/[slug] et /courses/[slug]/lessons/[lessonSlug], 36/36 tests Django passants, 0 erreur lint, build 14/14 validé | `backend/apps/courses/`, `docs/api/openapi.yaml`, `frontend/features/courses/`, `frontend/app/[locale]/courses/`, `frontend/messages/` | Valider et fusionner feat/course-structure sur main, puis aborder F1.6 ou F1.8 |
-
-
-
+| 2026-11-03 | F1.6 | Fichiers d'exercices téléchargeables et pièces jointes par leçon : modèle Django LessonAttachment (formats xlsx, csv, pbix, sql, py, pdf, zip), calcul de taille lisible (Ko/Mo) adapté aux forfaits data mobiles, contrôle d'accès serveur (permissions abonnement / free preview), endpoint /api/v1/courses/attachments/<id>/download/ avec traçage atomique, enrichissement seed Excel Douala (starter, solution, cheatsheet, dataset), composant Next.js LessonAttachmentsList (cibles tactiles ≥ 44px, badges typés, formatage data), intégration dans LessonReader, clés i18n FR/EN, spec OpenAPI 3.1, 42/42 tests Django passants, 0 erreur lint, build 14/14 validé | `backend/apps/courses/`, `docs/api/openapi.yaml`, `frontend/features/courses/`, `frontend/messages/` | F1.8 (Progression et reprise apprenant) ou F1.7 (Quiz) |

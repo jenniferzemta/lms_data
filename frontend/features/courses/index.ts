@@ -4,3 +4,4 @@ export * from './components/CourseSyllabus';
 export * from './components/LessonReader';
 export * from './components/LessonBottomBar';
 export * from './components/FallbackLanguageBanner';
+export * from './components/LessonAttachmentsList';

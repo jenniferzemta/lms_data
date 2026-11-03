@@ -104,7 +104,18 @@
     "audioVersionTitle": "Version audio condensée",
     "codeSnippetTitle": "Formule / Code à appliquer",
     "copyCode": "Copier",
-    "codeCopied": "Copié !"
+    "codeCopied": "Copié !",
+    "downloadableResourcesTitle": "Fichiers & Ressources de pratique",
+    "downloadableResourcesSubtitle": "Exercices, jeux de données et corrigés téléchargeables pour travailler hors ligne.",
+    "downloadAction": "Télécharger",
+    "typeStarter": "Exercice de départ",
+    "typeSolution": "Corrigé officiel",
+    "typeDataset": "Jeu de données",
+    "typeCheatsheet": "Aide-mémoire",
+    "typeOther": "Ressource",
+    "supportDocumentDesc": "Support de cours et guide pratique.",
+    "filesCountSingular": "fichier",
+    "filesCountPlural": "fichiers"
   },
   "Billing": {
     "title": "Activer mon abonnement",

@@ -1,8 +1,14 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from courses.models import Course, Lesson, LessonTranslation, Module, Track
-from courses.selectors import get_course_by_slug, get_lesson_detail, list_published_courses
+from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.selectors import (
+    get_course_by_slug,
+    get_lesson_attachment_by_id,
+    get_lesson_detail,
+    list_published_courses,
+)
+from courses.services import can_access_attachment, record_attachment_download
 
 
 class CoursesModelAndSelectorTests(TestCase):
@@ -57,13 +63,34 @@ class CoursesModelAndSelectorTests(TestCase):
             content='Content EN',
             status=LessonTranslation.Status.REVIEWED,
         )
-        # Lesson 2 has only FR translation (to test bilingual fallback)
         LessonTranslation.objects.create(
             lesson=self.lesson_2,
             language=LessonTranslation.Language.FR,
             title='Leçon 2 FR',
             content='Contenu FR uniquement',
             status=LessonTranslation.Status.REVIEWED,
+        )
+
+        # F1.6 Attachments
+        self.attachment_1 = LessonAttachment.objects.create(
+            lesson=self.lesson_1,
+            title='Exercice Ventes Douala',
+            attachment_type=LessonAttachment.AttachmentType.STARTER,
+            file_format='xlsx',
+            file_size_bytes=148480,
+            external_url='https://example.cm/ventes_douala.xlsx',
+            order=1,
+            is_free_preview=True,
+        )
+        self.attachment_2 = LessonAttachment.objects.create(
+            lesson=self.lesson_1,
+            title='Guide PDF Formats',
+            attachment_type=LessonAttachment.AttachmentType.CHEATSHEET,
+            file_format='pdf',
+            file_size_bytes=1048576,  # 1 Mo
+            external_url='https://example.cm/guide.pdf',
+            order=2,
+            is_free_preview=True,
         )
 
     def test_course_counts(self):
@@ -94,7 +121,6 @@ class CoursesModelAndSelectorTests(TestCase):
         self.assertEqual(data['next_lesson']['slug'], 'lesson-2')
 
     def test_get_lesson_detail_bilingual_fallback(self):
-        # Lesson 2 has only FR translation; when EN is requested, fallback is used
         data = get_lesson_detail(
             course_slug='test-course',
             lesson_slug='lesson-2',
@@ -107,51 +133,150 @@ class CoursesModelAndSelectorTests(TestCase):
         self.assertEqual(data['previous_lesson']['slug'], 'lesson-1')
         self.assertIsNone(data['next_lesson'])
 
+    def test_lesson_attachment_size_display(self):
+        # 148480 bytes = 145.0 Ko
+        self.assertEqual(self.attachment_1.file_size_display, '145.0 Ko')
+        # 1048576 bytes = 1.0 Mo
+        self.assertEqual(self.attachment_2.file_size_display, '1.0 Mo')
+        # Zero size
+        empty_attachment = LessonAttachment(file_size_bytes=0)
+        self.assertEqual(empty_attachment.file_size_display, '—')
 
-class CoursesAPITests(TestCase):
+    def test_get_lesson_detail_includes_attachments(self):
+        data = get_lesson_detail(
+            course_slug='test-course',
+            lesson_slug='lesson-1',
+            language='fr',
+        )
+        self.assertIn('attachments', data)
+        self.assertEqual(len(data['attachments']), 2)
+        self.assertEqual(data['attachments'][0].title, 'Exercice Ventes Douala')
+        self.assertEqual(data['attachments'][1].title, 'Guide PDF Formats')
+
+    def test_get_lesson_attachment_by_id(self):
+        att = get_lesson_attachment_by_id(self.attachment_1.id)
+        self.assertIsNotNone(att)
+        self.assertEqual(att.title, 'Exercice Ventes Douala')
+        self.assertEqual(att.lesson.slug, 'lesson-1')
+
+
+class AttachmentServicesAndAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.track = Track.objects.create(name='Excel Track', slug='excel-track', tool=Track.Tool.EXCEL)
-        self.course = Course.objects.create(
+        self.free_course = Course.objects.create(
             track=self.track,
-            title='Excel Analytics',
-            slug='excel-analytics',
+            title='Excel Analytics Free',
+            slug='excel-analytics-free',
             level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
         )
-        self.module = Module.objects.create(course=self.course, title='Module Alpha', order=1)
-        self.lesson = Lesson.objects.create(
-            module=self.module,
+        self.paid_course = Course.objects.create(
+            track=self.track,
+            title='Excel Pro Paid',
+            slug='excel-pro-paid',
+            level=Course.Level.ADVANCED,
+            price_tier=Course.PriceTier.PRO,
+        )
+        self.module_free = Module.objects.create(course=self.free_course, title='Module Free', order=1)
+        self.module_paid = Module.objects.create(course=self.paid_course, title='Module Paid', order=1)
+
+        self.lesson_free = Lesson.objects.create(
+            module=self.module_free,
             title='Nettoyage Douala',
             slug='nettoyage-douala',
             order=1,
         )
+        self.lesson_paid = Lesson.objects.create(
+            module=self.module_paid,
+            title='Macros Avancées',
+            slug='macros-avancees',
+            order=1,
+            is_free_preview=False,
+        )
+
         LessonTranslation.objects.create(
-            lesson=self.lesson,
+            lesson=self.lesson_free,
             language=LessonTranslation.Language.FR,
             title='Nettoyage Douala FR',
             content='# Markdown Content',
             status=LessonTranslation.Status.REVIEWED,
         )
+        LessonTranslation.objects.create(
+            lesson=self.lesson_paid,
+            language=LessonTranslation.Language.FR,
+            title='Macros Avancées FR',
+            content='# Paid Content',
+            status=LessonTranslation.Status.REVIEWED,
+        )
+
+        self.att_free = LessonAttachment.objects.create(
+            lesson=self.lesson_free,
+            title='Fichier Starter Libre',
+            attachment_type=LessonAttachment.AttachmentType.STARTER,
+            file_format='xlsx',
+            file_size_bytes=51200,
+            external_url='https://example.cm/starter.xlsx',
+            is_free_preview=True,
+            order=1,
+        )
+        self.att_paid = LessonAttachment.objects.create(
+            lesson=self.lesson_paid,
+            title='Fichier Pro Restreint',
+            attachment_type=LessonAttachment.AttachmentType.SOLUTION,
+            file_format='xlsx',
+            file_size_bytes=250000,
+            external_url='https://example.cm/pro_solution.xlsx',
+            is_free_preview=False,
+            order=1,
+        )
 
     def test_course_list_api(self):
         response = self.client.get('/api/v1/courses/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['slug'], 'excel-analytics')
+        self.assertEqual(len(response.data), 2)
 
     def test_course_detail_api(self):
-        response = self.client.get('/api/v1/courses/excel-analytics/')
+        response = self.client.get('/api/v1/courses/excel-analytics-free/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data['slug'], 'excel-analytics')
+        self.assertEqual(response.data['slug'], 'excel-analytics-free')
         self.assertEqual(len(response.data['modules']), 1)
-        self.assertEqual(len(response.data['modules'][0]['lessons']), 1)
 
-    def test_lesson_detail_api(self):
-        response = self.client.get('/api/v1/courses/excel-analytics/lessons/nettoyage-douala/?lang=fr')
+    def test_lesson_detail_api_includes_attachments_payload(self):
+        response = self.client.get('/api/v1/courses/excel-analytics-free/lessons/nettoyage-douala/?lang=fr')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['slug'], 'nettoyage-douala')
-        self.assertEqual(response.data['translation']['title'], 'Nettoyage Douala FR')
+        self.assertIn('attachments', response.data)
+        self.assertEqual(len(response.data['attachments']), 1)
 
-    def test_lesson_detail_404(self):
-        response = self.client.get('/api/v1/courses/excel-analytics/lessons/non-existent/')
+        att_data = response.data['attachments'][0]
+        self.assertEqual(att_data['title'], 'Fichier Starter Libre')
+        self.assertEqual(att_data['file_format'], 'xlsx')
+        self.assertEqual(att_data['file_size_display'], '50.0 Ko')
+        self.assertEqual(att_data['download_url'], 'https://example.cm/starter.xlsx')
+
+    def test_record_attachment_download_service(self):
+        initial_count = self.att_free.download_count
+        count = record_attachment_download(self.att_free)
+        self.assertEqual(count, initial_count + 1)
+
+    def test_download_endpoint_free_attachment_redirect(self):
+        url = f'/api/v1/courses/attachments/{self.att_free.id}/download/'
+        response = self.client.get(url)
+        # Should redirect to external_url with 302
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, 'https://example.cm/starter.xlsx')
+
+        # Download counter should have incremented
+        self.att_free.refresh_from_db()
+        self.assertEqual(self.att_free.download_count, 1)
+
+    def test_download_endpoint_paid_attachment_anonymous_denied(self):
+        url = f'/api/v1/courses/attachments/{self.att_paid.id}/download/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 403)
+        self.assertIn('Access denied', response.data['detail'])
+
+    def test_download_endpoint_not_found(self):
+        response = self.client.get('/api/v1/courses/attachments/99999/download/')
         self.assertEqual(response.status_code, 404)

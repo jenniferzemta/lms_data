@@ -195,3 +195,90 @@ class LessonTranslation(models.Model):
 
     def __str__(self) -> str:
         return f"{self.lesson.title} [{self.language.upper()}] ({self.status})"
+
+
+class LessonAttachment(models.Model):
+    """
+    Downloadable exercise file, dataset, template, or solution attached to a lesson (F1.6).
+    Designed for low-bandwidth learners: records byte sizes and displays
+    human-friendly sizes (Ko/Mo) so learners know data usage before downloading.
+    """
+
+    class AttachmentType(models.TextChoices):
+        STARTER = 'STARTER', _('Fichier de départ / Exercice')
+        SOLUTION = 'SOLUTION', _('Fichier corrigé')
+        DATASET = 'DATASET', _('Jeu de données')
+        CHEATSHEET = 'CHEATSHEET', _('Aide-mémoire / Fiche résumé')
+        OTHER = 'OTHER', _('Autre ressource')
+
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='attachments')
+    title = models.CharField(max_length=255, verbose_name=_('Titre du document'))
+    description = models.TextField(blank=True, verbose_name=_('Description ou instructions'))
+    attachment_type = models.CharField(
+        max_length=20,
+        choices=AttachmentType.choices,
+        default=AttachmentType.STARTER,
+    )
+    file = models.FileField(upload_to='courses/attachments/%Y/%m/', blank=True, null=True)
+    external_url = models.URLField(blank=True, default='', help_text=_('URL directe de téléchargement alternative'))
+    file_format = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text=_('Format ou extension (ex: xlsx, csv, pbix, sql, py, pdf, zip)'),
+    )
+    file_size_bytes = models.PositiveIntegerField(default=0, help_text=_('Taille en octets'))
+    order = models.PositiveIntegerField(default=1)
+    is_free_preview = models.BooleanField(
+        default=False,
+        help_text=_('Accessible en aperçu gratuit sans abonnement actif'),
+    )
+    download_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'id']
+        verbose_name = _('Pièce jointe de leçon')
+        verbose_name_plural = _('Pièces jointes de leçons')
+
+    def __str__(self) -> str:
+        return f"{self.lesson.title} - {self.title} ({self.file_format or 'file'})"
+
+    @property
+    def file_size_display(self) -> str:
+        """
+        Formats file size into human-friendly Ko or Mo for low-bandwidth mobile users.
+        """
+        bytes_val = self.file_size_bytes
+        if not bytes_val and self.file:
+            try:
+                bytes_val = self.file.size
+            except Exception:
+                bytes_val = 0
+
+        if bytes_val <= 0:
+            return '—'
+        if bytes_val < 1024 * 1024:
+            return f"{round(bytes_val / 1024, 1)} Ko"
+        return f"{round(bytes_val / (1024 * 1024), 2)} Mo"
+
+    @property
+    def download_url(self) -> str:
+        if self.file:
+            return self.file.url
+        return self.external_url
+
+    def save(self, *args, **kwargs):
+        if self.file:
+            try:
+                if not self.file_size_bytes:
+                    self.file_size_bytes = self.file.size
+                if not self.file_format and '.' in self.file.name:
+                    self.file_format = self.file.name.rsplit('.', 1)[-1].lower()
+            except Exception:
+                pass
+        elif self.external_url and not self.file_format and '.' in self.external_url.split('?')[0]:
+            ext = self.external_url.split('?')[0].rsplit('.', 1)[-1].lower()
+            if len(ext) <= 6:
+                self.file_format = ext
+        super().save(*args, **kwargs)

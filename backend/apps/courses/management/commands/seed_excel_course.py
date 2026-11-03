@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from courses.models import Course, Lesson, LessonTranslation, Module, Track
+from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
 
 
 class Command(BaseCommand):
@@ -225,4 +225,60 @@ class Command(BaseCommand):
             },
         )
 
-        self.stdout.write(self.style.SUCCESS("Successfully seeded Excel beginner course with 3 real lessons and translations!"))
+        # 4. Attachments for Lesson 1
+        LessonAttachment.objects.update_or_create(
+            lesson=l1,
+            title="Tableau d'exercice — Découverte des types (Douala)",
+            defaults={
+                'description': "Fichier de travail vierge à compléter pas à pas pendant la leçon.",
+                'attachment_type': LessonAttachment.AttachmentType.STARTER,
+                'file_format': 'xlsx',
+                'file_size_bytes': 128500,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/datasets/douala_types_starter.xlsx',
+                'is_free_preview': True,
+                'order': 1,
+            },
+        )
+        LessonAttachment.objects.update_or_create(
+            lesson=l1,
+            title="Guide mémo — Raccourcis et formats FCFA",
+            defaults={
+                'description': "Fiche PDF synthétique imprimable ou consultable sur smartphone.",
+                'attachment_type': LessonAttachment.AttachmentType.CHEATSHEET,
+                'file_format': 'pdf',
+                'file_size_bytes': 452000,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/guides/memo_formats_fcfa.pdf',
+                'is_free_preview': True,
+                'order': 2,
+            },
+        )
+
+        # Attachments for Lesson 3
+        LessonAttachment.objects.update_or_create(
+            lesson=l3,
+            title="Dataset brut — Ventes boutiques Douala (Non nettoyé)",
+            defaults={
+                'description': "Jeu de données réel de 50 transactions commerciales avec espaces à nettoyer.",
+                'attachment_type': LessonAttachment.AttachmentType.DATASET,
+                'file_format': 'csv',
+                'file_size_bytes': 48200,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/datasets/ventes_douala_raw.csv',
+                'is_free_preview': True,
+                'order': 1,
+            },
+        )
+        LessonAttachment.objects.update_or_create(
+            lesson=l3,
+            title="Corrigé complet — Ventes boutiques Douala (Solution)",
+            defaults={
+                'description': "Feuille de calcul finale avec les colonnes calculées SUPPRESPACE et MAJUSCULE.",
+                'attachment_type': LessonAttachment.AttachmentType.SOLUTION,
+                'file_format': 'xlsx',
+                'file_size_bytes': 142000,
+                'external_url': 'https://raw.githubusercontent.com/datamboa/lms-assets/main/solutions/ventes_douala_solution.xlsx',
+                'is_free_preview': True,
+                'order': 2,
+            },
+        )
+
+        self.stdout.write(self.style.SUCCESS("Successfully seeded Excel beginner course with 3 real lessons, translations and attachments!"))

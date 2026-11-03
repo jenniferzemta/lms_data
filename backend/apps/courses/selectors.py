@@ -1,5 +1,5 @@
 from typing import Optional
-from courses.models import Course, Lesson, LessonTranslation, Module
+from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
 
 
 def list_published_courses(*, tool: Optional[str] = None, level: Optional[str] = None, price_tier: Optional[str] = None):
@@ -44,7 +44,7 @@ def get_course_curriculum_lessons(course: Course):
 def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr') -> Optional[dict]:
     """
     Retrieves full lesson content, localized translation with bilingual fallback,
-    and previous/next navigation metadata.
+    downloadable attachments, and previous/next navigation metadata.
     """
     course = Course.objects.filter(slug=course_slug, is_published=True).first()
     if not course:
@@ -53,7 +53,7 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
     lesson = (
         Lesson.objects.filter(module__course=course, slug=lesson_slug, is_published=True)
         .select_related('module', 'module__course')
-        .prefetch_related('translations')
+        .prefetch_related('translations', 'attachments')
         .first()
     )
     if not lesson:
@@ -87,6 +87,9 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
             content='',
             status=LessonTranslation.Status.ABSENT,
         )
+
+    # Attachments ordered by order, then id
+    attachments = list(lesson.attachments.all().order_by('order', 'id'))
 
     # Compute previous and next lessons for thumb-friendly mobile navigation
     all_lessons = get_course_curriculum_lessons(course)
@@ -130,6 +133,18 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
         'is_free_preview': lesson.is_free_preview,
         'translation': translation,
         'is_fallback_language': is_fallback,
+        'attachments': attachments,
         'previous_lesson': prev_lesson,
         'next_lesson': next_lesson,
     }
+
+
+def get_lesson_attachment_by_id(attachment_id: int) -> Optional[LessonAttachment]:
+    """
+    Retrieves a single attachment by ID with its related lesson, module, and course.
+    """
+    return (
+        LessonAttachment.objects.filter(pk=attachment_id)
+        .select_related('lesson', 'lesson__module', 'lesson__module__course')
+        .first()
+    )
