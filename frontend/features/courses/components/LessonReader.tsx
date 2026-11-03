@@ -8,6 +8,7 @@ import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
 import { LessonBottomBar } from './LessonBottomBar';
 import { LessonAttachmentsList } from './LessonAttachmentsList';
+import { LessonContentRenderer } from './LessonContentRenderer';
 import {
   Clock,
   Sparkles,
@@ -223,48 +224,11 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
           </section>
         )}
 
-        {/* Rich Lesson Body Content */}
+        {/* Rich Lesson Body Content (Beautiful Pedagogical Magazine-Style) */}
         {translation.content && (
-          <article className="prose prose-slate max-w-none text-slate-800 text-sm sm:text-base leading-relaxed space-y-4 mb-8">
-            {translation.content.split('\n\n').map((paragraph, idx) => {
-              const trimmed = paragraph.trim();
-              if (trimmed.startsWith('## ')) {
-                return (
-                  <h2
-                    key={idx}
-                    className="text-lg sm:text-xl font-bold text-brand-primary mt-6 mb-2 border-b border-slate-100 pb-2"
-                  >
-                    {trimmed.replace('## ', '')}
-                  </h2>
-                );
-              }
-              if (trimmed.startsWith('### ')) {
-                return (
-                  <h3
-                    key={idx}
-                    className="text-base sm:text-lg font-semibold text-brand-primary mt-4 mb-1"
-                  >
-                    {trimmed.replace('### ', '')}
-                  </h3>
-                );
-              }
-              if (trimmed.startsWith('- ')) {
-                const items = trimmed.split('\n- ').map((item) => item.replace(/^- /, ''));
-                return (
-                  <ul key={idx} className="list-disc pl-5 space-y-1 my-2">
-                    {items.map((item, itemIdx) => (
-                      <li key={itemIdx}>{item}</li>
-                    ))}
-                  </ul>
-                );
-              }
-              return (
-                <p key={idx} className="text-slate-700">
-                  {trimmed}
-                </p>
-              );
-            })}
-          </article>
+          <section className="mb-8">
+            <LessonContentRenderer content={translation.content} />
+          </section>
         )}
 
         {/* Formula / Code Snippet Block */}
