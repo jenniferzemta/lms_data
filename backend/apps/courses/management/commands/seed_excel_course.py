@@ -1,6 +1,16 @@
 from decimal import Decimal
 from django.core.management.base import BaseCommand
-from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.models import (
+    Course,
+    Lesson,
+    LessonAttachment,
+    LessonTranslation,
+    Module,
+    Quiz,
+    QuizAnswerOption,
+    QuizQuestion,
+    Track,
+)
 
 
 class Command(BaseCommand):
@@ -134,6 +144,57 @@ class Command(BaseCommand):
             },
         )
 
+        # Quiz 1: Attached to Lesson 1.1 (F1.7)
+        q1_obj, _ = Quiz.objects.update_or_create(
+            lesson=l1,
+            defaults={
+                'title': "Quiz Formatif : Rigueur des types & FCFA",
+                'description': "Testez votre compréhension des formats de données avant de passer aux calculs.",
+                'purpose': Quiz.Purpose.FORMATIVE,
+                'passing_score_percentage': 70,
+                'is_published': True,
+            },
+        )
+        q1_obj.questions.all().delete()
+
+        # Question 1.1 (Single Choice, Apply)
+        qq1 = QuizQuestion.objects.create(
+            quiz=q1_obj,
+            prompt="Dans un tableau de caisse à Akwa, un collègue tape '2 500 000 FCFA' directement dans la cellule C4. Que se passe-t-il lors du calcul =SOMME(C2:C10) ?",
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            explanation="Écrire du texte dans une cellule numérique la convertit en chaîne de caractères brute. Excel ignore cette cellule lors des additions ou produit une erreur. Pour afficher 'FCFA', tapez 2500000 et appliquez le format personnalisé # ##0 \"FCFA\".",
+            order=1,
+        )
+        QuizAnswerOption.objects.create(question=qq1, text="Excel calcule correctement la somme en ignorant le mot FCFA", is_correct=False, order=1)
+        QuizAnswerOption.objects.create(question=qq1, text="Excel ignore la cellule C4 ou bloque les calculs car la valeur est considérée comme du texte", is_correct=True, order=2)
+        QuizAnswerOption.objects.create(question=qq1, text="Excel convertit automatiquement la colonne en devise FCFA", is_correct=False, order=3)
+
+        # Question 1.2 (Single Choice, Remember)
+        qq2 = QuizQuestion.objects.create(
+            quiz=q1_obj,
+            prompt="Quel format de date standard devez-vous impérativement appliquer en entreprise en zone francophone (Cameroun, CEMAC) ?",
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            bloom_level=QuizQuestion.BloomLevel.REMEMBER,
+            explanation="La norme comptable et administrative en zone CEMAC est le format francophone JJ/MM/AAAA. Le format américain MM/JJ/AAAA inverse les jours et mois inférieurs à 12 et fausse les tris temporels.",
+            order=2,
+        )
+        QuizAnswerOption.objects.create(question=qq2, text="MM/JJ/AAAA (format anglophone)", is_correct=False, order=1)
+        QuizAnswerOption.objects.create(question=qq2, text="JJ/MM/AAAA (format standard francophone)", is_correct=True, order=2)
+        QuizAnswerOption.objects.create(question=qq2, text="Texte libre sans séparateur", is_correct=False, order=3)
+
+        # Question 1.3 (True/False, Understand)
+        qq3 = QuizQuestion.objects.create(
+            quiz=q1_obj,
+            prompt="Vrai ou Faux : Aligner un nombre à gauche via les boutons d'alignement modifie sa nature et le transforme en texte dans Excel.",
+            question_type=QuizQuestion.QuestionType.TRUE_FALSE,
+            bloom_level=QuizQuestion.BloomLevel.UNDERSTAND,
+            explanation="Faux. L'alignement visuel (gauche, centre, droite) modifie uniquement la présentation visuelle. La valeur reste un nombre et participe normalement à tous les calculs.",
+            order=3,
+        )
+        QuizAnswerOption.objects.create(question=qq3, text="Vrai", is_correct=False, order=1)
+        QuizAnswerOption.objects.create(question=qq3, text="Faux", is_correct=True, order=2)
+
         # Lesson 1.2: Formules fondamentales SOMME et MOYENNE
         l1_2, _ = Lesson.objects.update_or_create(
             module=m1,
@@ -192,6 +253,56 @@ class Command(BaseCommand):
                 'status': LessonTranslation.Status.REVIEWED,
             },
         )
+
+        # Quiz 2: Attached to Lesson 1.2 (F1.7)
+        q2_obj, _ = Quiz.objects.update_or_create(
+            lesson=l1_2,
+            defaults={
+                'title': "Quiz Formatif : SOMME, MOYENNE et séparateurs régionaux",
+                'description': "Validez vos formules et le rapprochement multi-boutiques avant le module suivant.",
+                'purpose': Quiz.Purpose.FORMATIVE,
+                'passing_score_percentage': 70,
+                'is_published': True,
+            },
+        )
+        q2_obj.questions.all().delete()
+
+        # Question 2.1 (Single Choice, Apply)
+        qq2_1 = QuizQuestion.objects.create(
+            quiz=q2_obj,
+            prompt="Sur une version française d'Excel, quel séparateur devez-vous utiliser entre les arguments d'une formule telle que SOMME ?",
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            explanation="En français, la virgule (,) est le séparateur décimal (ex: 12,5). Le séparateur d'arguments de fonctions est obligatoirement le point-virgule (;).",
+            order=1,
+        )
+        QuizAnswerOption.objects.create(question=qq2_1, text="La virgule (,)", is_correct=False, order=1)
+        QuizAnswerOption.objects.create(question=qq2_1, text="Le point-virgule (;)", is_correct=True, order=2)
+        QuizAnswerOption.objects.create(question=qq2_1, text="Le double point (:)", is_correct=False, order=3)
+
+        # Question 2.2 (Numeric, Apply)
+        QuizQuestion.objects.create(
+            quiz=q2_obj,
+            prompt="Vous consolidez les ventes des 3 boutiques : Akwa (1 450 000 FCFA), Bonabéri (890 000 FCFA) et Bafoussam (1 120 000 FCFA). Quel est le montant total consolidé en FCFA ?",
+            question_type=QuizQuestion.QuestionType.NUMERIC,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            numeric_target=Decimal('3460000.00'),
+            explanation="1 450 000 + 890 000 + 1 120 000 = 3 460 000 FCFA.",
+            order=2,
+        )
+
+        # Question 2.3 (Single Choice, Analyze)
+        qq2_3 = QuizQuestion.objects.create(
+            quiz=q2_obj,
+            prompt="Comment la fonction =MOYENNE(A1:A10) réagit-elle si une cellule de la plage contient du texte ou est vide ?",
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            bloom_level=QuizQuestion.BloomLevel.ANALYZE,
+            explanation="La fonction MOYENNE ignore automatiquement les cellules textuelles et vides dans le calcul du diviseur. Si la cellule contient 0, elle est en revanche comptabilisée.",
+            order=3,
+        )
+        QuizAnswerOption.objects.create(question=qq2_3, text="Elle renvoie l'erreur #DIV/0!", is_correct=False, order=1)
+        QuizAnswerOption.objects.create(question=qq2_3, text="Elle ignore la cellule texte et divise uniquement par le nombre de cellules contenant des chiffres", is_correct=True, order=2)
+        QuizAnswerOption.objects.create(question=qq2_3, text="Elle attribue la valeur 0 à la cellule texte", is_correct=False, order=3)
 
         # -------------------------------------------------------------
         # MODULE 2: Recherche et conversion de données

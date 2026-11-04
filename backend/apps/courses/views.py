@@ -15,6 +15,7 @@ from courses.selectors import (
     get_course_progress_summary,
     get_lesson_attachment_by_id,
     get_lesson_detail,
+    get_quiz_for_lesson,
     list_published_courses,
 )
 from courses.serializers import (
@@ -22,10 +23,14 @@ from courses.serializers import (
     CourseListSerializer,
     CourseProgressSerializer,
     LessonDetailSerializer,
+    QuizAttemptResponseSerializer,
+    QuizPublicSerializer,
+    QuizSubmitSerializer,
 )
 from courses.services import (
     can_access_attachment,
     enroll_user_in_course,
+    evaluate_quiz_submission,
     mark_lesson_completed,
     record_attachment_download,
 )
@@ -273,3 +278,56 @@ class VideoStreamView(APIView):
             response['Content-Length'] = str(file_size)
             response['Accept-Ranges'] = 'bytes'
             return response
+
+
+class LessonQuizDetailView(APIView):
+    """
+    GET /api/v1/courses/<course_slug>/lessons/<lesson_slug>/quiz/
+    Retrieves the public quiz structure for a lesson.
+    Omits correct answers and explanations until submitted (F1.7).
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        quiz = get_quiz_for_lesson(course_slug=course_slug, lesson_slug=lesson_slug)
+        if not quiz:
+            return Response(
+                {'detail': 'No quiz configured for this lesson.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = QuizPublicSerializer(quiz)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LessonQuizSubmitView(APIView):
+    """
+    POST /api/v1/courses/<course_slug>/lessons/<lesson_slug>/quiz/submit/
+    Evaluates learner quiz responses against passing score threshold (F1.7).
+    Returns formative feedback per question (explanation, correctness).
+    Automatically marks the lesson as completed if the passing score is achieved.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        quiz = get_quiz_for_lesson(course_slug=course_slug, lesson_slug=lesson_slug)
+        if not quiz:
+            return Response(
+                {'detail': 'No quiz configured for this lesson.'},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = QuizSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        raw_answers = serializer.validated_data['answers']
+        attempt, feedback = evaluate_quiz_submission(
+            user=request.user,
+            quiz=quiz,
+            answers=raw_answers,
+        )
+
+        response_serializer = QuizAttemptResponseSerializer(attempt)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+

@@ -1,6 +1,16 @@
+from decimal import Decimal
 from django.db.models import F
 from django.utils import timezone
-from courses.models import Course, CourseEnrollment, Lesson, LessonAttachment, LessonProgress
+from courses.models import (
+    Course,
+    CourseEnrollment,
+    Lesson,
+    LessonAttachment,
+    LessonProgress,
+    Quiz,
+    QuizAttempt,
+    QuizQuestion,
+)
 
 
 def record_attachment_download(attachment: LessonAttachment, user=None) -> int:
@@ -115,3 +125,94 @@ def mark_lesson_completed(user, lesson: Lesson) -> tuple[LessonProgress, CourseE
 
     update_course_enrollment_progress(enrollment)
     return progress, enrollment
+
+
+def evaluate_quiz_submission(user, quiz: Quiz, answers: dict) -> tuple[QuizAttempt, list[dict]]:
+    """
+    Evaluates a learner submission for a quiz (F1.7):
+    - Computes score and pass/fail against passing_score_percentage
+    - Generates formative feedback explanations per question
+    - Records QuizAttempt
+    - If passed, automatically completes the associated lesson
+    """
+    questions = list(quiz.questions.prefetch_related('options').order_by('order', 'id'))
+    total_questions = len(questions)
+
+    if total_questions == 0:
+        score_pct = 100
+        is_passed = True
+        attempt = QuizAttempt.objects.create(
+            user=user,
+            quiz=quiz,
+            score_percentage=score_pct,
+            is_passed=is_passed,
+            submitted_answers=answers,
+            feedback_summary=[],
+        )
+        return attempt, []
+
+    earned_points = 0
+    feedback_list = []
+
+    for q in questions:
+        q_id_str = str(q.id)
+        user_raw = answers.get(q_id_str)
+        is_correct = False
+        correct_display = ""
+
+        if q.question_type == QuizQuestion.QuestionType.NUMERIC:
+            try:
+                cleaned = str(user_raw).strip().replace(' ', '').replace('\xa0', '').replace(',', '.')
+                user_val = Decimal(cleaned)
+                is_correct = (q.numeric_target is not None and abs(user_val - q.numeric_target) < Decimal('0.01'))
+                correct_display = str(q.numeric_target)
+            except Exception:
+                is_correct = False
+                correct_display = str(q.numeric_target or '')
+
+        elif q.question_type == QuizQuestion.QuestionType.MULTIPLE_CHOICE:
+            correct_opts = set(q.options.filter(is_correct=True).values_list('id', flat=True))
+            user_opts = set()
+            if isinstance(user_raw, list):
+                user_opts = set(int(x) for x in user_raw if str(x).isdigit())
+            elif user_raw and str(user_raw).isdigit():
+                user_opts = {int(user_raw)}
+            is_correct = (user_opts == correct_opts)
+            correct_display = ", ".join(q.options.filter(is_correct=True).values_list('text', flat=True))
+
+        else:  # SINGLE_CHOICE or TRUE_FALSE
+            correct_opt = q.options.filter(is_correct=True).first()
+            if correct_opt and user_raw is not None and str(user_raw).isdigit():
+                is_correct = (int(user_raw) == correct_opt.id)
+            correct_display = correct_opt.text if correct_opt else ""
+
+        if is_correct:
+            earned_points += 1
+
+        feedback_list.append({
+            'question_id': q.id,
+            'prompt': q.prompt,
+            'question_type': q.question_type,
+            'bloom_level': q.bloom_level,
+            'is_correct': is_correct,
+            'user_answer': user_raw,
+            'correct_answer': correct_display,
+            'explanation': q.explanation,
+        })
+
+    score_pct = int((earned_points / total_questions) * 100)
+    is_passed = score_pct >= quiz.passing_score_percentage
+
+    attempt = QuizAttempt.objects.create(
+        user=user,
+        quiz=quiz,
+        score_percentage=score_pct,
+        is_passed=is_passed,
+        submitted_answers=answers,
+        feedback_summary=feedback_list,
+    )
+
+    if is_passed and user and user.is_authenticated:
+        mark_lesson_completed(user, quiz.lesson)
+
+    return attempt, feedback_list

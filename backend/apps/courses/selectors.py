@@ -7,6 +7,8 @@ from courses.models import (
     LessonProgress,
     LessonTranslation,
     Module,
+    Quiz,
+    QuizAttempt,
     Track,
 )
 
@@ -171,7 +173,6 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
 
     is_fallback = False
     if not translation:
-        # Fallback to the other language (EN if requested FR, or FR if requested EN)
         alt_lang = 'en' if preferred_lang == 'fr' else 'fr'
         translation = lesson.translations.filter(
             language=alt_lang,
@@ -180,7 +181,6 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
         if translation:
             is_fallback = True
 
-    # If no translation exists at all, generate a minimal fallback translation object
     if not translation:
         translation = LessonTranslation(
             lesson=lesson,
@@ -191,10 +191,8 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
             status=LessonTranslation.Status.ABSENT,
         )
 
-    # Attachments ordered by order, then id
     attachments = list(lesson.attachments.all().order_by('order', 'id'))
 
-    # Compute previous and next lessons for thumb-friendly mobile navigation
     all_lessons = get_course_curriculum_lessons(course)
     current_index = -1
     for idx, item in enumerate(all_lessons):
@@ -245,3 +243,28 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
 
 def get_lesson_attachment_by_id(pk: int) -> Optional[LessonAttachment]:
     return LessonAttachment.objects.filter(pk=pk).select_related('lesson', 'lesson__module__course').first()
+
+
+def get_quiz_for_lesson(course_slug: str, lesson_slug: str) -> Optional[Quiz]:
+    """
+    Retrieves the published quiz attached to a lesson with questions and choices.
+    """
+    return (
+        Quiz.objects.filter(
+            lesson__module__course__slug=course_slug,
+            lesson__slug=lesson_slug,
+            is_published=True,
+        )
+        .select_related('lesson', 'lesson__module__course')
+        .prefetch_related('questions__options')
+        .first()
+    )
+
+
+def get_user_quiz_attempts(user, quiz: Quiz):
+    """
+    Returns recent quiz attempts for a user.
+    """
+    if not user or not user.is_authenticated:
+        return []
+    return list(QuizAttempt.objects.filter(user=user, quiz=quiz).order_by('-created_at')[:5])

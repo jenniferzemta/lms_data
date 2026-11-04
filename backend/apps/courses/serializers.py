@@ -1,6 +1,17 @@
 from rest_framework import serializers
 
-from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.models import (
+    Course,
+    Lesson,
+    LessonAttachment,
+    LessonTranslation,
+    Module,
+    Quiz,
+    QuizAnswerOption,
+    QuizAttempt,
+    QuizQuestion,
+    Track,
+)
 
 
 class TrackSerializer(serializers.ModelSerializer):
@@ -170,3 +181,80 @@ class CourseProgressSerializer(serializers.Serializer):
     total_lessons_count = serializers.IntegerField()
     completed_lesson_slugs = serializers.ListField(child=serializers.CharField())
     resume_lesson = serializers.DictField(allow_null=True)
+
+
+# =====================================================================
+# QUIZ SERIALIZERS (F1.7)
+# =====================================================================
+
+class QuizAnswerOptionPublicSerializer(serializers.ModelSerializer):
+    """
+    Public options for questions. Note: is_correct is strictly omitted.
+    """
+    class Meta:
+        model = QuizAnswerOption
+        fields = ('id', 'text', 'order')
+
+
+class QuizQuestionPublicSerializer(serializers.ModelSerializer):
+    """
+    Public quiz question prompt. Explanations are withheld until submission.
+    """
+    options = QuizAnswerOptionPublicSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = QuizQuestion
+        fields = (
+            'id',
+            'prompt',
+            'question_type',
+            'bloom_level',
+            'order',
+            'options',
+        )
+
+
+class QuizPublicSerializer(serializers.ModelSerializer):
+    """
+    Public Quiz representation for active learners.
+    """
+    questions = QuizQuestionPublicSerializer(many=True, read_only=True)
+    total_questions = serializers.IntegerField(source='questions.count', read_only=True)
+
+    class Meta:
+        model = Quiz
+        fields = (
+            'id',
+            'title',
+            'description',
+            'purpose',
+            'passing_score_percentage',
+            'max_attempts',
+            'total_questions',
+            'questions',
+        )
+
+
+class QuizSubmitSerializer(serializers.Serializer):
+    answers = serializers.DictField(
+        help_text="Dictionary of {question_id: answer_val_or_list}"
+    )
+
+
+class QuizQuestionFeedbackSerializer(serializers.Serializer):
+    question_id = serializers.IntegerField()
+    prompt = serializers.CharField()
+    question_type = serializers.CharField()
+    bloom_level = serializers.CharField()
+    is_correct = serializers.BooleanField()
+    user_answer = serializers.JSONField(allow_null=True)
+    correct_answer = serializers.CharField()
+    explanation = serializers.CharField()
+
+
+class QuizAttemptResponseSerializer(serializers.Serializer):
+    attempt_id = serializers.IntegerField(source='id')
+    score_percentage = serializers.IntegerField()
+    is_passed = serializers.BooleanField()
+    created_at = serializers.DateTimeField()
+    feedback_summary = QuizQuestionFeedbackSerializer(many=True)

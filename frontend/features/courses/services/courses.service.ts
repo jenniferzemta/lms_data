@@ -5,6 +5,8 @@ import {
   LessonDetail,
   CourseProgress,
   LessonCompleteResponse,
+  QuizDetail,
+  QuizAttemptResponse,
 } from '../types';
 
 export const coursesService = {
@@ -99,6 +101,36 @@ export const coursesService = {
     return await apiClient<LessonCompleteResponse>(
       `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/complete/`,
       { method: 'POST' }
+    );
+  },
+
+  /**
+   * Fetches the formative quiz structure for a lesson (F1.7)
+   */
+  async getLessonQuiz(courseSlug: string, lessonSlug: string): Promise<QuizDetail | null> {
+    try {
+      return await apiClient<QuizDetail>(
+        `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/quiz/`
+      );
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Submits learner answers for evaluation and instant formative feedback (F1.7)
+   */
+  async submitLessonQuiz(
+    courseSlug: string,
+    lessonSlug: string,
+    answers: Record<string, unknown>
+  ): Promise<QuizAttemptResponse> {
+    return await apiClient<QuizAttemptResponse>(
+      `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/quiz/submit/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ answers }),
+      }
     );
   },
 

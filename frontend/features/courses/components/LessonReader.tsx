@@ -9,6 +9,7 @@ import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
 import { LessonAttachmentsList } from './LessonAttachmentsList';
 import { LessonContentRenderer } from './LessonContentRenderer';
+import { LessonQuizInteractive } from './LessonQuizInteractive';
 import {
   ChevronLeft,
   ChevronRight,
@@ -81,8 +82,6 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     "Attention : toujours utiliser le point-virgule (;) sous Excel en français.",
   ]);
   const [newNoteInput, setNewNoteInput] = useState('');
-  const [quizStarted, setQuizStarted] = useState(false);
-  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState<number | null>(null);
 
   // Fetch course progression on mount
   useEffect(() => {
@@ -216,6 +215,12 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     } finally {
       setIsCompleting(false);
     }
+  };
+
+  const handleQuizPassed = () => {
+    coursesService.getCourseProgress(lesson.course_slug).then((prog) => {
+      setProgress(prog);
+    });
   };
 
   // Progression display
@@ -757,71 +762,12 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               </form>
             </div>
 
-            {/* Exercise Challenge Callout (Mini Quiz) */}
-            <div className="bg-gradient-to-r from-[#e6eeff] to-[#dee9fc] p-4 sm:p-5 rounded-2xl flex items-center justify-between gap-3 border border-slate-200">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-1.5 text-[#006b5f]">
-                  <HelpCircle className="w-4 h-4" />
-                  <span className="text-xs font-bold tracking-wider uppercase">
-                    MINI QUIZ RAPIDE
-                  </span>
-                </div>
-                <h4 className="text-sm sm:text-base font-bold text-[#121c2a]">
-                  Validez vos acquis (3 questions)
-                </h4>
-                <p className="text-xs text-slate-600">Temps estimé : 2 minutes</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setQuizStarted(!quizStarted)}
-                className="min-h-[44px] px-4 bg-[#4a5f81] text-white rounded-xl text-xs sm:text-sm font-bold shrink-0 active:scale-95 shadow-xs hover:bg-[#324768] transition-colors"
-              >
-                {quizStarted ? 'Fermer' : 'Démarrer'}
-              </button>
-            </div>
-
-            {/* Interactive Mini Quiz Drawer / Area */}
-            {quizStarted && (
-              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                <span className="text-xs font-bold text-[#006b5f] uppercase tracking-wider">
-                  Question 1 sur 3
-                </span>
-                <p className="text-sm font-bold text-slate-900">
-                  Que se passe-t-il si vous saisissez manuellement &quot;25000 FCFA&quot; dans une cellule Excel ?
-                </p>
-                <div className="space-y-2">
-                  {[
-                    "Excel effectue la somme normalement.",
-                    "La cellule devient du texte et renvoie une erreur #VALEUR! dans les formules.",
-                    "Excel convertit automatiquement le texte en devise FCFA.",
-                  ].map((choice, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setSelectedQuizAnswer(i)}
-                      className={`w-full text-left p-3 rounded-xl border text-xs sm:text-sm transition-all min-h-[44px] ${
-                        selectedQuizAnswer === i
-                          ? i === 1
-                            ? 'bg-emerald-50 border-emerald-500 text-emerald-900 font-semibold'
-                            : 'bg-red-50 border-red-500 text-red-900 font-semibold'
-                          : 'bg-[#f8f9ff] border-slate-200 hover:bg-slate-100 text-slate-800'
-                      }`}
-                    >
-                      {choice}
-                    </button>
-                  ))}
-                </div>
-                {selectedQuizAnswer !== null && (
-                  <div className={`p-3 rounded-xl text-xs ${selectedQuizAnswer === 1 ? 'bg-emerald-100 text-emerald-900' : 'bg-amber-100 text-amber-900'}`}>
-                    {selectedQuizAnswer === 1 ? (
-                      <p><strong>Correct !</strong> Saisir des lettres transforme le nombre en chaîne de caractères, bloquant toute fonction arithmétique.</p>
-                    ) : (
-                      <p><strong>Incorrect.</strong> Saisir &quot;FCFA&quot; à la main transforme le type en Texte, rendant tout calcul impossible.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Interactive Formative Assessment Quiz (F1.7) */}
+            <LessonQuizInteractive
+              courseSlug={lesson.course_slug}
+              lessonSlug={lesson.slug}
+              onQuizPassed={handleQuizPassed}
+            />
           </div>
         )}
 

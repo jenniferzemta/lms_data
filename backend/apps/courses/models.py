@@ -379,3 +379,176 @@ class LessonProgress(models.Model):
     def __str__(self) -> str:
         status_str = "Terminée" if self.is_completed else "En cours"
         return f"{self.user} - {self.lesson.title} [{status_str}]"
+
+
+
+class Quiz(models.Model):
+    """
+    Assessment quiz attached to a lesson (F1.7).
+    Supports diagnostic, formative, or summative purposes with passing score threshold.
+    """
+    class Purpose(models.TextChoices):
+        DIAGNOSTIC = 'DIAGNOSTIC', _('Diagnostique (positionnement)')
+        FORMATIVE = 'FORMATIVE', _('Formative (entraînement)')
+        SUMMATIVE = 'SUMMATIVE', _('Sommative (certification)')
+
+    lesson = models.OneToOneField(
+        'Lesson',
+        on_delete=models.CASCADE,
+        related_name='quiz',
+        verbose_name=_('Leçon associée'),
+    )
+    title = models.CharField(max_length=200, verbose_name=_('Titre du quiz'))
+    description = models.TextField(blank=True, verbose_name=_('Consignes'))
+    purpose = models.CharField(
+        max_length=20,
+        choices=Purpose.choices,
+        default=Purpose.FORMATIVE,
+        verbose_name=_('Finalité pédagogique'),
+    )
+    passing_score_percentage = models.PositiveIntegerField(
+        default=70,
+        verbose_name=_('Score de passage (%)'),
+        help_text=_('Pourcentage minimal de bonnes réponses pour valider'),
+    )
+    max_attempts = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Nombre maximal de tentatives'),
+        help_text=_('Laisser vide pour un nombre de tentatives illimité'),
+    )
+    is_published = models.BooleanField(default=True, verbose_name=_('Publié'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Quiz')
+        verbose_name_plural = _('Quiz')
+
+    def __str__(self) -> str:
+        return f"{self.title} ({self.lesson.title}) [{self.passing_score_percentage}%]"
+
+
+class QuizQuestion(models.Model):
+    """
+    Individual question within a quiz, linked to a Bloom cognitive level and explanation feedback (F1.7).
+    """
+    class QuestionType(models.TextChoices):
+        SINGLE_CHOICE = 'SINGLE_CHOICE', _('Choix unique (QCM)')
+        MULTIPLE_CHOICE = 'MULTIPLE_CHOICE', _('Choix multiple')
+        TRUE_FALSE = 'TRUE_FALSE', _('Vrai / Faux')
+        NUMERIC = 'NUMERIC', _('Numérique exact')
+
+    class BloomLevel(models.TextChoices):
+        REMEMBER = 'REMEMBER', _('Mémoriser (Conn.')
+        UNDERSTAND = 'UNDERSTAND', _('Comprendre')
+        APPLY = 'APPLY', _('Appliquer')
+        ANALYZE = 'ANALYZE', _('Analyser')
+        EVALUATE = 'EVALUATE', _('Évaluer')
+        CREATE = 'CREATE', _('Créer')
+
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name='questions',
+        verbose_name=_('Quiz'),
+    )
+    prompt = models.TextField(verbose_name=_('Énoncé de la question'))
+    question_type = models.CharField(
+        max_length=30,
+        choices=QuestionType.choices,
+        default=QuestionType.SINGLE_CHOICE,
+        verbose_name=_('Type de question'),
+    )
+    bloom_level = models.CharField(
+        max_length=20,
+        choices=BloomLevel.choices,
+        default=BloomLevel.APPLY,
+        verbose_name=_('Niveau de Bloom'),
+    )
+    explanation = models.TextField(
+        verbose_name=_('Feedback explicatif'),
+        help_text=_('Explication pédagogique détaillée affichée après la réponse pour lever les doutes'),
+    )
+    numeric_target = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name=_('Valeur numérique attendue'),
+    )
+    order = models.PositiveIntegerField(default=1, verbose_name=_('Ordre'))
+
+    class Meta:
+        verbose_name = _('Question de quiz')
+        verbose_name_plural = _('Questions de quiz')
+        ordering = ('order', 'id')
+
+    def __str__(self) -> str:
+        return f"Q{self.order}: {self.prompt[:60]}... [{self.question_type}]"
+
+
+class QuizAnswerOption(models.Model):
+    """
+    Choice option for multiple choice, single choice, or true/false questions.
+    """
+    question = models.ForeignKey(
+        QuizQuestion,
+        on_delete=models.CASCADE,
+        related_name='options',
+        verbose_name=_('Question'),
+    )
+    text = models.CharField(max_length=255, verbose_name=_('Texte du choix'))
+    is_correct = models.BooleanField(
+        default=False,
+        verbose_name=_('Bonne réponse'),
+    )
+    order = models.PositiveIntegerField(default=1, verbose_name=_('Ordre'))
+
+    class Meta:
+        verbose_name = _('Option de réponse')
+        verbose_name_plural = _('Options de réponse')
+        ordering = ('order', 'id')
+
+    def __str__(self) -> str:
+        marker = '✓' if self.is_correct else '✗'
+        return f"[{marker}] {self.text[:50]}"
+
+
+class QuizAttempt(models.Model):
+    """
+    Tracks a learner attempt at a quiz, including score, submitted answers and feedback (F1.7).
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='quiz_attempts',
+        verbose_name=_('Apprenant'),
+    )
+    quiz = models.ForeignKey(
+        Quiz,
+        on_delete=models.CASCADE,
+        related_name='attempts',
+        verbose_name=_('Quiz'),
+    )
+    score_percentage = models.PositiveIntegerField(verbose_name=_('Score obtenu (%)'))
+    is_passed = models.BooleanField(verbose_name=_('Validé'))
+    submitted_answers = models.JSONField(
+        default=dict,
+        verbose_name=_('Réponses soumises'),
+        help_text=_('{question_id: selected_option_id(s) or numeric_val}'),
+    )
+    feedback_summary = models.JSONField(
+        default=list,
+        verbose_name=_('Synthèse des feedbacks'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Date de la tentative'))
+
+    class Meta:
+        verbose_name = _('Tentative de quiz')
+        verbose_name_plural = _('Tentatives de quiz')
+        ordering = ('-created_at',)
+
+    def __str__(self) -> str:
+        status_str = "Validé" if self.is_passed else "Échec"
+        return f"{self.user} - {self.quiz.title}: {self.score_percentage}% [{status_str}]"

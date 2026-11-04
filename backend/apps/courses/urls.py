@@ -7,6 +7,8 @@ from courses.views import (
     LessonAttachmentDownloadView,
     LessonCompleteView,
     LessonDetailView,
+    LessonQuizDetailView,
+    LessonQuizSubmitView,
     VideoStreamView,
 )
 
@@ -21,4 +23,6 @@ urlpatterns = [
     path('<slug:slug>/enroll/', CourseEnrollView.as_view(), name='course-enroll'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/', LessonDetailView.as_view(), name='lesson-detail'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/complete/', LessonCompleteView.as_view(), name='lesson-complete'),
+    path('<slug:course_slug>/lessons/<slug:lesson_slug>/quiz/', LessonQuizDetailView.as_view(), name='lesson-quiz-detail'),
+    path('<slug:course_slug>/lessons/<slug:lesson_slug>/quiz/submit/', LessonQuizSubmitView.as_view(), name='lesson-quiz-submit'),
 ]

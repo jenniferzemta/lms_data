@@ -7,6 +7,10 @@ from courses.models import (
     LessonProgress,
     LessonTranslation,
     Module,
+    Quiz,
+    QuizAnswerOption,
+    QuizAttempt,
+    QuizQuestion,
     Track,
 )
 
@@ -32,6 +36,12 @@ class ModuleInline(admin.TabularInline):
     model = Module
     extra = 1
     fields = ('order', 'title', 'is_published')
+
+
+class QuizAnswerOptionInline(admin.TabularInline):
+    model = QuizAnswerOption
+    extra = 3
+    fields = ('order', 'text', 'is_correct')
 
 
 @admin.register(Track)
@@ -93,3 +103,33 @@ class LessonProgressAdmin(admin.ModelAdmin):
     list_display = ('user', 'lesson', 'is_completed', 'completed_at', 'last_accessed_at')
     list_filter = ('is_completed', 'lesson__module__course')
     search_fields = ('user__email', 'lesson__title')
+
+
+class QuizQuestionInline(admin.StackedInline):
+    model = QuizQuestion
+    extra = 1
+    fields = ('order', 'prompt', 'question_type', 'bloom_level', 'explanation', 'numeric_target')
+
+
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'lesson', 'purpose', 'passing_score_percentage', 'max_attempts', 'is_published')
+    list_filter = ('purpose', 'is_published')
+    search_fields = ('title', 'description', 'lesson__title')
+    inlines = [QuizQuestionInline]
+
+
+@admin.register(QuizQuestion)
+class QuizQuestionAdmin(admin.ModelAdmin):
+    list_display = ('prompt', 'quiz', 'question_type', 'bloom_level', 'order')
+    list_filter = ('question_type', 'bloom_level', 'quiz')
+    search_fields = ('prompt', 'explanation', 'quiz__title')
+    inlines = [QuizAnswerOptionInline]
+
+
+@admin.register(QuizAttempt)
+class QuizAttemptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'quiz', 'score_percentage', 'is_passed', 'created_at')
+    list_filter = ('is_passed', 'quiz')
+    search_fields = ('user__email', 'quiz__title')
+    readonly_fields = ('created_at',)

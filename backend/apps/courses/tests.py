@@ -2,7 +2,18 @@ import os
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from courses.models import Course, Lesson, LessonAttachment, LessonTranslation, Module, Track
+from courses.models import (
+    Course,
+    Lesson,
+    LessonAttachment,
+    LessonTranslation,
+    Module,
+    Quiz,
+    QuizAnswerOption,
+    QuizAttempt,
+    QuizQuestion,
+    Track,
+)
 from courses.selectors import (
     get_course_by_slug,
     get_lesson_attachment_by_id,
@@ -420,3 +431,140 @@ class CourseProgressAndEnrollmentTests(TestCase):
         self.assertEqual(res2.status_code, 200)
         self.assertEqual(res2.data['progress_percentage'], 100)
         self.assertEqual(res2.data['status'], 'COMPLETED')
+
+
+class QuizAPITests(TestCase):
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='quizlearner@datamboa.cm',
+            password='TestPassword123!',
+            first_name='Quiz',
+            last_name='Learner',
+        )
+        self.track = Track.objects.create(name='Excel Track', slug='excel-quiz-track', tool=Track.Tool.EXCEL, order=1)
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Analytics',
+            slug='excel-analytics',
+            level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
+        )
+        self.module = Module.objects.create(course=self.course, title='Module 1', order=1)
+        self.lesson = Lesson.objects.create(
+            module=self.module,
+            title='Environnement et Types',
+            slug='environnement-et-types',
+            duration_minutes=15,
+            order=1,
+        )
+        self.quiz = Quiz.objects.create(
+            lesson=self.lesson,
+            title='Quiz d’évaluation formative',
+            passing_score_percentage=70,
+        )
+        # Question 1: Single choice
+        self.q1 = QuizQuestion.objects.create(
+            quiz=self.quiz,
+            prompt='Dans un tableau Excel au Cameroun, que se passe-t-il si vous écrivez "15000 FCFA" ?',
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            explanation='Excel considère la cellule comme du texte brut et empêche toute opération arithmétique.',
+            order=1,
+        )
+        self.q1_opt1 = QuizAnswerOption.objects.create(
+            question=self.q1,
+            text='Excel le convertit automatiquement en devise',
+            is_correct=False,
+            order=1,
+        )
+        self.q1_opt2 = QuizAnswerOption.objects.create(
+            question=self.q1,
+            text='Excel le traite comme du texte, bloquant les calculs',
+            is_correct=True,
+            order=2,
+        )
+
+        # Question 2: Numeric
+        self.q2 = QuizQuestion.objects.create(
+            quiz=self.quiz,
+            prompt='Si la créance d’Akwa est de 250000 et celle de Bonabéri de 150000, quel est le total ?',
+            question_type=QuizQuestion.QuestionType.NUMERIC,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            numeric_target=400000,
+            explanation='250000 + 150000 = 400000 FCFA.',
+            order=2,
+        )
+
+    def test_public_quiz_endpoint_does_not_leak_answers(self):
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/quiz/'
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = response.data
+        self.assertEqual(data['title'], 'Quiz d’évaluation formative')
+        self.assertEqual(len(data['questions']), 2)
+
+        # Ensure correct answer and explanation are NOT leaked in public GET
+        for q in data['questions']:
+            self.assertNotIn('explanation', q)
+            self.assertNotIn('numeric_target', q)
+            for opt in q['options']:
+                self.assertNotIn('is_correct', opt)
+
+    def test_quiz_submission_unauthenticated_fails(self):
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/quiz/submit/'
+        response = self.client.post(url, {'answers': {str(self.q1.id): self.q1_opt2.id}}, format='json')
+        self.assertIn(response.status_code, [401, 403])
+
+    def test_quiz_submission_passing_completes_lesson(self):
+        self.client.force_authenticate(user=self.user)
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/quiz/submit/'
+
+        # Submit 100% correct answers
+        payload = {
+            'answers': {
+                str(self.q1.id): self.q1_opt2.id,
+                str(self.q2.id): '400 000',  # Test spaces in numeric input
+            }
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, 200)
+        data = response.data
+
+        self.assertEqual(data['score_percentage'], 100)
+        self.assertTrue(data['is_passed'])
+        self.assertEqual(len(data['feedback_summary']), 2)
+
+        # Check formative feedback includes explanation
+        fb1 = data['feedback_summary'][0]
+        self.assertTrue(fb1['is_correct'])
+        self.assertIn('Excel considère la cellule comme du texte brut', fb1['explanation'])
+
+        # Check lesson is auto-marked as completed
+        from courses.models import LessonProgress
+        progress = LessonProgress.objects.get(user=self.user, lesson=self.lesson)
+        self.assertTrue(progress.is_completed)
+
+    def test_quiz_submission_failing_does_not_complete_lesson(self):
+        self.client.force_authenticate(user=self.user)
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/quiz/submit/'
+
+        # Submit incorrect answers -> 0%
+        payload = {
+            'answers': {
+                str(self.q1.id): self.q1_opt1.id,
+                str(self.q2.id): '1000',
+            }
+        }
+        response = self.client.post(url, payload, format='json')
+        self.assertEqual(response.status_code, 200)
+        data = response.data
+
+        self.assertEqual(data['score_percentage'], 0)
+        self.assertFalse(data['is_passed'])
+
+        from courses.models import LessonProgress
+        progress = LessonProgress.objects.filter(user=self.user, lesson=self.lesson).first()
+        self.assertTrue(progress is None or not progress.is_completed)
+

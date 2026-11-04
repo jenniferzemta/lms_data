@@ -136,3 +136,51 @@ export interface LessonCompleteResponse {
   status: string;
   summary: CourseProgress;
 }
+
+export type QuizQuestionType = 'SINGLE_CHOICE' | 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'NUMERIC';
+export type QuizBloomLevel = 'REMEMBER' | 'UNDERSTAND' | 'APPLY' | 'ANALYZE' | 'EVALUATE' | 'CREATE';
+
+export interface QuizAnswerOption {
+  id: number;
+  text: string;
+  order: number;
+}
+
+export interface QuizQuestion {
+  id: number;
+  prompt: string;
+  question_type: QuizQuestionType;
+  bloom_level: QuizBloomLevel;
+  order: number;
+  options: QuizAnswerOption[];
+}
+
+export interface QuizDetail {
+  id: number;
+  title: string;
+  description: string;
+  purpose: 'FORMATIVE' | 'DIAGNOSTIC' | 'SUMMATIVE';
+  passing_score_percentage: number;
+  max_attempts: number | null;
+  total_questions: number;
+  questions: QuizQuestion[];
+}
+
+export interface QuizQuestionFeedback {
+  question_id: number;
+  prompt: string;
+  question_type: QuizQuestionType;
+  bloom_level: QuizBloomLevel;
+  is_correct: boolean;
+  user_answer: unknown;
+  correct_answer: string;
+  explanation: string;
+}
+
+export interface QuizAttemptResponse {
+  attempt_id: number;
+  score_percentage: number;
+  is_passed: boolean;
+  created_at: string;
+  feedback_summary: QuizQuestionFeedback[];
+}
