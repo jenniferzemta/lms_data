@@ -420,3 +420,4 @@ export const LessonQuizInteractive: React.FC<LessonQuizInteractiveProps> = ({
     </section>
   );
 };
+

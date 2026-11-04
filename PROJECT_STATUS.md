@@ -13,14 +13,14 @@
 Phase globale     : V1 SOCLE
 Version suivante  : V1 Socle — phase SAM : Développement (F1.9 / F1.10)
 Avancement (M)    : V1 8/19 validé (F1.1 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.2 🔎) · V2 0/11 · V3 0/7 · V4 0/4
-Conformité péda.  : 14/26 critères R ✅ validés dans le code (R1, R5, R6, R7, R8, R10, R13, R16, R19, R20, R21, R22, R24, R25, R26)
-Fait              : F1.7 validé (Modélisation Quiz, QuizQuestion avec niveaux taxonomiques de Bloom, QuizAnswerOption, QuizAttempt, seuil de validation configurable 70%, feedback explicatif pédagogique immédiat sans rechargement R24, validation automatique de la leçon en cas de succès, composant tactile mobile LessonQuizInteractive intégré dans LessonReader, 52/52 tests Django passants, build 14/14 Next.js validé)
-En cours          : V1 Socle
-Prochaine tâche   : F1.9 (Prise de notes personnelles synchronisées par leçon avec timecodes vidéo) ou F1.10 (Espace Q&R d'entraide par leçon)
-Décisions         : Feedback pédagogique explicatif et réponses correctes masqués côté public GET et révélés uniquement après soumission POST ; validation automatique de leçon liée au seuil de passage.
+Conformité péda.  : 16/26 critères R ✅ validés dans le code (R1, R5, R6, R7, R8, R10, R11, R13, R16, R19, R20, R21, R22, R24, R25, R26)
+Fait              : Curriculum YITA Roadmap déployé sur les 3 niveaux Excel (Niveau 1 Intermédiaire, Niveau 2 Avancé Power Query, Niveau 3 Expert DAX & Dashboards), 18 modules créés avec cas d'entreprise réels Kamer SARL en FCFA, intégration des vidéos D:\videoschariow (CREANCE 1-5, exo1-12, KPI2, jenafg), 52/52 tests Django passants, build 14/14 Next.js validé.
+En cours          : V1 Socle — Option A : F1.9 (Notes personnelles par timecode) et F1.10 (Q&R par leçon)
+Prochaine tâche   : F1.9 (Prise de notes personnelles synchronisées avec timecodes vidéo dans le lecteur Stitch)
+Décisions         : Structure en 3 cours complets sous le Track Excel avec granularité par niveau et modules de synthèse décisionnelle finale.
 Questions ouvertes: Agrégateur Mobile Money V4 ; tableur labo Excel V2 ; hébergement VPS+Docker
-Dépôt             : Branche feat/quizzes active, 52/52 tests Django passants, 0 erreur lint, build Next.js validé
-Dernière commande : git commit -m "feat(quizzes): implement interactive formative quizzes with Bloom levels, feedback and passing threshold (F1.7)"
+Dépôt             : Branche feat/curriculum-roadmap active, 52/52 tests Django passants, build Next.js validé
+Dernière commande : git commit -m "feat(curriculum): deploy complete 3-level Excel roadmap curriculum with local video streaming"
 ```
 
 ---
@@ -33,8 +33,8 @@ Dernière commande : git commit -m "feat(quizzes): implement interactive formati
 | Version cible suivante | V1 — Socle |
 | Phase SAM de la version cible | Développement (F1.9 / F1.10) |
 | Dernière mise à jour | 2026-11-04 |
-| Dépôt | Synchronisé sur GitHub (`origin/main`), branche de travail `feat/quizzes` |
-| Conformité pédagogique | 14/26 critères R ✅ validés dans le code |
+| Dépôt | Synchronisé sur GitHub (`origin/main`), branche de travail `feat/curriculum-roadmap` |
+| Conformité pédagogique | 16/26 critères R ✅ validés dans le code |
 
 ### Jalons de préparation
 
@@ -51,3 +51,4 @@ Dernière commande : git commit -m "feat(quizzes): implement interactive formati
 | Intégration vidéos locales | ✅ | Endpoint Django streaming HTTP Range 206 depuis `D:\videoschariow` |
 | Progression et reprise (F1.8) | ✅ | CourseEnrollment + LessonProgress, endpoints REST, auto-reprise, validation sommaire |
 | Quiz interactifs & feedback (F1.7) | ✅ | Quiz, Bloom levels, score 70%, feedback pédagogique instantané R24, auto-complétion |
+| Curriculum YITA Roadmap (3 niveaux) | ✅ | 3 cours, 18 modules (N1, N2 Power Query, N3 DAX & Dashboards), vidéos réelles associées |
