@@ -184,3 +184,31 @@ export interface QuizAttemptResponse {
   created_at: string;
   feedback_summary: QuizQuestionFeedback[];
 }
+
+export interface LessonNote {
+  id: number;
+  content: string;
+  video_timestamp_seconds: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LessonAnswer {
+  id: number;
+  user_name: string;
+  is_instructor: boolean;
+  content: string;
+  is_endorsed_by_instructor: boolean;
+  created_at: string;
+}
+
+export interface LessonQuestion {
+  id: number;
+  title: string;
+  content: string;
+  user_name: string;
+  is_resolved: boolean;
+  created_at: string;
+  answers_count: number;
+  answers: LessonAnswer[];
+}

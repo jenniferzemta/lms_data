@@ -15,20 +15,33 @@ from courses.selectors import (
     get_course_progress_summary,
     get_lesson_attachment_by_id,
     get_lesson_detail,
+    get_lesson_question_by_id,
     get_quiz_for_lesson,
+    get_user_lesson_notes,
+    list_lesson_questions,
     list_published_courses,
 )
 from courses.serializers import (
     CourseDetailSerializer,
     CourseListSerializer,
     CourseProgressSerializer,
+    LessonAnswerSerializer,
+    LessonCreateAnswerSerializer,
+    LessonCreateNoteSerializer,
+    LessonCreateQuestionSerializer,
     LessonDetailSerializer,
+    LessonNoteSerializer,
+    LessonQuestionSerializer,
     QuizAttemptResponseSerializer,
     QuizPublicSerializer,
     QuizSubmitSerializer,
 )
 from courses.services import (
     can_access_attachment,
+    create_lesson_answer,
+    create_lesson_note,
+    create_lesson_question,
+    delete_lesson_note,
     enroll_user_in_course,
     evaluate_quiz_submission,
     mark_lesson_completed,
@@ -330,4 +343,122 @@ class LessonQuizSubmitView(APIView):
 
         response_serializer = QuizAttemptResponseSerializer(attempt)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+
+class LessonNotesView(APIView):
+    """
+    GET /api/v1/courses/<course_slug>/lessons/<lesson_slug>/notes/
+    POST /api/v1/courses/<course_slug>/lessons/<lesson_slug>/notes/
+    Manages learner's personal notes anchored to video timecodes (F1.9).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        notes = get_user_lesson_notes(
+            user=request.user,
+            course_slug=course_slug,
+            lesson_slug=lesson_slug,
+        )
+        serializer = LessonNoteSerializer(notes, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        lesson = Lesson.objects.filter(
+            module__course__slug=course_slug,
+            slug=lesson_slug,
+        ).first()
+        if not lesson:
+            return Response({'detail': 'Lesson not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = LessonCreateNoteSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        note = create_lesson_note(
+            user=request.user,
+            lesson=lesson,
+            content=serializer.validated_data['content'],
+            video_timestamp_seconds=serializer.validated_data.get('video_timestamp_seconds', 0),
+        )
+        return Response(LessonNoteSerializer(note).data, status=status.HTTP_201_CREATED)
+
+
+class LessonNoteDetailView(APIView):
+    """
+    DELETE /api/v1/courses/notes/<int:pk>/
+    Deletes a user personal note (F1.9).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request: Request, pk: int) -> Response:
+        success = delete_lesson_note(user=request.user, note_id=pk)
+        if not success:
+            return Response({'detail': 'Note not found or unauthorized.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'success': True}, status=status.HTTP_204_NO_CONTENT)
+
+
+class LessonQuestionsView(APIView):
+    """
+    GET /api/v1/courses/<course_slug>/lessons/<lesson_slug>/questions/
+    POST /api/v1/courses/<course_slug>/lessons/<lesson_slug>/questions/
+    Community Q&A for a lesson (F1.10).
+    """
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
+
+    def get(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        questions = list_lesson_questions(
+            course_slug=course_slug,
+            lesson_slug=lesson_slug,
+        )
+        serializer = LessonQuestionSerializer(questions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        lesson = Lesson.objects.filter(
+            module__course__slug=course_slug,
+            slug=lesson_slug,
+        ).first()
+        if not lesson:
+            return Response({'detail': 'Lesson not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = LessonCreateQuestionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        question = create_lesson_question(
+            user=request.user,
+            lesson=lesson,
+            title=serializer.validated_data['title'],
+            content=serializer.validated_data['content'],
+        )
+        return Response(LessonQuestionSerializer(question).data, status=status.HTTP_201_CREATED)
+
+
+class LessonQuestionAnswerView(APIView):
+    """
+    POST /api/v1/courses/questions/<int:pk>/answers/
+    Replies to a community question thread (F1.10).
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, pk: int) -> Response:
+        question = get_lesson_question_by_id(pk)
+        if not question:
+            return Response({'detail': 'Question not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = LessonCreateAnswerSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        answer = create_lesson_answer(
+            user=request.user,
+            question=question,
+            content=serializer.validated_data['content'],
+        )
+        return Response(LessonAnswerSerializer(answer).data, status=status.HTTP_201_CREATED)
+
 

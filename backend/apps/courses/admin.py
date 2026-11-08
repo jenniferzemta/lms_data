@@ -3,8 +3,11 @@ from courses.models import (
     Course,
     CourseEnrollment,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
     LessonProgress,
+    LessonQuestion,
     LessonTranslation,
     Module,
     Quiz,
@@ -133,3 +136,32 @@ class QuizAttemptAdmin(admin.ModelAdmin):
     list_filter = ('is_passed', 'quiz')
     search_fields = ('user__email', 'quiz__title')
     readonly_fields = ('created_at',)
+
+
+@admin.register(LessonNote)
+class LessonNoteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'lesson', 'video_timestamp_seconds', 'created_at')
+    list_filter = ('lesson__module__course',)
+    search_fields = ('user__email', 'content', 'lesson__title')
+
+
+class LessonAnswerInline(admin.StackedInline):
+    model = LessonAnswer
+    extra = 1
+    fields = ('user', 'content', 'is_endorsed_by_instructor')
+
+
+@admin.register(LessonQuestion)
+class LessonQuestionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'lesson', 'is_resolved', 'created_at')
+    list_filter = ('is_resolved', 'lesson__module__course')
+    search_fields = ('title', 'content', 'user__email', 'lesson__title')
+    inlines = [LessonAnswerInline]
+
+
+@admin.register(LessonAnswer)
+class LessonAnswerAdmin(admin.ModelAdmin):
+    list_display = ('question', 'user', 'is_endorsed_by_instructor', 'created_at')
+    list_filter = ('is_endorsed_by_instructor',)
+    search_fields = ('content', 'user__email', 'question__title')
+

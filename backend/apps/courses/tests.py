@@ -5,7 +5,11 @@ from rest_framework.test import APIClient
 from courses.models import (
     Course,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
+    LessonProgress,
+    LessonQuestion,
     LessonTranslation,
     Module,
     Quiz,
@@ -567,4 +571,111 @@ class QuizAPITests(TestCase):
         from courses.models import LessonProgress
         progress = LessonProgress.objects.filter(user=self.user, lesson=self.lesson).first()
         self.assertTrue(progress is None or not progress.is_completed)
+
+
+class LessonNotesAndQATests(TestCase):
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.learner = User.objects.create_user(
+            email='paul.biya@example.cm',
+            password='TestPassword123!',
+            first_name='Paul',
+            last_name='Biya',
+        )
+        self.instructor = User.objects.create_user(
+            email='alain.fotso@datamboa.cm',
+            password='TestPassword123!',
+            first_name='Alain',
+            last_name='Fotso',
+            is_staff=True,
+        )
+        self.track = Track.objects.create(name='Excel Track', slug='excel-notes-track', tool=Track.Tool.EXCEL, order=1)
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Formation',
+            slug='excel-formation',
+            level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
+        )
+        self.module = Module.objects.create(course=self.course, title='Module 1', order=1)
+        self.lesson = Lesson.objects.create(
+            module=self.module,
+            title='Leçon Formules',
+            slug='lecon-formules',
+            duration_minutes=20,
+            order=1,
+        )
+
+    def test_unauthenticated_cannot_create_or_view_notes(self):
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/notes/'
+        response = self.client.get(url)
+        self.assertIn(response.status_code, [401, 403])
+
+        post_res = self.client.post(url, {'content': 'Ma note', 'video_timestamp_seconds': 45}, format='json')
+        self.assertIn(post_res.status_code, [401, 403])
+
+    def test_authenticated_can_create_list_and_delete_notes(self):
+        self.client.force_authenticate(user=self.learner)
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/notes/'
+
+        # Create note
+        res = self.client.post(url, {'content': 'Attention au point-virgule', 'video_timestamp_seconds': 125}, format='json')
+        self.assertEqual(res.status_code, 201)
+        note_id = res.data['id']
+        self.assertEqual(res.data['video_timestamp_seconds'], 125)
+        self.assertEqual(res.data['content'], 'Attention au point-virgule')
+
+        # List notes
+        list_res = self.client.get(url)
+        self.assertEqual(list_res.status_code, 200)
+        self.assertEqual(len(list_res.data), 1)
+        self.assertEqual(list_res.data[0]['id'], note_id)
+
+        # Delete note
+        del_url = f'/api/v1/courses/notes/{note_id}/'
+        del_res = self.client.delete(del_url)
+        self.assertEqual(del_res.status_code, 204)
+
+        # Ensure deleted
+        list_res2 = self.client.get(url)
+        self.assertEqual(len(list_res2.data), 0)
+
+    def test_community_qa_workflow(self):
+        # Anonymous can view Q&A
+        qa_url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/questions/'
+        get_res = self.client.get(qa_url)
+        self.assertEqual(get_res.status_code, 200)
+        self.assertEqual(len(get_res.data), 0)
+
+        # Learner asks a question
+        self.client.force_authenticate(user=self.learner)
+        post_q_res = self.client.post(
+            qa_url,
+            {'title': 'Erreur #NOM?', 'content': 'Pourquoi mon Excel affiche #NOM? quand j’écris =SUM() ?'},
+            format='json',
+        )
+        self.assertEqual(post_q_res.status_code, 201)
+        q_id = post_q_res.data['id']
+        self.assertEqual(post_q_res.data['title'], 'Erreur #NOM?')
+
+        # Instructor replies with endorsement
+        self.client.force_authenticate(user=self.instructor)
+        ans_url = f'/api/v1/courses/questions/{q_id}/answers/'
+        ans_res = self.client.post(
+            ans_url,
+            {'content': 'Sur la version française, utilisez la fonction =SOMME() et non =SUM().'},
+            format='json',
+        )
+        self.assertEqual(ans_res.status_code, 201)
+        self.assertTrue(ans_res.data['is_endorsed_by_instructor'])
+        self.assertTrue(ans_res.data['is_instructor'])
+
+        # Check full question thread includes reply
+        thread_res = self.client.get(qa_url)
+        self.assertEqual(thread_res.status_code, 200)
+        self.assertEqual(len(thread_res.data), 1)
+        self.assertEqual(thread_res.data[0]['answers_count'], 1)
+        self.assertEqual(thread_res.data[0]['answers'][0]['content'], 'Sur la version française, utilisez la fonction =SOMME() et non =SUM().')
+
 

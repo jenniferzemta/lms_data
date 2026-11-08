@@ -5,8 +5,11 @@ from courses.models import (
     Course,
     CourseEnrollment,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
     LessonProgress,
+    LessonQuestion,
     Quiz,
     QuizAttempt,
     QuizQuestion,
@@ -216,3 +219,50 @@ def evaluate_quiz_submission(user, quiz: Quiz, answers: dict) -> tuple[QuizAttem
         mark_lesson_completed(user, quiz.lesson)
 
     return attempt, feedback_list
+
+
+def create_lesson_note(user, lesson: Lesson, content: str, video_timestamp_seconds: int = 0) -> LessonNote:
+    """
+    Creates a new learner personal note anchored to a video timecode (F1.9).
+    """
+    return LessonNote.objects.create(
+        user=user,
+        lesson=lesson,
+        content=content.strip(),
+        video_timestamp_seconds=max(0, video_timestamp_seconds),
+    )
+
+
+def delete_lesson_note(user, note_id: int) -> bool:
+    """
+    Deletes a personal note belonging to the requesting learner.
+    """
+    deleted, _ = LessonNote.objects.filter(id=note_id, user=user).delete()
+    return deleted > 0
+
+
+def create_lesson_question(user, lesson: Lesson, title: str, content: str) -> LessonQuestion:
+    """
+    Creates a community question thread for a lesson (F1.10).
+    """
+    return LessonQuestion.objects.create(
+        user=user,
+        lesson=lesson,
+        title=title.strip(),
+        content=content.strip(),
+    )
+
+
+def create_lesson_answer(user, question: LessonQuestion, content: str) -> LessonAnswer:
+    """
+    Posts a reply to a lesson question (F1.10).
+    Automatically flags answer as endorsed if user is staff or admin.
+    """
+    is_staff_or_admin = getattr(user, 'is_staff', False) or getattr(user, 'role', '') in ('ADMIN', 'INSTRUCTOR')
+    return LessonAnswer.objects.create(
+        question=question,
+        user=user,
+        content=content.strip(),
+        is_endorsed_by_instructor=is_staff_or_admin,
+    )
+

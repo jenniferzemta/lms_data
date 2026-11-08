@@ -552,3 +552,104 @@ class QuizAttempt(models.Model):
     def __str__(self) -> str:
         status_str = "Validé" if self.is_passed else "Échec"
         return f"{self.user} - {self.quiz.title}: {self.score_percentage}% [{status_str}]"
+
+
+class LessonNote(models.Model):
+    """
+    Personal notes taken by a learner during a lesson, optionally anchored to a video timecode (F1.9).
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='lesson_notes',
+        verbose_name=_('Apprenant'),
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='notes',
+        verbose_name=_('Leçon'),
+    )
+    content = models.TextField(verbose_name=_('Contenu de la note'))
+    video_timestamp_seconds = models.PositiveIntegerField(
+        default=0,
+        verbose_name=_('Horodatage vidéo (secondes)'),
+        help_text=_('Position exacte dans la vidéo au moment de la prise de note'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Date de création'))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Dernière modification'))
+
+    class Meta:
+        verbose_name = _('Note de cours')
+        verbose_name_plural = _('Notes de cours')
+        ordering = ('-created_at',)
+
+    def __str__(self) -> str:
+        return f"Note {self.user} sur {self.lesson.slug} [{self.video_timestamp_seconds}s]"
+
+
+class LessonQuestion(models.Model):
+    """
+    Community peer-to-peer Q&A thread posted on a specific lesson (F1.10).
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='lesson_questions',
+        verbose_name=_('Auteur'),
+    )
+    lesson = models.ForeignKey(
+        Lesson,
+        on_delete=models.CASCADE,
+        related_name='community_questions',
+        verbose_name=_('Leçon'),
+    )
+    title = models.CharField(max_length=255, verbose_name=_('Question'))
+    content = models.TextField(verbose_name=_('Détails ou code'))
+    is_resolved = models.BooleanField(default=False, verbose_name=_('Résolue'))
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Date de publication'))
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Question de cours (Q&R)')
+        verbose_name_plural = _('Questions de cours (Q&R)')
+        ordering = ('-created_at',)
+
+    def __str__(self) -> str:
+        return f"[{self.lesson.slug}] {self.title}"
+
+
+class LessonAnswer(models.Model):
+    """
+    Community or instructor answer to a lesson question (F1.10).
+    """
+    question = models.ForeignKey(
+        LessonQuestion,
+        on_delete=models.CASCADE,
+        related_name='answers',
+        verbose_name=_('Question'),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='lesson_answers',
+        verbose_name=_('Auteur de la réponse'),
+    )
+    content = models.TextField(verbose_name=_('Contenu de la réponse'))
+    is_endorsed_by_instructor = models.BooleanField(
+        default=False,
+        verbose_name=_('Validée par le formateur'),
+        help_text=_('Coché si la réponse est certifiée exacte par un enseignant'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Date de la réponse'))
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Réponse Q&R')
+        verbose_name_plural = _('Réponses Q&R')
+        ordering = ('created_at',)
+
+    def __str__(self) -> str:
+        marker = ' [Certifié]' if self.is_endorsed_by_instructor else ''
+        return f"Réponse de {self.user} à Q#{self.question.id}{marker}"
+

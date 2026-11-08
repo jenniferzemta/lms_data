@@ -3,8 +3,11 @@ from courses.models import (
     Course,
     CourseEnrollment,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
     LessonProgress,
+    LessonQuestion,
     LessonTranslation,
     Module,
     Quiz,
@@ -268,3 +271,38 @@ def get_user_quiz_attempts(user, quiz: Quiz):
     if not user or not user.is_authenticated:
         return []
     return list(QuizAttempt.objects.filter(user=user, quiz=quiz).order_by('-created_at')[:5])
+
+
+def get_user_lesson_notes(*, user, course_slug: str, lesson_slug: str):
+    """
+    Returns personal notes for an authenticated user on a specific lesson (F1.9).
+    """
+    if not user or not user.is_authenticated:
+        return []
+    return list(
+        LessonNote.objects.filter(
+            user=user,
+            lesson__module__course__slug=course_slug,
+            lesson__slug=lesson_slug,
+        ).order_by('video_timestamp_seconds', '-created_at')
+    )
+
+
+def list_lesson_questions(*, course_slug: str, lesson_slug: str):
+    """
+    Returns community questions and their answers for a lesson (F1.10).
+    """
+    return (
+        LessonQuestion.objects.filter(
+            lesson__module__course__slug=course_slug,
+            lesson__slug=lesson_slug,
+        )
+        .select_related('user')
+        .prefetch_related('answers__user')
+        .order_by('-created_at')
+    )
+
+
+def get_lesson_question_by_id(question_id: int) -> Optional[LessonQuestion]:
+    return LessonQuestion.objects.filter(pk=question_id).select_related('lesson', 'user').first()
+

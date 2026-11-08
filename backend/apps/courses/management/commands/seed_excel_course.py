@@ -3,7 +3,10 @@ from django.core.management.base import BaseCommand
 from courses.models import (
     Course,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
+    LessonQuestion,
     LessonTranslation,
     Module,
     Quiz,
@@ -1186,5 +1189,31 @@ class Command(BaseCommand):
                 'order': 1,
             },
         )
+
+        # Sample Community Q&A thread (F1.10)
+        from accounts.models import User
+        coach = User.objects.filter(is_staff=True).first() or User.objects.filter(email='laure@datamboa.cm').first()
+        student = User.objects.filter(email='laurejennifer06@gmail.com').first()
+        if not student:
+            student = User.objects.filter(is_staff=False).first()
+
+        if coach and student:
+            q_thread, _ = LessonQuestion.objects.update_or_create(
+                lesson=c1_l1_1,
+                title="Pourquoi mon Excel m'affiche une erreur #NOM? quand j'écris =SUM() ?",
+                defaults={
+                    'user': student,
+                    'content': "J'ai essayé de calculer la somme de la colonne ventes en écrivant =SUM(C2:C10) mais j'obtiens une erreur.",
+                    'is_resolved': True,
+                },
+            )
+            LessonAnswer.objects.update_or_create(
+                question=q_thread,
+                user=coach,
+                defaults={
+                    'content': "Si votre logiciel Excel est paramétré en version française, la fonction doit obligatoirement s'écrire =SOMME() et non en anglais =SUM(). Pensez également à utiliser le point-virgule (;) si vous ajoutez d'autres arguments disjoints.",
+                    'is_endorsed_by_instructor': True,
+                },
+            )
 
         self.stdout.write(self.style.SUCCESS("Successfully seeded all 3 Excel courses aligned with the YITA Data Analyst Roadmap!"))

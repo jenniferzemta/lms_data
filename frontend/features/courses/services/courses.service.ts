@@ -7,6 +7,9 @@ import {
   LessonCompleteResponse,
   QuizDetail,
   QuizAttemptResponse,
+  LessonNote,
+  LessonQuestion,
+  LessonAnswer,
 } from '../types';
 
 export const coursesService = {
@@ -140,5 +143,97 @@ export const coursesService = {
   getAttachmentDownloadUrl(attachmentId: number): string {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
     return `${apiBase}/courses/attachments/${attachmentId}/download/`;
+  },
+
+  /**
+   * Fetches learner personal notes for a lesson (F1.9)
+   */
+  async getLessonNotes(courseSlug: string, lessonSlug: string): Promise<LessonNote[]> {
+    try {
+      return await apiClient<LessonNote[]>(
+        `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/notes/`
+      );
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Creates a personal note anchored to a video timecode (F1.9)
+   */
+  async createLessonNote(
+    courseSlug: string,
+    lessonSlug: string,
+    content: string,
+    videoTimestampSeconds: number = 0
+  ): Promise<LessonNote> {
+    return await apiClient<LessonNote>(
+      `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/notes/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          content,
+          video_timestamp_seconds: videoTimestampSeconds,
+        }),
+      }
+    );
+  },
+
+  /**
+   * Deletes a learner personal note (F1.9)
+   */
+  async deleteLessonNote(noteId: number): Promise<boolean> {
+    try {
+      await apiClient<{ success?: boolean }>(`/courses/notes/${noteId}/`, {
+        method: 'DELETE',
+      });
+      return true;
+    } catch {
+      return false;
+    }
+  },
+
+  /**
+   * Lists community questions and replies for a lesson (F1.10)
+   */
+  async getLessonQuestions(courseSlug: string, lessonSlug: string): Promise<LessonQuestion[]> {
+    try {
+      return await apiClient<LessonQuestion[]>(
+        `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/questions/`
+      );
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Posts a new question to the lesson community thread (F1.10)
+   */
+  async createLessonQuestion(
+    courseSlug: string,
+    lessonSlug: string,
+    title: string,
+    content: string
+  ): Promise<LessonQuestion> {
+    return await apiClient<LessonQuestion>(
+      `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/questions/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ title, content }),
+      }
+    );
+  },
+
+  /**
+   * Posts an answer to a question thread (F1.10)
+   */
+  async createLessonAnswer(questionId: number, content: string): Promise<LessonAnswer> {
+    return await apiClient<LessonAnswer>(
+      `/courses/questions/${questionId}/answers/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      }
+    );
   },
 };

@@ -3,7 +3,10 @@ from rest_framework import serializers
 from courses.models import (
     Course,
     Lesson,
+    LessonAnswer,
     LessonAttachment,
+    LessonNote,
+    LessonQuestion,
     LessonTranslation,
     Module,
     Quiz,
@@ -258,3 +261,92 @@ class QuizAttemptResponseSerializer(serializers.Serializer):
     is_passed = serializers.BooleanField()
     created_at = serializers.DateTimeField()
     feedback_summary = QuizQuestionFeedbackSerializer(many=True)
+
+
+class LessonNoteSerializer(serializers.ModelSerializer):
+    """
+    Serializer for learner's personal lesson notes (F1.9).
+    """
+    class Meta:
+        model = LessonNote
+        fields = (
+            'id',
+            'content',
+            'video_timestamp_seconds',
+            'created_at',
+            'updated_at',
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at')
+
+
+class LessonCreateNoteSerializer(serializers.Serializer):
+    content = serializers.CharField(max_length=5000)
+    video_timestamp_seconds = serializers.IntegerField(default=0, min_value=0)
+
+
+class LessonAnswerSerializer(serializers.ModelSerializer):
+    """
+    Community reply to a lesson question (F1.10).
+    """
+    user_name = serializers.SerializerMethodField()
+    is_instructor = serializers.SerializerMethodField()
+
+    class Meta:
+        model = LessonAnswer
+        fields = (
+            'id',
+            'user_name',
+            'is_instructor',
+            'content',
+            'is_endorsed_by_instructor',
+            'created_at',
+        )
+
+    def get_user_name(self, obj: LessonAnswer) -> str:
+        first = getattr(obj.user, 'first_name', '')
+        last = getattr(obj.user, 'last_name', '')
+        if first or last:
+            return f"{first} {last}".strip()
+        return obj.user.email.split('@')[0]
+
+    def get_is_instructor(self, obj: LessonAnswer) -> bool:
+        return getattr(obj.user, 'is_staff', False) or getattr(obj.user, 'role', '') in ('ADMIN', 'INSTRUCTOR')
+
+
+class LessonQuestionSerializer(serializers.ModelSerializer):
+    """
+    Community question thread on a lesson (F1.10).
+    """
+    user_name = serializers.SerializerMethodField()
+    answers = LessonAnswerSerializer(many=True, read_only=True)
+    answers_count = serializers.IntegerField(source='answers.count', read_only=True)
+
+    class Meta:
+        model = LessonQuestion
+        fields = (
+            'id',
+            'title',
+            'content',
+            'user_name',
+            'is_resolved',
+            'created_at',
+            'answers_count',
+            'answers',
+        )
+
+    def get_user_name(self, obj: LessonQuestion) -> str:
+        first = getattr(obj.user, 'first_name', '')
+        last = getattr(obj.user, 'last_name', '')
+        if first or last:
+            return f"{first} {last}".strip()
+        return obj.user.email.split('@')[0]
+
+
+class LessonCreateQuestionSerializer(serializers.Serializer):
+    title = serializers.CharField(max_length=255)
+    content = serializers.CharField(max_length=10000)
+
+
+class LessonCreateAnswerSerializer(serializers.Serializer):
+    content = serializers.CharField(max_length=10000)
+

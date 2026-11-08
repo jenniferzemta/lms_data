@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
-import { LessonDetail, ModuleCurriculum, CourseProgress } from '../types';
+import { LessonDetail, ModuleCurriculum, CourseProgress, LessonNote, LessonQuestion } from '../types';
 import { coursesService } from '../services/courses.service';
 import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
@@ -35,6 +35,8 @@ import {
   HelpCircle,
   Sparkles,
   Loader2,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 
 interface LessonReaderProps {
@@ -77,18 +79,50 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [isSyllabusDrawerOpen, setIsSyllabusDrawerOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
-  const [personalNotes, setPersonalNotes] = useState<string[]>([
-    "Format monétaire personnalisé FCFA : # ##0 \"FCFA\" sans retaper le texte.",
-    "Attention : toujours utiliser le point-virgule (;) sous Excel en français.",
-  ]);
+
+  // Notes state (F1.9)
+  const [notes, setNotes] = useState<LessonNote[]>([]);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+  const [isAddingNote, setIsAddingNote] = useState(false);
   const [newNoteInput, setNewNoteInput] = useState('');
 
-  // Fetch course progression on mount
+  // Questions & Answers state (F1.10)
+  const [questions, setQuestions] = useState<LessonQuestion[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [isAskingQuestion, setIsAskingQuestion] = useState(false);
+  const [showAskQuestionForm, setShowAskQuestionForm] = useState(false);
+  const [newQuestionTitle, setNewQuestionTitle] = useState('');
+  const [newQuestionContent, setNewQuestionContent] = useState('');
+  const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
+  const [isSubmittingReply, setIsSubmittingReply] = useState<Record<number, boolean>>({});
+
+  // Fetch course progression, notes and community questions
   useEffect(() => {
+    let isMounted = true;
     coursesService.getCourseProgress(lesson.course_slug).then((prog) => {
-      setProgress(prog);
+      if (isMounted) setProgress(prog);
     });
-  }, [lesson.course_slug]);
+
+    setIsLoadingNotes(true);
+    coursesService.getLessonNotes(lesson.course_slug, lesson.slug).then((res) => {
+      if (isMounted) {
+        setNotes(res);
+        setIsLoadingNotes(false);
+      }
+    });
+
+    setIsLoadingQuestions(true);
+    coursesService.getLessonQuestions(lesson.course_slug, lesson.slug).then((res) => {
+      if (isMounted) {
+        setQuestions(res);
+        setIsLoadingQuestions(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [lesson.course_slug, lesson.slug]);
 
   const translation = lesson.translation || {
     language: locale,
@@ -187,12 +221,98 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     }
   };
 
-  const handleAddNote = (e: React.FormEvent) => {
+  const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newNoteInput.trim()) return;
-    const timeFormatted = formatTime(currentTime);
-    setPersonalNotes([...personalNotes, `[${timeFormatted}] ${newNoteInput.trim()}`]);
-    setNewNoteInput('');
+    if (!newNoteInput.trim() || isAddingNote) return;
+    try {
+      setIsAddingNote(true);
+      const timestamp = Math.floor(currentTime);
+      const newNote = await coursesService.createLessonNote(
+        lesson.course_slug,
+        lesson.slug,
+        newNoteInput.trim(),
+        timestamp
+      );
+      setNotes((prev) => [...prev, newNote]);
+      setNewNoteInput('');
+    } catch {
+      // Fallback local note if unauthenticated or offline
+      const timeFormatted = formatTime(currentTime);
+      setNotes((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          content: newNoteInput.trim(),
+          video_timestamp_seconds: Math.floor(currentTime),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
+      setNewNoteInput('');
+    } finally {
+      setIsAddingNote(false);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: number) => {
+    await coursesService.deleteLessonNote(noteId);
+    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+  };
+
+  const handleJumpToTimestamp = (seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      videoRef.current.play().catch(() => {});
+      setIsPlaying(true);
+    }
+  };
+
+  const handleAskQuestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newQuestionTitle.trim() || isAskingQuestion) return;
+    try {
+      setIsAskingQuestion(true);
+      const newQ = await coursesService.createLessonQuestion(
+        lesson.course_slug,
+        lesson.slug,
+        newQuestionTitle.trim(),
+        newQuestionContent.trim()
+      );
+      setQuestions((prev) => [newQ, ...prev]);
+      setNewQuestionTitle('');
+      setNewQuestionContent('');
+      setShowAskQuestionForm(false);
+    } catch {
+      // Fallback
+    } finally {
+      setIsAskingQuestion(false);
+    }
+  };
+
+  const handleReplyQuestion = async (questionId: number) => {
+    const replyText = replyInputs[questionId]?.trim();
+    if (!replyText || isSubmittingReply[questionId]) return;
+    try {
+      setIsSubmittingReply((prev) => ({ ...prev, [questionId]: true }));
+      const newAns = await coursesService.createLessonAnswer(questionId, replyText);
+      setQuestions((prev) =>
+        prev.map((q) => {
+          if (q.id === questionId) {
+            return {
+              ...q,
+              answers_count: (q.answers_count || 0) + 1,
+              answers: [...(q.answers || []), newAns],
+            };
+          }
+          return q;
+        })
+      );
+      setReplyInputs((prev) => ({ ...prev, [questionId]: '' }));
+    } catch {
+      // Fallback
+    } finally {
+      setIsSubmittingReply((prev) => ({ ...prev, [questionId]: false }));
+    }
   };
 
   const handleCompleteAndNext = async () => {
@@ -482,7 +602,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               }`}
             >
               <Edit3 className="w-4 h-4" />
-              <span>Notes ({personalNotes.length})</span>
+              <span>Notes ({notes.length})</span>
             </button>
             <button
               type="button"
@@ -494,7 +614,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               }`}
             >
               <MessageSquare className="w-4 h-4" />
-              <span>Q&R (4)</span>
+              <span>Q&R ({questions.length})</span>
             </button>
           </div>
         </section>
@@ -706,41 +826,54 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                   onClick={() => setActiveTab('qa')}
                   className="text-xs font-bold text-[#006b5f] hover:underline min-h-[44px] flex items-center"
                 >
-                  Voir les 4
+                  Voir les {questions.length}
                 </button>
               </div>
 
-              <div className="bg-[#f8f9ff] p-3.5 rounded-xl border border-slate-100 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-full bg-[#d5e3ff] text-[#021c3a] font-bold text-[11px] flex items-center justify-center">
-                    SN
-                  </div>
-                  <span className="text-xs font-semibold text-[#121c2a]">
-                    Samuel N. (Étudiant)
-                  </span>
-                  <span className="text-[11px] text-slate-400 ml-auto">Hier</span>
-                </div>
-                <p className="text-xs sm:text-sm text-slate-700 font-medium">
-                  &quot;Pourquoi mon Excel m&apos;affiche une erreur #NOM? quand j&apos;écris =SUM() ?&quot;
-                </p>
-
-                {/* Instructor Answer */}
-                <div className="mt-2 pt-2 bg-white p-3 rounded-lg border border-slate-100 flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-[#006b5f] shrink-0 mt-0.5" />
-                  <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-[#006b5f]">
-                        Alain Fotso (Formateur Douala)
-                      </span>
-                      <span className="text-[10px] text-slate-400">Coach Data</span>
+              {questions.length > 0 ? (
+                <div className="bg-[#f8f9ff] p-3.5 rounded-xl border border-slate-100 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-full bg-[#d5e3ff] text-[#021c3a] font-bold text-[11px] flex items-center justify-center">
+                      {questions[0].user_name.slice(0, 2).toUpperCase()}
                     </div>
-                    <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
-                      Si votre logiciel est en version française, la fonction doit obligatoirement s&apos;écrire{' '}
-                      <strong className="text-slate-900">=SOMME()</strong> et non en anglais.
-                    </p>
+                    <span className="text-xs font-semibold text-[#121c2a]">
+                      {questions[0].user_name}
+                    </span>
+                    <span className="text-[11px] text-slate-400 ml-auto">
+                      {new Date(questions[0].created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR')}
+                    </span>
                   </div>
+                  <p className="text-xs sm:text-sm text-slate-800 font-medium">
+                    &quot;{questions[0].title}&quot;
+                  </p>
+
+                  {/* Instructor / First Answer */}
+                  {questions[0].answers && questions[0].answers.length > 0 && (
+                    <div className="mt-2 pt-2 bg-white p-3 rounded-lg border border-slate-100 flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-[#006b5f] shrink-0 mt-0.5" />
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-[#006b5f]">
+                            {questions[0].answers[0].user_name}
+                          </span>
+                          {questions[0].answers[0].is_endorsed_by_instructor && (
+                            <span className="text-[10px] bg-teal-50 text-[#006b5f] px-1.5 py-0.5 rounded-md font-semibold border border-teal-200">
+                              Formateur
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
+                          {questions[0].answers[0].content}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 text-center text-xs text-slate-500 bg-[#f8f9ff] rounded-xl border border-dashed border-slate-200">
+                  Aucune question posée pour l&apos;instant. Soyez le premier à demander de l&apos;aide !
+                </div>
+              )}
 
               {/* Quick Add Personal Note Trigger */}
               <form onSubmit={handleAddNote} className="mt-4 flex items-center gap-2 bg-[#f8f9ff] px-3 py-1 rounded-xl border border-slate-200">
@@ -754,10 +887,11 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                 />
                 <button
                   type="submit"
+                  disabled={isAddingNote || !newNoteInput.trim()}
                   aria-label="Enregistrer la note"
-                  className="h-9 px-3 bg-[#006b5f] text-white rounded-lg text-xs font-bold shrink-0 hover:bg-[#13b8a6] transition-colors"
+                  className="h-9 px-3 bg-[#006b5f] text-white rounded-lg text-xs font-bold shrink-0 hover:bg-[#13b8a6] transition-colors disabled:opacity-50"
                 >
-                  Sauvegarder
+                  {isAddingNote ? 'Enregistrement...' : 'Sauvegarder'}
                 </button>
               </form>
             </div>
@@ -772,51 +906,284 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
         )}
 
         {/* ------------------------------------------------------------- */}
-        {/* TAB 2: NOTES PERSONNELLES                                     */}
+        {/* TAB 2: NOTES PERSONNELLES (F1.9)                               */}
         {/* ------------------------------------------------------------- */}
         {activeTab === 'notes' && (
-          <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-100 space-y-4">
-            <h2 className="text-base font-bold text-slate-900">Vos notes sur cette leçon</h2>
-            <div className="space-y-2">
-              {personalNotes.map((note, idx) => (
-                <div key={idx} className="p-3 bg-[#f8f9ff] rounded-xl border border-slate-100 text-xs sm:text-sm text-slate-800">
-                  {note}
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-100 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 text-[#006b5f] flex items-center justify-center font-bold">
+                  <Edit3 className="w-4 h-4" />
                 </div>
-              ))}
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 leading-tight">
+                    Vos notes d&apos;apprentissage
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Synchronisées automatiquement • Liées aux timecodes de la vidéo
+                  </p>
+                </div>
+              </div>
+              <span className="text-xs font-semibold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full">
+                {notes.length} note{notes.length > 1 ? 's' : ''}
+              </span>
             </div>
-            <form onSubmit={handleAddNote} className="flex gap-2">
-              <input
-                type="text"
-                value={newNoteInput}
-                onChange={(e) => setNewNoteInput(e.target.value)}
-                placeholder="Rédiger une nouvelle note..."
-                className="flex-1 h-11 px-3 bg-[#f8f9ff] border border-slate-200 rounded-xl text-xs sm:text-sm"
-              />
-              <button
-                type="submit"
-                className="h-11 px-4 bg-[#006b5f] text-white rounded-xl text-xs font-bold hover:bg-[#13b8a6]"
-              >
-                Ajouter
-              </button>
+
+            {/* Note Creation Form */}
+            <form onSubmit={handleAddNote} className="space-y-3 bg-[#f8f9ff] p-3.5 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-[#006b5f]" />
+                  Horodatage actuel : <strong className="text-[#006b5f] font-mono">{formatTime(currentTime)}</strong>
+                </span>
+                <span className="text-[11px] text-slate-400">Cliquez sur un timecode pour revoir l&apos;extrait</span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newNoteInput}
+                  onChange={(e) => setNewNoteInput(e.target.value)}
+                  placeholder={`Écrire une note à ${formatTime(currentTime)}...`}
+                  className="flex-1 h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#006b5f]/30"
+                />
+                <button
+                  type="submit"
+                  disabled={isAddingNote || !newNoteInput.trim()}
+                  className="h-11 px-4 bg-[#006b5f] hover:bg-[#13b8a6] text-white rounded-xl text-xs font-bold shrink-0 transition-colors disabled:opacity-50 flex items-center gap-1.5 min-h-[44px]"
+                >
+                  {isAddingNote ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                  <span>Enregistrer</span>
+                </button>
+              </div>
             </form>
+
+            {/* Notes List */}
+            {isLoadingNotes ? (
+              <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+                <Loader2 className="w-4 h-4 animate-spin text-[#006b5f]" />
+                <span>Chargement de vos notes...</span>
+              </div>
+            ) : notes.length > 0 ? (
+              <div className="space-y-2.5">
+                {notes.map((note) => (
+                  <div
+                    key={note.id}
+                    className="p-3.5 bg-[#f8f9ff] rounded-xl border border-slate-100 flex items-start justify-between gap-3 group hover:border-slate-300 transition-all"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleJumpToTimestamp(note.video_timestamp_seconds)}
+                          className="px-2 py-0.5 rounded-md bg-teal-50 hover:bg-teal-100 text-[#006b5f] text-xs font-mono font-bold border border-teal-200 flex items-center gap-1 transition-colors"
+                          title="Sauter à ce moment dans la vidéo"
+                        >
+                          <Play className="w-2.5 h-2.5 fill-current" />
+                          <span>{formatTime(note.video_timestamp_seconds)}</span>
+                        </button>
+                        <span className="text-[11px] text-slate-400">
+                          {new Date(note.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR')}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-slate-800 leading-relaxed font-medium pt-0.5">
+                        {note.content}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteNote(note.id)}
+                      aria-label="Supprimer la note"
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 px-4 text-center bg-[#f8f9ff] rounded-xl border border-dashed border-slate-200">
+                <Lightbulb className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm font-semibold text-slate-700">
+                  Vous n&apos;avez pas encore de notes sur cette leçon.
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Mettez la vidéo en pause à tout moment et saisissez un point clé pour le retrouver instantanément !
+                </p>
+              </div>
+            )}
           </div>
         )}
 
         {/* ------------------------------------------------------------- */}
-        {/* TAB 3: QUESTIONS & RÉPONSES                                    */}
+        {/* TAB 3: QUESTIONS & RÉPONSES (F1.10)                           */}
         {/* ------------------------------------------------------------- */}
         {activeTab === 'qa' && (
-          <div className="bg-white p-5 rounded-2xl shadow-xs border border-slate-100 space-y-4">
-            <h2 className="text-base font-bold text-slate-900">Forum d'entraide de la leçon</h2>
-            <div className="p-3 bg-[#f8f9ff] rounded-xl border border-slate-100 space-y-2">
-              <span className="text-xs font-bold text-[#006b5f]">Samuel N.</span>
-              <p className="text-xs sm:text-sm text-slate-700">
-                &quot;Comment afficher automatiquement le symbole FCFA sur toute une colonne ?&quot;
-              </p>
-              <div className="bg-white p-2.5 rounded-lg border border-slate-100 text-xs text-slate-600">
-                <strong>Réponse du Coach Alain :</strong> Sélectionnez la colonne entière, appuyez sur <code className="bg-slate-100 px-1 py-0.5 rounded">Ctrl+1</code>, puis dans l&apos;onglet Nombre &gt; Personnalisé, appliquez <code className="bg-slate-100 px-1 py-0.5 rounded"># ##0 &quot;FCFA&quot;</code>.
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-xs border border-slate-100 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-teal-50 text-[#006b5f] flex items-center justify-center font-bold">
+                  <MessageSquare className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 leading-tight">
+                    Forum d&apos;entraide de la leçon
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    Posez vos questions et échangez avec les formateurs et apprenants
+                  </p>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowAskQuestionForm(!showAskQuestionForm)}
+                className="px-3 py-1.5 bg-[#006b5f] hover:bg-[#13b8a6] text-white text-xs font-bold rounded-xl transition-colors shadow-2xs flex items-center gap-1.5 min-h-[44px]"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Poser une question</span>
+              </button>
             </div>
+
+            {/* Ask Question Form */}
+            {showAskQuestionForm && (
+              <form onSubmit={handleAskQuestion} className="bg-[#f8f9ff] p-4 rounded-xl border border-teal-200 space-y-3">
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Nouvelle question sur cette leçon
+                </h3>
+                <input
+                  type="text"
+                  value={newQuestionTitle}
+                  onChange={(e) => setNewQuestionTitle(e.target.value)}
+                  placeholder="Ex: Pourquoi la formule SOMME renvoie #VALEUR! ?"
+                  className="w-full h-11 px-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#006b5f]/30"
+                  required
+                />
+                <textarea
+                  value={newQuestionContent}
+                  onChange={(e) => setNewQuestionContent(e.target.value)}
+                  rows={3}
+                  placeholder="Décrivez votre problème ou collez votre formule..."
+                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-[#006b5f]/30"
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAskQuestionForm(false)}
+                    className="px-3 py-1.5 text-xs text-slate-600 hover:text-slate-900 font-semibold"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isAskingQuestion || !newQuestionTitle.trim()}
+                    className="px-4 py-2 bg-[#006b5f] hover:bg-[#13b8a6] text-white text-xs font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    {isAskingQuestion ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                    <span>Publier ma question</span>
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* Questions List */}
+            {isLoadingQuestions ? (
+              <div className="py-8 flex items-center justify-center gap-2 text-xs text-slate-400">
+                <Loader2 className="w-4 h-4 animate-spin text-[#006b5f]" />
+                <span>Chargement des échanges...</span>
+              </div>
+            ) : questions.length > 0 ? (
+              <div className="space-y-4">
+                {questions.map((q) => (
+                  <div key={q.id} className="p-4 bg-[#f8f9ff] rounded-2xl border border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-[#d5e3ff] text-[#021c3a] font-bold text-xs flex items-center justify-center">
+                          {q.user_name.slice(0, 2).toUpperCase()}
+                        </div>
+                        <span className="text-xs font-bold text-slate-800">{q.user_name}</span>
+                        <span className="text-[11px] text-slate-400">
+                          {new Date(q.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR')}
+                        </span>
+                      </div>
+                      {q.is_resolved && (
+                        <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
+                          Résolu
+                        </span>
+                      )}
+                    </div>
+
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900 leading-snug">{q.title}</h4>
+                      {q.content && <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">{q.content}</p>}
+                    </div>
+
+                    {/* Answers Thread */}
+                    {q.answers && q.answers.length > 0 && (
+                      <div className="space-y-2 pt-1 border-t border-slate-200/60">
+                        {q.answers.map((ans) => (
+                          <div
+                            key={ans.id}
+                            className={`p-3 rounded-xl border text-xs sm:text-sm leading-relaxed ${
+                              ans.is_endorsed_by_instructor
+                                ? 'bg-white border-teal-200 text-slate-800 shadow-2xs'
+                                : 'bg-white/80 border-slate-100 text-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-[#006b5f]">{ans.user_name}</span>
+                              {ans.is_endorsed_by_instructor && (
+                                <span className="inline-flex items-center gap-1 text-[10px] bg-teal-50 text-[#006b5f] px-1.5 py-0.5 rounded font-bold border border-teal-200">
+                                  <CheckCircle2 className="w-3 h-3 text-[#006b5f]" />
+                                  Certifié Formateur
+                                </span>
+                              )}
+                              <span className="text-[10px] text-slate-400 ml-auto">
+                                {new Date(ans.created_at).toLocaleDateString(locale === 'en' ? 'en-US' : 'fr-FR')}
+                              </span>
+                            </div>
+                            <p className="text-slate-600">{ans.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Quick Reply Form */}
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleReplyQuestion(q.id);
+                      }}
+                      className="pt-1 flex gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={replyInputs[q.id] || ''}
+                        onChange={(e) => setReplyInputs((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                        placeholder="Apporter une réponse ou un conseil..."
+                        className="flex-1 h-9 px-3 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 placeholder:text-slate-400 focus:outline-hidden focus:ring-1 focus:ring-[#006b5f]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isSubmittingReply[q.id] || !replyInputs[q.id]?.trim()}
+                        className="h-9 px-3 bg-slate-800 hover:bg-[#006b5f] text-white rounded-lg text-xs font-semibold transition-colors disabled:opacity-50 shrink-0"
+                      >
+                        {isSubmittingReply[q.id] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Répondre'}
+                      </button>
+                    </form>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-8 px-4 text-center bg-[#f8f9ff] rounded-xl border border-dashed border-slate-200">
+                <MessageSquare className="w-6 h-6 text-slate-400 mx-auto mb-2" />
+                <p className="text-xs sm:text-sm font-semibold text-slate-700">
+                  Aucune question posée pour l&apos;instant.
+                </p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Une question sur la syntaxe ou un calcul ? Posez-la pour échanger avec la communauté !
+                </p>
+              </div>
+            )}
           </div>
         )}
       </main>
