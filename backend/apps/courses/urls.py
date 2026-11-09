@@ -1,5 +1,8 @@
 from django.urls import path
 from courses.views import (
+    CertificateVerificationView,
+    CourseCertificateView,
+    UserCertificatesListView,
     CourseDetailView,
     CourseEnrollView,
     CourseListView,
@@ -24,7 +27,10 @@ urlpatterns = [
     path('videos/<str:filename>/', VideoStreamView.as_view(), name='video-stream'),
     path('notes/<int:pk>/', LessonNoteDetailView.as_view(), name='lesson-note-detail'),
     path('questions/<int:pk>/answers/', LessonQuestionAnswerView.as_view(), name='question-answer'),
+    path('certificates/<str:code>/verify/', CertificateVerificationView.as_view(), name='certificate-verify'),
+    path('my-certificates/', UserCertificatesListView.as_view(), name='my-certificates'),
     path('<slug:slug>/', CourseDetailView.as_view(), name='course-detail'),
+    path('<slug:slug>/certificate/', CourseCertificateView.as_view(), name='course-certificate'),
     path('<slug:slug>/progress/', CourseProgressView.as_view(), name='course-progress'),
     path('<slug:slug>/enroll/', CourseEnrollView.as_view(), name='course-enroll'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/', LessonDetailView.as_view(), name='lesson-detail'),

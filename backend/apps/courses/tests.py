@@ -3,6 +3,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from courses.models import (
+    Certificate,
     Course,
     Lesson,
     LessonAnswer,
@@ -679,3 +680,118 @@ class LessonNotesAndQATests(TestCase):
         self.assertEqual(thread_res.data[0]['answers'][0]['content'], 'Sur la version française, utilisez la fonction =SOMME() et non =SUM().')
 
 
+
+
+class CertificateTests(TestCase):
+    def setUp(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        self.learner = User.objects.create_user(
+            email='laure_cert@datamboa.cm',
+            password='Password123!',
+            first_name='Laure',
+            last_name='Ngue',
+        )
+        self.track = Track.objects.create(
+            name='Excel Track',
+            slug='excel-track',
+            tool=Track.Tool.EXCEL,
+            order=1,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Bases & Formules',
+            slug='excel-bases-cert',
+            level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
+            order=1,
+            is_published=True,
+        )
+        self.module = Module.objects.create(
+            course=self.course,
+            title='Module 1',
+            order=1,
+            is_published=True,
+        )
+        self.lesson = Lesson.objects.create(
+            module=self.module,
+            title='Leçon Unique',
+            slug='lecon-unique-cert',
+            duration_minutes=15,
+            order=1,
+            is_published=True,
+        )
+        self.client = APIClient()
+
+    def test_automatic_certificate_issuance_at_100_percent(self):
+        from courses.services import mark_lesson_completed, issue_course_certificate
+        from courses.models import CourseEnrollment
+
+        # Before completion: 0 certificates
+        self.assertEqual(Certificate.objects.filter(user=self.learner, course=self.course).count(), 0)
+
+        # Mark lesson completed -> triggers 100% progress and auto-issuance
+        progress, enrollment = mark_lesson_completed(self.learner, self.lesson)
+        self.assertEqual(enrollment.progress_percentage, 100)
+        self.assertEqual(enrollment.status, CourseEnrollment.Status.COMPLETED)
+
+        # Certificate must now exist
+        cert = Certificate.objects.filter(user=self.learner, course=self.course).first()
+        self.assertIsNotNone(cert)
+        self.assertTrue(cert.certificate_code.startswith('DMB-EXC-'))
+        self.assertEqual(cert.recipient_name, 'Laure Ngue')
+        self.assertEqual(cert.final_score, 100)
+
+    def test_certificate_public_verification_api(self):
+        from courses.services import mark_lesson_completed
+        mark_lesson_completed(self.learner, self.lesson)
+        cert = Certificate.objects.get(user=self.learner, course=self.course)
+
+        # Public verification (no auth needed)
+        verify_url = f'/api/v1/courses/certificates/{cert.certificate_code}/verify/'
+        res = self.client.get(verify_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['is_valid'])
+        self.assertEqual(res.data['recipient_name'], 'Laure Ngue')
+        self.assertEqual(res.data['course_title'], 'Excel Bases & Formules')
+        self.assertEqual(res.data['track_name'], 'Excel Track')
+        self.assertEqual(res.data['certificate_code'], cert.certificate_code)
+
+        # Invalid code verification
+        bad_res = self.client.get('/api/v1/courses/certificates/NON-EXISTENT-CODE/verify/')
+        self.assertEqual(bad_res.status_code, 404)
+        self.assertFalse(bad_res.data['is_valid'])
+
+        # Revoked certificate verification
+        cert.is_revoked = True
+        cert.save()
+        revoked_res = self.client.get(verify_url)
+        self.assertEqual(revoked_res.status_code, 404)
+
+    def test_learner_course_and_my_certificates_api(self):
+        from courses.services import mark_lesson_completed
+        cert_url = f'/api/v1/courses/{self.course.slug}/certificate/'
+        my_certs_url = '/api/v1/courses/my-certificates/'
+
+        # Anonymous cannot access learner certificate endpoints
+        self.assertIn(self.client.get(cert_url).status_code, [401, 403])
+        self.assertIn(self.client.get(my_certs_url).status_code, [401, 403])
+
+        # Authenticated but incomplete course -> 404
+        self.client.force_authenticate(user=self.learner)
+        self.assertEqual(self.client.get(cert_url).status_code, 404)
+
+        # Complete course -> certificate available with social share URLs
+        mark_lesson_completed(self.learner, self.lesson)
+        res = self.client.get(cert_url)
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('share_whatsapp_url', res.data)
+        self.assertIn('share_linkedin_url', res.data)
+        self.assertIn('api.whatsapp.com', res.data['share_whatsapp_url'])
+        self.assertIn('linkedin.com', res.data['share_linkedin_url'])
+
+        # List all learner certificates
+        my_res = self.client.get(my_certs_url)
+        self.assertEqual(my_res.status_code, 200)
+        self.assertEqual(len(my_res.data), 1)
+        self.assertEqual(my_res.data[0]['course_slug'], self.course.slug)

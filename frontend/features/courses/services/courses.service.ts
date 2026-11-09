@@ -10,6 +10,7 @@ import {
   LessonNote,
   LessonQuestion,
   LessonAnswer,
+  Certificate,
 } from '../types';
 
 export const coursesService = {
@@ -235,5 +236,34 @@ export const coursesService = {
         body: JSON.stringify({ content }),
       }
     );
+  },
+
+  /**
+   * Fetches official completion certificate for a course (F1.11)
+   */
+  async getCourseCertificate(courseSlug: string): Promise<Certificate> {
+    return await apiClient<Certificate>(
+      `/courses/${encodeURIComponent(courseSlug)}/certificate/`
+    );
+  },
+
+  /**
+   * Verifies an issued certificate by unique code (Public AllowAny, F1.11 & V4.5)
+   */
+  async verifyCertificate(code: string): Promise<Certificate> {
+    return await apiClient<Certificate>(
+      `/courses/certificates/${encodeURIComponent(code)}/verify/`
+    );
+  },
+
+  /**
+   * Lists all certificates earned by the authenticated learner
+   */
+  async getMyCertificates(): Promise<Certificate[]> {
+    try {
+      return await apiClient<Certificate[]>('/courses/my-certificates/');
+    } catch {
+      return [];
+    }
   },
 };

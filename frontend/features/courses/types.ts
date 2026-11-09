@@ -212,3 +212,20 @@ export interface LessonQuestion {
   answers_count: number;
   answers: LessonAnswer[];
 }
+
+
+export interface Certificate {
+  certificate_code: string;
+  recipient_name: string;
+  course_title: string;
+  course_slug: string;
+  track_name: string;
+  final_score: number;
+  issued_at: string;
+  instructor_name: string;
+  skills_summary: string;
+  verification_url: string;
+  share_whatsapp_url?: string;
+  share_linkedin_url?: string;
+  is_valid?: boolean;
+}

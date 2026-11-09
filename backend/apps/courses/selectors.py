@@ -1,5 +1,6 @@
 from typing import Optional
 from courses.models import (
+    Certificate,
     Course,
     CourseEnrollment,
     Lesson,
@@ -306,3 +307,45 @@ def list_lesson_questions(*, course_slug: str, lesson_slug: str):
 def get_lesson_question_by_id(question_id: int) -> Optional[LessonQuestion]:
     return LessonQuestion.objects.filter(pk=question_id).select_related('lesson', 'user').first()
 
+
+
+def get_certificate_by_code(code: str) -> Optional[Certificate]:
+    """
+    Retrieves an active certificate by unique code for public verification (F1.11 & V4.5).
+    Returns None if certificate is revoked or does not exist.
+    """
+    return (
+        Certificate.objects.filter(certificate_code__iexact=code.strip(), is_revoked=False)
+        .select_related('user', 'course', 'course__track')
+        .first()
+    )
+
+
+def get_user_course_certificate(user, course_slug: str) -> Optional[Certificate]:
+    """
+    Retrieves the authenticated user's certificate for a given course.
+    """
+    if not user or not user.is_authenticated:
+        return None
+    return (
+        Certificate.objects.filter(
+            user=user,
+            course__slug=course_slug,
+            is_revoked=False,
+        )
+        .select_related('user', 'course', 'course__track')
+        .first()
+    )
+
+
+def get_user_certificates(user):
+    """
+    Returns all valid certificates earned by a learner.
+    """
+    if not user or not user.is_authenticated:
+        return Certificate.objects.none()
+    return (
+        Certificate.objects.filter(user=user, is_revoked=False)
+        .select_related('course', 'course__track')
+        .order_by('-issued_at')
+    )

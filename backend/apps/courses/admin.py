@@ -1,5 +1,6 @@
 from django.contrib import admin
 from courses.models import (
+    Certificate,
     Course,
     CourseEnrollment,
     Lesson,
@@ -165,3 +166,11 @@ class LessonAnswerAdmin(admin.ModelAdmin):
     list_filter = ('is_endorsed_by_instructor',)
     search_fields = ('content', 'user__email', 'question__title')
 
+
+
+@admin.register(Certificate)
+class CertificateAdmin(admin.ModelAdmin):
+    list_display = ('certificate_code', 'user', 'course', 'final_score', 'issued_at', 'is_revoked')
+    list_filter = ('is_revoked', 'course')
+    search_fields = ('certificate_code', 'user__email', 'user__username', 'course__title')
+    readonly_fields = ('certificate_code', 'issued_at', 'created_at', 'updated_at')

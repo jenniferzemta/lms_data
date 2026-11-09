@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -653,3 +654,88 @@ class LessonAnswer(models.Model):
         marker = ' [Certifié]' if self.is_endorsed_by_instructor else ''
         return f"Réponse de {self.user} à Q#{self.question.id}{marker}"
 
+
+
+class Certificate(models.Model):
+    """
+    Official verifiable completion certificate issued upon 100% course progress (F1.11 & V4.5).
+    Includes a unique verification code, final quiz performance score, issuance date,
+    and instructor endorsement. Publicly verifiable for employers and LinkedIn.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='certificates',
+        verbose_name=_('Apprenant'),
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='certificates',
+        verbose_name=_('Cours certifié'),
+    )
+    enrollment = models.OneToOneField(
+        'CourseEnrollment',
+        on_delete=models.CASCADE,
+        related_name='certificate',
+        verbose_name=_('Inscription associée'),
+    )
+    certificate_code = models.CharField(
+        max_length=64,
+        unique=True,
+        db_index=True,
+        verbose_name=_('Code unique infalsifiable'),
+        help_text=_('Format ex: DMB-EXC-2026-9B4F vérifiable en ligne'),
+    )
+    final_score = models.PositiveIntegerField(
+        default=100,
+        verbose_name=_('Score final moyen (%)'),
+        help_text=_('Score moyen obtenu aux quiz formatifs et sommatifs du cours'),
+    )
+    issued_at = models.DateTimeField(
+        default=timezone.now,
+        verbose_name=_('Date et heure de délivrance'),
+    )
+    instructor_name = models.CharField(
+        max_length=255,
+        default='Alain FOTSO / DataMboa',
+        verbose_name=_('Formateur référent'),
+    )
+    is_revoked = models.BooleanField(
+        default=False,
+        verbose_name=_('Certificat révoqué'),
+        help_text=_('Coché en cas de fraude ou annulation administrative'),
+    )
+    revocation_reason = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Motif de révocation'),
+    )
+    skills_summary = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Compétences clés validées'),
+        help_text=_('Liste des compétences acquises affichées sur la vérification publique'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Certificat de réussite')
+        verbose_name_plural = _('Certificats de réussite')
+        unique_together = ('user', 'course')
+        ordering = ('-issued_at',)
+
+    def __str__(self) -> str:
+        return f"Certificat [{self.certificate_code}] {self.user} - {self.course.title}"
+
+    @property
+    def recipient_name(self) -> str:
+        first = getattr(self.user, 'first_name', '') or ''
+        last = getattr(self.user, 'last_name', '') or ''
+        full = f"{first} {last}".strip()
+        return full if full else self.user.email.split('@')[0]
+
+    @property
+    def verification_url(self) -> str:
+        return f"/verify/{self.certificate_code}"

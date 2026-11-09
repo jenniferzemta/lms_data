@@ -1,6 +1,8 @@
+import urllib.parse
 from rest_framework import serializers
 
 from courses.models import (
+    Certificate,
     Course,
     Lesson,
     LessonAnswer,
@@ -350,3 +352,69 @@ class LessonCreateQuestionSerializer(serializers.Serializer):
 class LessonCreateAnswerSerializer(serializers.Serializer):
     content = serializers.CharField(max_length=10000)
 
+
+
+
+# =====================================================================
+# CERTIFICATE SERIALIZERS (F1.11 & V4.5)
+# =====================================================================
+
+class CertificatePublicSerializer(serializers.ModelSerializer):
+    """
+    Public serialization for verifying authenticity of an issued certificate (F1.11 & V4.5).
+    """
+    recipient_name = serializers.CharField(read_only=True)
+    course_title = serializers.CharField(source='course.title', read_only=True)
+    course_slug = serializers.CharField(source='course.slug', read_only=True)
+    track_name = serializers.CharField(source='course.track.name', read_only=True)
+    verification_url = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Certificate
+        fields = (
+            'certificate_code',
+            'recipient_name',
+            'course_title',
+            'course_slug',
+            'track_name',
+            'final_score',
+            'issued_at',
+            'instructor_name',
+            'skills_summary',
+            'verification_url',
+        )
+
+
+class CertificateDetailSerializer(CertificatePublicSerializer):
+    """
+    Detailed certificate data with social sharing URLs for the certified learner.
+    """
+    share_whatsapp_url = serializers.SerializerMethodField()
+    share_linkedin_url = serializers.SerializerMethodField()
+
+    class Meta(CertificatePublicSerializer.Meta):
+        fields = CertificatePublicSerializer.Meta.fields + (
+            'share_whatsapp_url',
+            'share_linkedin_url',
+        )
+
+    def get_share_whatsapp_url(self, obj: Certificate) -> str:
+        text = (
+            f"🎓 Je viens de valider ma certification officielle chez DataMboa !\n"
+            f"Formation : {obj.course.title}\n"
+            f"Vérifier mon certificat : https://datamboa.cm/verify/{obj.certificate_code}"
+        )
+        return f"https://api.whatsapp.com/send?text={urllib.parse.quote(text)}"
+
+    def get_share_linkedin_url(self, obj: Certificate) -> str:
+        cert_url = f"https://datamboa.cm/verify/{obj.certificate_code}"
+        params = {
+            'startTask': 'CERTIFICATION_NAME',
+            'name': obj.course.title,
+            'organizationName': 'DataMboa',
+            'issueYear': obj.issued_at.strftime('%Y'),
+            'issueMonth': obj.issued_at.strftime('%m'),
+            'certUrl': cert_url,
+            'certId': obj.certificate_code,
+        }
+        return f"https://www.linkedin.com/profile/add?{urllib.parse.urlencode(params)}"

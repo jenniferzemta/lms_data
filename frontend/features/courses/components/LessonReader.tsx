@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
-import { LessonDetail, ModuleCurriculum, CourseProgress, LessonNote, LessonQuestion } from '../types';
+import { LessonDetail, ModuleCurriculum, CourseProgress, LessonNote, LessonQuestion, Certificate } from '../types';
 import { coursesService } from '../services/courses.service';
 import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
@@ -37,6 +37,7 @@ import {
   Loader2,
   Trash2,
   Plus,
+  Award,
 } from 'lucide-react';
 
 interface LessonReaderProps {
@@ -76,6 +77,8 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   // UI state & Progression
   const [progress, setProgress] = useState<CourseProgress | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [earnedCertificate, setEarnedCertificate] = useState<Certificate | null>(null);
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [isSyllabusDrawerOpen, setIsSyllabusDrawerOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -102,6 +105,10 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     coursesService.getCourseProgress(lesson.course_slug).then((prog) => {
       if (isMounted) setProgress(prog);
     });
+
+    coursesService.getCourseCertificate(lesson.course_slug).then((cert) => {
+      if (isMounted) setEarnedCertificate(cert);
+    }).catch(() => {});
 
     setIsLoadingNotes(true);
     coursesService.getLessonNotes(lesson.course_slug, lesson.slug).then((res) => {
@@ -320,6 +327,18 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
     try {
       const res = await coursesService.completeLesson(lesson.course_slug, lesson.slug);
       setProgress(res.summary);
+
+      if (res.summary.progress_percentage >= 100 || !lesson.next_lesson) {
+        try {
+          const cert = await coursesService.getCourseCertificate(lesson.course_slug);
+          setEarnedCertificate(cert);
+          setShowCertificateModal(true);
+          return;
+        } catch {
+          // If certificate fetch fails, proceed with normal navigation
+        }
+      }
+
       if (lesson.next_lesson) {
         router.push(`/courses/${lesson.course_slug}/lessons/${lesson.next_lesson.slug}`);
       } else {
@@ -405,6 +424,25 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
           </div>
         </div>
       </header>
+      {/* ------------------------------------------------------------- */}
+      {/* 1.1 CERTIFICATE EARNED TOP BANNER (F1.11)                     */}
+      {/* ------------------------------------------------------------- */}
+      {earnedCertificate && (
+        <div className="bg-gradient-to-r from-amber-500/15 via-teal-500/15 to-amber-500/15 border-b border-amber-300 px-3 py-2.5 flex items-center justify-between text-xs text-amber-950 max-w-4xl mx-auto w-full">
+          <div className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-[#7c5800] shrink-0" />
+            <span className="font-semibold">
+              Félicitations ! Vous avez validé 100% de la formation. Votre Certificat Officiel est disponible.
+            </span>
+          </div>
+          <Link
+            href={`/verify/${earnedCertificate.certificate_code}`}
+            className="px-3.5 py-1.5 bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-lg shrink-0 ml-2 shadow-xs transition text-xs flex items-center gap-1"
+          >
+            <span>Voir mon Certificat</span>
+          </Link>
+        </div>
+      )}
 
       {/* ------------------------------------------------------------- */}
       {/* 2. STATUS CONTEXT BAR (Low Data / 3G Indicator)                */}
@@ -1264,6 +1302,40 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                 activeLessonSlug={lesson.slug}
                 completedLessonSlugs={progress?.completed_lesson_slugs || []}
               />
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ------------------------------------------------------------- */}
+      {/* 8. CERTIFICATE CELEBRATION MODAL (F1.11)                      */}
+      {/* ------------------------------------------------------------- */}
+      {showCertificateModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl border border-amber-200 animate-in fade-in zoom-in duration-200">
+            <div className="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto border-2 border-amber-300">
+              <Award className="w-9 h-9" />
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">Formation 100% Validée !</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Toutes nos félicitations ! Vous avez validé l'intégralité du parcours pratique. Votre certificat officiel DataMboa est prêt et inscrit au registre académique.
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              {earnedCertificate && (
+                <Link
+                  href={`/verify/${earnedCertificate.certificate_code}`}
+                  className="w-full py-3 bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
+                >
+                  <Award className="w-4 h-4" />
+                  <span>Consulter et Partager mon Certificat</span>
+                </Link>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowCertificateModal(false)}
+                className="w-full py-2.5 text-slate-600 hover:bg-slate-100 font-medium rounded-xl text-sm transition"
+              >
+                Continuer
+              </button>
             </div>
           </div>
         </div>

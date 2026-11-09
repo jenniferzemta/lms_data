@@ -1,7 +1,9 @@
+import secrets
 from decimal import Decimal
 from django.db.models import F
 from django.utils import timezone
 from courses.models import (
+    Certificate,
     Course,
     CourseEnrollment,
     Lesson,
@@ -95,9 +97,13 @@ def update_course_enrollment_progress(enrollment: CourseEnrollment) -> int:
     percentage = min(100, int((completed_lessons / total_lessons) * 100))
     enrollment.progress_percentage = percentage
 
-    if percentage >= 100 and enrollment.status != CourseEnrollment.Status.COMPLETED:
-        enrollment.status = CourseEnrollment.Status.COMPLETED
-        enrollment.completed_at = timezone.now()
+    if percentage >= 100:
+        if enrollment.status != CourseEnrollment.Status.COMPLETED:
+            enrollment.status = CourseEnrollment.Status.COMPLETED
+            enrollment.completed_at = timezone.now()
+        enrollment.save(update_fields=['progress_percentage', 'status', 'completed_at', 'updated_at'])
+        issue_course_certificate(enrollment)
+        return percentage
     elif percentage < 100 and enrollment.status == CourseEnrollment.Status.COMPLETED:
         enrollment.status = CourseEnrollment.Status.ACTIVE
         enrollment.completed_at = None
@@ -266,3 +272,61 @@ def create_lesson_answer(user, question: LessonQuestion, content: str) -> Lesson
         is_endorsed_by_instructor=is_staff_or_admin,
     )
 
+
+
+def generate_certificate_code(course: Course) -> str:
+    """
+    Generates a human-readable, unforgeable certificate code (F1.11 and V4.5).
+    Format example: DMB-EXC-2026-7K82
+    """
+    prefix = "DMB"
+    tool = getattr(course.track, "tool", "EXC") if course.track else "EXC"
+    tool_code = str(tool)[:3].upper()
+    year = timezone.now().strftime("%Y")
+    chars = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+    while True:
+        suffix = "".join(secrets.choice(chars) for _ in range(5))
+        code = f"{prefix}-{tool_code}-{year}-{suffix}"
+        if not Certificate.objects.filter(certificate_code=code).exists():
+            return code
+
+
+def calculate_course_final_score(user, course: Course) -> int:
+    """
+    Calculates average score across all passed quiz attempts for this course.
+    """
+    attempts = QuizAttempt.objects.filter(
+        user=user,
+        quiz__lesson__module__course=course,
+        is_passed=True,
+    )
+    if not attempts.exists():
+        return 100
+    scores = [a.score_percentage for a in attempts]
+    return int(sum(scores) / len(scores))
+
+
+def issue_course_certificate(enrollment: CourseEnrollment) -> Certificate:
+    """
+    Issues or retrieves an official verifiable completion certificate for an enrolled learner (F1.11).
+    """
+    cert = Certificate.objects.filter(enrollment=enrollment).first()
+    if cert:
+        return cert
+
+    course = enrollment.course
+    final_score = calculate_course_final_score(enrollment.user, course)
+    code = generate_certificate_code(course)
+
+    module_titles = list(course.modules.filter(is_published=True).order_by("order").values_list("title", flat=True)[:4])
+    skills_summary = " · ".join(module_titles) if module_titles else course.title
+
+    return Certificate.objects.create(
+        user=enrollment.user,
+        course=course,
+        enrollment=enrollment,
+        certificate_code=code,
+        final_score=final_score,
+        instructor_name="Alain FOTSO / DataMboa",
+        skills_summary=skills_summary,
+    )

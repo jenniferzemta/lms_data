@@ -11,6 +11,9 @@ from rest_framework.views import APIView
 
 from courses.models import Course, Lesson
 from courses.selectors import (
+    get_certificate_by_code,
+    get_user_certificates,
+    get_user_course_certificate,
     get_course_by_slug,
     get_course_progress_summary,
     get_lesson_attachment_by_id,
@@ -22,6 +25,8 @@ from courses.selectors import (
     list_published_courses,
 )
 from courses.serializers import (
+    CertificateDetailSerializer,
+    CertificatePublicSerializer,
     CourseDetailSerializer,
     CourseListSerializer,
     CourseProgressSerializer,
@@ -37,6 +42,7 @@ from courses.serializers import (
     QuizSubmitSerializer,
 )
 from courses.services import (
+    issue_course_certificate,
     can_access_attachment,
     create_lesson_answer,
     create_lesson_note,
@@ -462,3 +468,77 @@ class LessonQuestionAnswerView(APIView):
         return Response(LessonAnswerSerializer(answer).data, status=status.HTTP_201_CREATED)
 
 
+
+
+
+# =====================================================================
+# CERTIFICATE VIEWS (F1.11 & V4.5)
+# =====================================================================
+
+class CertificateVerificationView(APIView):
+    """
+    GET /api/v1/courses/certificates/<str:code>/verify/
+    Public verification endpoint for certificate authenticity check (F1.11 & V4.5).
+    Open to employers, recruiters, and social network crawlers (AllowAny).
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, code: str) -> Response:
+        cert = get_certificate_by_code(code)
+        if not cert:
+            return Response(
+                {
+                    'detail': 'Certificat introuvable ou révoqué.',
+                    'is_valid': False,
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        serializer = CertificatePublicSerializer(cert)
+        return Response({**serializer.data, 'is_valid': True}, status=status.HTTP_200_OK)
+
+
+class CourseCertificateView(APIView):
+    """
+    GET /api/v1/courses/<slug:slug>/certificate/
+    Retrieves or generates on-the-fly the authenticated learner's certificate for a completed course.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, slug: str) -> Response:
+        cert = get_user_course_certificate(request.user, slug)
+        if not cert:
+            # Check if enrollment progress is 100% and issue certificate
+            from courses.models import CourseEnrollment
+            enrollment = CourseEnrollment.objects.filter(
+                user=request.user,
+                course__slug=slug,
+            ).first()
+            if enrollment and enrollment.progress_percentage >= 100:
+                cert = issue_course_certificate(enrollment)
+
+        if not cert:
+            return Response(
+                {
+                    'detail': 'Certificat non disponible. Le cours doit être terminé à 100%.',
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        serializer = CertificateDetailSerializer(cert)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserCertificatesListView(APIView):
+    """
+    GET /api/v1/courses/my-certificates/
+    Lists all official certificates earned by the authenticated learner.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        certs = get_user_certificates(request.user)
+        serializer = CertificateDetailSerializer(certs, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
