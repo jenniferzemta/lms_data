@@ -144,6 +144,13 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'modules_count',
             'lessons_count',
             'modules',
+            'target_audience',
+            'prerequisites',
+            'learning_outcomes',
+            'pedagogical_modalities',
+            'instructor_name',
+            'instructor_role',
+            'instructor_bio',
             'created_at',
         )
 

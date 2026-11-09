@@ -795,3 +795,67 @@ class CertificateTests(TestCase):
         self.assertEqual(my_res.status_code, 200)
         self.assertEqual(len(my_res.data), 1)
         self.assertEqual(my_res.data[0]['course_slug'], self.course.slug)
+
+
+class CourseSyllabusAndObjectivesTests(TestCase):
+    def setUp(self):
+        self.track = Track.objects.create(
+            name='Track BI',
+            slug='track-bi',
+            tool=Track.Tool.EXCEL,
+            order=1,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Pro & Reporting',
+            slug='excel-pro-reporting',
+            subtitle='Tableaux de bord d’entreprise',
+            description='Formation complète en analyse décisionnelle.',
+            level=Course.Level.INTERMEDIATE,
+            price_tier=Course.PriceTier.ESSENTIAL,
+            duration_hours=16,
+            is_published=True,
+            target_audience='Contrôleurs de gestion et analystes en Afrique centrale.',
+            prerequisites='Excel intermédiaire (fonctions de calcul usuelles).',
+            learning_outcomes=[
+                {'statement': 'Modéliser des données de vente en FCFA', 'bloom_level': 'APPLY'},
+                {'statement': 'Analyser les écarts budgétaires via les TCD', 'bloom_level': 'ANALYZE'},
+                {'statement': 'Concevoir un tableau de bord exécutif', 'bloom_level': 'CREATE'},
+            ],
+            pedagogical_modalities='Vidéos HD, ateliers pratiques, quiz Bloom et certification officielle.',
+            instructor_name='Alain FOTSO',
+            instructor_role='Lead Data Analyst',
+            instructor_bio='Expert décisionnel avec 8 ans d’expérience.',
+        )
+        self.client = APIClient()
+
+    def test_course_detail_exposes_all_mandatory_syllabus_components_r9(self):
+        """
+        Tests R9 & F1.15 compliance: all 5 mandatory syllabus components must be returned.
+        """
+        url = f'/api/v1/courses/{self.course.slug}/'
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+
+        # 1. SMART learning outcomes with Bloom levels (F1.16, R2, R3)
+        self.assertIn('learning_outcomes', res.data)
+        self.assertEqual(len(res.data['learning_outcomes']), 3)
+        self.assertEqual(res.data['learning_outcomes'][0]['bloom_level'], 'APPLY')
+        self.assertEqual(res.data['learning_outcomes'][1]['bloom_level'], 'ANALYZE')
+        self.assertEqual(res.data['learning_outcomes'][2]['bloom_level'], 'CREATE')
+
+        # 2. Instructor credentials
+        self.assertEqual(res.data['instructor_name'], 'Alain FOTSO')
+        self.assertEqual(res.data['instructor_role'], 'Lead Data Analyst')
+        self.assertIn('8 ans', res.data['instructor_bio'])
+
+        # 3. Target audience and prerequisites
+        self.assertIn('Afrique centrale', res.data['target_audience'])
+        self.assertIn('Excel intermédiaire', res.data['prerequisites'])
+
+        # 4. Pedagogical modalities
+        self.assertIn('Vidéos HD', res.data['pedagogical_modalities'])
+
+        # 5. General metrics
+        self.assertEqual(res.data['duration_hours'], 16)
+        self.assertEqual(res.data['level'], 'INTERMEDIATE')

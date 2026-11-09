@@ -72,21 +72,33 @@ export interface CourseSummary {
   order: number;
 }
 
+export interface LearningOutcome {
+  statement: string;
+  bloom_level: string;
+}
+
 export interface CourseDetail {
   id: number;
   title: string;
   slug: string;
   subtitle: string;
   description: string;
-  level: 'debutant' | 'intermediaire' | 'avance';
+  level: 'debutant' | 'intermediaire' | 'avance' | 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | string;
   duration_hours: number;
-  price_tier: 'free' | 'essential' | 'pro';
+  price_tier: 'free' | 'essential' | 'pro' | 'FREE' | 'ESSENTIAL' | 'PRO' | string;
   image_url: string;
   tool: string;
   track: Track | null;
   modules_count: number;
   lessons_count: number;
   modules: ModuleCurriculum[];
+  target_audience?: string;
+  prerequisites?: string;
+  learning_outcomes?: LearningOutcome[];
+  pedagogical_modalities?: string;
+  instructor_name?: string;
+  instructor_role?: string;
+  instructor_bio?: string;
   created_at: string;
 }
 

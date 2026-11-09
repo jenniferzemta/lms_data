@@ -69,6 +69,49 @@ class Course(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Mandatory Syllabus & SMART Objectives Fields (F1.15, F1.16, R9, R2, R3)
+    target_audience = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Public cible'),
+        help_text=_("Profils d'apprenants ciblés par la formation"),
+    )
+    prerequisites = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Prérequis réels'),
+        help_text=_("Compétences préalables et équipement requis"),
+    )
+    learning_outcomes = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_('Objectifs SMART & Bloom'),
+        help_text=_("Liste d'objectifs avec statement et bloom_level"),
+    )
+    pedagogical_modalities = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Modalités pédagogiques'),
+        help_text=_("Ateliers, vidéos adaptées bande passante, cas réels et évaluations"),
+    )
+    instructor_name = models.CharField(
+        max_length=255,
+        blank=True,
+        default='Alain FOTSO',
+        verbose_name=_('Nom du formateur référent'),
+    )
+    instructor_role = models.CharField(
+        max_length=255,
+        blank=True,
+        default='Lead Data Analyst & Formateur Principal',
+        verbose_name=_('Rôle du formateur'),
+    )
+    instructor_bio = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Biographie du formateur'),
+    )
+
     class Meta:
         ordering = ['order', 'created_at']
         verbose_name = _('Course')

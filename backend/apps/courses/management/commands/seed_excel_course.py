@@ -54,6 +54,19 @@ class Command(BaseCommand):
                 'duration_hours': 14,
                 'is_published': True,
                 'order': 1,
+                'target_audience': "Comptables, gestionnaires de stock, contrôleurs de gestion, étudiants en gestion/finance et analystes juniors souhaitant structurer et fiabiliser leurs reportings sans erreur.",
+                'prerequisites': "Aucun prérequis en analyse de données. Utilisation basique d'un ordinateur (clavier, souris, gestionnaire de fichiers) et accès à Excel 2016 ou plus récent.",
+                'learning_outcomes': [
+                    {"statement": "Identifier et assainir les types de données monétaires (FCFA), dates et textes pour fiabiliser les calculs", "bloom_level": "KNOWLEDGE"},
+                    {"statement": "Appliquer les fonctions de recherche avancées (RECHERCHEV, INDEX/EQUIV, XLOOKUP) pour croiser des tables sans doublon", "bloom_level": "APPLY"},
+                    {"statement": "Structurer les données en tableaux officiels et automatiser les alertes d'impayés par Mise en Forme Conditionnelle", "bloom_level": "APPLY"},
+                    {"statement": "Analyser les ventes multi-régions via les Tableaux Croisés Dynamiques (TCD) avec segments et chronologies", "bloom_level": "ANALYZE"},
+                    {"statement": "Concevoir un tableau de bord commercial décisionnel interactif pour la direction de Kamer SARL", "bloom_level": "CREATE"}
+                ],
+                'pedagogical_modalities': "Formation 100% pratique orientée cas d'entreprise réels à Douala et Yaoundé. Chaque notion est illustrée en vidéo HD avec mode économie de données, complétée par un jeu de données téléchargeable (XLSX), un quiz formatif immédiat et sanctionnée par un certificat officiel vérifiable.",
+                'instructor_name': "Alain FOTSO",
+                'instructor_role': "Lead Data Analyst & Formateur Référent DataMboa",
+                'instructor_bio': "8+ années d'expérience en Business Intelligence et modélisation financière en Afrique centrale. A formé plus de 1 200 cadres et analystes au Cameroun et dans la sous-région CEMAC.",
             },
         )
 
