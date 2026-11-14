@@ -1291,4 +1291,142 @@ class Command(BaseCommand):
                 },
             )
 
-        self.stdout.write(self.style.SUCCESS("Successfully seeded all 3 Excel courses aligned with the YITA Data Analyst Roadmap!"))
+        # =============================================================
+        # 4. TRACKS & COURS COMPLÉMENTAIRES DU PROGRAMME (SQL, POWER BI, PYTHON)
+        # =============================================================
+        sql_track, _ = Track.objects.update_or_create(
+            tool=Track.Tool.SQL,
+            defaults={
+                'name': "SQL pour l'Analyse de Données",
+                'slug': 'sql-analyse',
+                'description': "Interroger et agréger de gros volumes relationnels (PostgreSQL, MySQL, SQLite).",
+                'icon': "Database",
+                'order': 2,
+                'is_published': True,
+            },
+        )
+        sql_c1, _ = Course.objects.update_or_create(
+            slug='premiers-pas-sql',
+            defaults={
+                'track': sql_track,
+                'title': "SQL — Niveau 1 : Requêtes & Bases de données Microfinance",
+                'subtitle': "Écrire des requêtes SELECT, WHERE, GROUP BY sur des données de crédits et épargne en FCFA.",
+                'description': "Apprenez à extraire, filtrer et agréger des transactions bancaires et de microfinance camerounaise directement avec SQL.",
+                'level': Course.Level.BEGINNER,
+                'price_tier': Course.PriceTier.FREE,
+                'duration_hours': 8,
+                'is_published': True,
+                'order': 1,
+                'instructor_name': "Alain FOTSO",
+                'instructor_role': "Lead Data Analyst DataMboa",
+            },
+        )
+        sql_m1, _ = Module.objects.update_or_create(
+            course=sql_c1,
+            order=1,
+            defaults={'title': "Module 1 : Les requêtes SELECT et filtres WHERE", 'description': "Extraction de tables et conditions", 'is_published': True},
+        )
+        Lesson.objects.update_or_create(
+            module=sql_m1,
+            slug='select-from-where-microfinance',
+            defaults={
+                'title': "Extraire les clients ayant un crédit en cours en FCFA",
+                'lesson_type': Lesson.LessonType.CODE,
+                'duration_minutes': 15,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        pbi_track, _ = Track.objects.update_or_create(
+            tool=Track.Tool.POWERBI,
+            defaults={
+                'name': "Power BI & Business Intelligence",
+                'slug': 'powerbi-bi',
+                'description': "Concevoir des tableaux de bord interactifs de direction et modéliser en DAX.",
+                'icon': "BarChart3",
+                'order': 3,
+                'is_published': True,
+            },
+        )
+        pbi_c1, _ = Course.objects.update_or_create(
+            slug='decouvrir-power-bi',
+            defaults={
+                'track': pbi_track,
+                'title': "Power BI — Niveau 1 : Tableaux de Bord & Visualisation Direction",
+                'subtitle': "Créer des rapports interactifs pour piloter les ventes régionales en FCFA.",
+                'description': "Transformez vos données d'entreprise en dashboards exécutifs dynamiques avec Power BI Desktop.",
+                'level': Course.Level.BEGINNER,
+                'price_tier': Course.PriceTier.ESSENTIAL,
+                'duration_hours': 10,
+                'is_published': True,
+                'order': 1,
+                'instructor_name': "Alain FOTSO",
+                'instructor_role': "Lead Data Analyst DataMboa",
+            },
+        )
+        pbi_m1, _ = Module.objects.update_or_create(
+            course=pbi_c1,
+            order=1,
+            defaults={'title': "Module 1 : Importer et modéliser dans Power BI", 'description': "Connexions aux sources Excel et SQL", 'is_published': True},
+        )
+        Lesson.objects.update_or_create(
+            module=pbi_m1,
+            slug='premier-rapport-powerbi-direction',
+            defaults={
+                'title': "Créer votre premier canevas de rapport avec cartes KPI",
+                'lesson_type': Lesson.LessonType.VIDEO,
+                'duration_minutes': 20,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        py_track, _ = Track.objects.update_or_create(
+            tool=Track.Tool.PYTHON,
+            defaults={
+                'name': "Python pour la Data Science",
+                'slug': 'python-datascience',
+                'description': "Automatisation, Pandas, manipulation de données volumineuses et visualisation.",
+                'icon': "Code2",
+                'order': 4,
+                'is_published': True,
+            },
+        )
+        py_c1, _ = Course.objects.update_or_create(
+            slug='python-data-pandas',
+            defaults={
+                'track': py_track,
+                'title': "Python — Niveau 1 : Manipulation de Données avec Pandas",
+                'subtitle': "Nettoyer, transformer et croiser de volumineux fichiers Excel avec Python.",
+                'description': "Maîtrisez les DataFrames Pandas pour automatiser le traitement des données financières et commerciales.",
+                'level': Course.Level.INTERMEDIATE,
+                'price_tier': Course.PriceTier.PRO,
+                'duration_hours': 12,
+                'is_published': True,
+                'order': 1,
+                'instructor_name': "Alain FOTSO",
+                'instructor_role': "Lead Data Analyst DataMboa",
+            },
+        )
+        py_m1, _ = Module.objects.update_or_create(
+            course=py_c1,
+            order=1,
+            defaults={'title': "Module 1 : Les DataFrames Pandas", 'description': "Charger des CSV et Excel dans Pandas", 'is_published': True},
+        )
+        Lesson.objects.update_or_create(
+            module=py_m1,
+            slug='introduction-dataframes-pandas',
+            defaults={
+                'title': "Charger et explorer un fichier de ventes avec Pandas",
+                'lesson_type': Lesson.LessonType.CODE,
+                'duration_minutes': 25,
+                'is_free_preview': True,
+                'order': 1,
+                'is_published': True,
+            },
+        )
+
+        self.stdout.write(self.style.SUCCESS("Successfully seeded all courses aligned with the YITA Data Analyst Roadmap!"))

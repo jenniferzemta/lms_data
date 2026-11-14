@@ -22,6 +22,7 @@ export interface User {
   full_name: string;
   phone_number: string;
   role: UserRole;
+  is_staff?: boolean;
   is_learner: boolean;
   is_instructor: boolean;
   is_admin_role: boolean;

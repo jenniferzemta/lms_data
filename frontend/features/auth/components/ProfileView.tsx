@@ -16,7 +16,8 @@ import {
   Wifi, 
   Smartphone, 
   Save,
-  KeyRound
+  KeyRound,
+  ExternalLink
 } from 'lucide-react';
 import { Button } from '@/ui/Button';
 import { ApiError } from '@/lib/api-client';
@@ -443,6 +444,51 @@ export const ProfileView: React.FC = () => {
               {tProfile('planFree')}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Roles & Administration Info Card (F1.3, F1.13) */}
+      <div className="bg-gradient-to-r from-slate-50 via-teal-50/30 to-amber-50/40 rounded-2xl p-4 sm:p-5 border border-slate-200/80 mb-6 shadow-2xs space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs uppercase font-extrabold tracking-wider text-slate-600">
+                Statut & Droits sur la plateforme
+              </span>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                user.role === 'ADMIN' || user.is_staff
+                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                  : user.role === 'INSTRUCTOR'
+                  ? 'bg-blue-100 text-blue-900 border border-blue-300'
+                  : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+              }`}>
+                {user.role === 'ADMIN' || user.is_staff
+                  ? '👑 Administrateur'
+                  : user.role === 'INSTRUCTOR'
+                  ? '👨‍🏫 Formateur'
+                  : '🎓 Apprenant'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 mt-1 max-w-xl">
+              {user.role === 'ADMIN' || user.is_staff
+                ? 'Vous disposez des accès d’administration complets sur le catalogue, les utilisateurs, les paiements manuels et les données de progression.'
+                : user.role === 'INSTRUCTOR'
+                ? 'Vous avez les droits d’auteur pour créer des cours, évaluer les exercices et valider les réponses d’entraide.'
+                : 'Vous avez accès aux formations d’analyse de données, exercices interactifs, quiz et certificats officiels.'}
+            </p>
+          </div>
+
+          {(user.role === 'ADMIN' || user.is_staff) && (
+            <a
+              href="http://localhost:8000/admin/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#006b5f] hover:bg-[#00574d] text-white text-xs font-bold shrink-0 min-h-[44px] shadow-xs"
+            >
+              <span>Accéder à Django Admin</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          )}
         </div>
       </div>
 

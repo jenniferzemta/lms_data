@@ -22,9 +22,12 @@ export const coursesService = {
    */
   async getCourses(lang: string = 'fr'): Promise<CourseSummary[]> {
     try {
-      const response = await apiClient<{ count: number; results: CourseSummary[] }>(
+      const response = await apiClient<CourseSummary[] | { count: number; results: CourseSummary[] }>(
         `/courses/?lang=${encodeURIComponent(lang)}`
       );
+      if (Array.isArray(response)) {
+        return response;
+      }
       return response.results || [];
     } catch (error) {
       if (error instanceof ApiError) {

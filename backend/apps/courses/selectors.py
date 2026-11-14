@@ -39,13 +39,28 @@ def list_published_courses(*, tool: Optional[str] = None, level: Optional[str] =
 def get_course_by_slug(slug: str) -> Optional[Course]:
     """
     Retrieves a single published course by its slug, prefetching modules and lessons.
+    Supports legacy and alternate slugs for robust backwards compatibility.
     """
-    return (
+    course = (
         Course.objects.filter(slug=slug, is_published=True)
         .select_related('track')
         .prefetch_related('modules__lessons__translations')
         .first()
     )
+    if not course:
+        aliases = {
+            'excel-fondamentaux': 'excel-bases-analyse',
+            'analyser-ventes-excel': 'excel-bases-analyse',
+        }
+        target = aliases.get(slug)
+        if target:
+            course = (
+                Course.objects.filter(slug=target, is_published=True)
+                .select_related('track')
+                .prefetch_related('modules__lessons__translations')
+                .first()
+            )
+    return course
 
 
 def get_course_curriculum_lessons(course: Course):
@@ -146,7 +161,7 @@ def get_lesson_detail(*, course_slug: str, lesson_slug: str, language: str = 'fr
     Retrieves full lesson content, localized translation with bilingual fallback,
     downloadable attachments, previous/next navigation metadata, and learner completion state.
     """
-    course = Course.objects.filter(slug=course_slug, is_published=True).first()
+    course = get_course_by_slug(course_slug)
     if not course:
         return None
 

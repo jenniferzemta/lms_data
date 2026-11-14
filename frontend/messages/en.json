@@ -24,8 +24,8 @@
     "register": "Sign Up"
   },
   "Home": {
-    "greeting": "Hello, Laure",
-    "greetingSubtitle": "Ready to level up your skills today?",
+    "greeting": "Welcome to DataMboa",
+    "greetingSubtitle": "Ready to level up your data skills today?",
     "syncLightMode": "Synced · Data-saver active",
     "daysStreak": "days",
     "streakTitle": "Current streak",

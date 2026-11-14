@@ -1,25 +1,71 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { CourseTool, CourseLevel } from '../types';
+import { CourseTool, CourseLevel, CourseTier, Course } from '../types';
 import { mockCourses } from '../data/mockCourses';
 import { CourseCard } from './CourseCard';
 import { ToolFilterList } from './ToolFilterList';
 import { LevelFilterList } from './LevelFilterList';
 import { TrustBanner } from './TrustBanner';
 import { Input } from '@/ui/Input';
+import { coursesService, CourseSummary } from '@/features/courses';
 import { Sparkles, Search, SlidersHorizontal, SearchX, RotateCcw } from 'lucide-react';
+
+function mapApiToCatalog(api: CourseSummary): Course {
+  const toolLower = (api.tool || 'EXCEL').toLowerCase() as CourseTool;
+  const levelNorm = (api.level || 'BEGINNER').toUpperCase();
+  let level: CourseLevel = 'debutant';
+  if (levelNorm === 'INTERMEDIATE') level = 'intermediaire';
+  if (levelNorm === 'ADVANCED') level = 'avance';
+
+  const tierNorm = (api.price_tier || 'FREE').toUpperCase();
+  let tier: CourseTier = 'free';
+  if (tierNorm === 'ESSENTIAL') tier = 'essential';
+  if (tierNorm === 'PRO' || tierNorm === 'EXPERT') tier = 'pro';
+
+  return {
+    id: `course-${api.id}`,
+    slug: api.slug,
+    title: api.title,
+    tool: ['excel', 'sql', 'powerbi', 'python'].includes(toolLower) ? toolLower : 'excel',
+    level: level,
+    tier: tier,
+    duration: `${api.duration_hours || 4}h00`,
+    lessonCount: api.lessons_count || 10,
+    casPratiqueCount: Math.max(2, Math.floor((api.lessons_count || 10) * 0.5)),
+    localContext: api.subtitle || "Cas d'entreprise africaine en FCFA",
+    description: api.subtitle || api.title,
+    imageUrl: api.image_url || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=600&q=80',
+    imageAlt: api.title,
+  };
+}
 
 export const CatalogView: React.FC = () => {
   const tCatalog = useTranslations('Catalog');
 
+  const [courses, setCourses] = useState<Course[]>(mockCourses);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTool, setSelectedTool] = useState<CourseTool>('all');
   const [selectedLevel, setSelectedLevel] = useState<CourseLevel>('all');
   const [bookmarkedIds, setBookmarkedIds] = useState<Record<string, boolean>>({
     'course-excel-1': true
   });
+
+  useEffect(() => {
+    let isMounted = true;
+    coursesService.getCourses().then((apiCourses) => {
+      if (isMounted && apiCourses && apiCourses.length > 0) {
+        const mapped = apiCourses.map(mapApiToCatalog);
+        setCourses(mapped);
+      }
+    }).catch(() => {
+      // Keep mockCourses on error
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleBookmarkToggle = (courseId: string) => {
     setBookmarkedIds((prev) => ({
@@ -35,7 +81,7 @@ export const CatalogView: React.FC = () => {
   };
 
   const filteredCourses = useMemo(() => {
-    return mockCourses.filter((course) => {
+    return courses.filter((course) => {
       // Tool filter
       if (selectedTool !== 'all' && course.tool !== selectedTool) {
         return false;
@@ -58,7 +104,7 @@ export const CatalogView: React.FC = () => {
       }
       return true;
     });
-  }, [searchQuery, selectedTool, selectedLevel]);
+  }, [courses, searchQuery, selectedTool, selectedLevel]);
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6 pb-6">

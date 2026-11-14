@@ -13,7 +13,8 @@ import {
   User, 
   LogOut,
   ExternalLink,
-  LogIn
+  LogIn,
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -119,6 +120,24 @@ export const DesktopSidebar: React.FC = () => {
               </Link>
             );
           })}
+          {/* Admin & Instructor Access Link (F1.3, F1.13) */}
+          {(user?.role === 'ADMIN' || user?.is_staff || user?.role === 'INSTRUCTOR') && (
+            <div className="pt-2 mt-2 border-t border-slate-100">
+              <span className="px-3.5 text-[10px] uppercase font-bold text-amber-700 tracking-wider">
+                Espace {user.role === 'ADMIN' || user.is_staff ? 'Admin' : 'Formateur'}
+              </span>
+              <a
+                href="http://localhost:8000/admin/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2.5 px-3.5 py-2 mt-1 rounded-xl text-xs font-bold transition-all min-h-[44px] bg-amber-50 text-amber-900 border border-amber-200/80 hover:bg-amber-100/90 shadow-2xs"
+              >
+                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                <span className="truncate">Panneau Admin Django</span>
+                <ExternalLink className="w-3.5 h-3.5 ml-auto text-amber-700 shrink-0" />
+              </a>
+            </div>
+          )}
         </nav>
       </div>
 

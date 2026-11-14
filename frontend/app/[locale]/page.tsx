@@ -239,7 +239,7 @@ export default function HomePage() {
                   <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     {/* Carte 1: Excel */}
                     <Link
-                      href="/courses/excel-fondamentaux"
+                      href="/courses/excel-bases-analyse"
                       className="flex flex-col justify-between p-4 rounded-2xl bg-white border border-brand-border shadow-2xs hover:shadow-xs transition-all text-left min-h-[140px]"
                     >
                       <div>
@@ -292,38 +292,41 @@ export default function HomePage() {
                           <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200/50">
                             <BarChart3 className="w-4 h-4" />
                           </div>
-                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-brand-canvas-alt text-brand-muted">
-                            Libre
+                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200/50">
+                            Essentiel
                           </span>
                         </div>
                         <h3 className="font-bold text-sm sm:text-base text-brand-primary truncate">Power BI</h3>
-                        <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">Découverte visuelle</p>
+                        <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">Niveau 1 · Tableaux de bord</p>
                       </div>
-                      <div className="flex items-center text-brand-muted text-xs font-semibold mt-3">
+                      <div className="flex items-center text-brand-teal text-xs font-semibold mt-3">
                         <span>Explorer</span>
                         <ArrowRight className="w-3.5 h-3.5 ml-1" />
                       </div>
                     </Link>
 
                     {/* Carte 4: Python */}
-                    <div className="flex flex-col justify-between p-4 rounded-2xl bg-slate-50 border border-brand-border/60 shadow-none text-left min-h-[140px] opacity-80">
+                    <Link
+                      href="/courses/python-data-pandas"
+                      className="flex flex-col justify-between p-4 rounded-2xl bg-white border border-brand-border shadow-2xs hover:shadow-xs transition-all text-left min-h-[140px]"
+                    >
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <div className="w-8 h-8 rounded-lg bg-slate-200/70 text-slate-600 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center border border-purple-200/50">
                             <Code2 className="w-4 h-4" />
                           </div>
-                          <span className="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">
-                            Bientôt
+                          <span className="text-[11px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-200/50">
+                            Pro
                           </span>
                         </div>
-                        <h3 className="font-bold text-sm sm:text-base text-brand-muted truncate">Python</h3>
-                        <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">Analyse avancée</p>
+                        <h3 className="font-bold text-sm sm:text-base text-brand-primary truncate">Python</h3>
+                        <p className="text-[11px] sm:text-xs text-brand-muted mt-0.5">Niveau 1 · Pandas & Data</p>
                       </div>
-                      <div className="flex items-center text-slate-500 text-xs font-medium mt-3">
-                        <Lock className="w-3.5 h-3.5 mr-1" />
-                        <span>Prochainement</span>
+                      <div className="flex items-center text-brand-teal text-xs font-semibold mt-3">
+                        <span>Explorer</span>
+                        <ArrowRight className="w-3.5 h-3.5 ml-1" />
                       </div>
-                    </div>
+                    </Link>
                   </div>
                 </section>
 
