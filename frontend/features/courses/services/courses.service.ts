@@ -11,6 +11,8 @@ import {
   LessonQuestion,
   LessonAnswer,
   Certificate,
+  InteractiveExercise,
+  ExerciseVerificationResult,
 } from '../types';
 
 export const coursesService = {
@@ -265,5 +267,34 @@ export const coursesService = {
     } catch {
       return [];
     }
+  },
+
+  /**
+   * Fetches interactive hands-on exercises for a lesson (F1.18, R10)
+   */
+  async getLessonExercises(courseSlug: string, lessonSlug: string): Promise<InteractiveExercise[]> {
+    try {
+      return await apiClient<InteractiveExercise[]>(
+        `/courses/${encodeURIComponent(courseSlug)}/lessons/${encodeURIComponent(lessonSlug)}/exercises/`
+      );
+    } catch {
+      return [];
+    }
+  },
+
+  /**
+   * Verifies submitted answers for an interactive exercise (F1.18, R24)
+   */
+  async verifyExercise(
+    exerciseId: number,
+    answers: Record<string, string>
+  ): Promise<ExerciseVerificationResult> {
+    return await apiClient<ExerciseVerificationResult>(
+      `/courses/exercises/${exerciseId}/verify/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ answers }),
+      }
+    );
   },
 };

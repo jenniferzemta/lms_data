@@ -1,5 +1,7 @@
 from typing import Optional
 from courses.models import (
+    InteractiveExercise,
+    ExerciseAttempt,
     Certificate,
     Course,
     CourseEnrollment,
@@ -349,3 +351,44 @@ def get_user_certificates(user):
         .select_related('course', 'course__track')
         .order_by('-issued_at')
     )
+
+
+def list_lesson_exercises(*, course_slug: str, lesson_slug: str):
+    """
+    Returns all published interactive exercises for a given lesson (F1.18, R10).
+    """
+    return (
+        InteractiveExercise.objects.filter(
+            lesson__module__course__slug=course_slug,
+            lesson__slug=lesson_slug,
+            is_published=True,
+        )
+        .select_related('lesson', 'lesson__module', 'lesson__module__course')
+        .order_by('order', 'id')
+    )
+
+
+def get_exercise_by_id(exercise_id: int) -> Optional[InteractiveExercise]:
+    """
+    Retrieves an interactive exercise by primary key.
+    """
+    return (
+        InteractiveExercise.objects.filter(pk=exercise_id, is_published=True)
+        .select_related('lesson', 'lesson__module', 'lesson__module__course')
+        .first()
+    )
+
+
+def get_user_exercise_status(user, exercise: InteractiveExercise) -> dict:
+    """
+    Checks if an authenticated user has already successfully solved an exercise.
+    """
+    if not user or not user.is_authenticated:
+        return {'is_completed': False, 'attempts_count': 0}
+
+    attempts = ExerciseAttempt.objects.filter(user=user, exercise=exercise)
+    has_passed = attempts.filter(is_correct=True).exists()
+    return {
+        'is_completed': has_passed,
+        'attempts_count': attempts.count(),
+    }

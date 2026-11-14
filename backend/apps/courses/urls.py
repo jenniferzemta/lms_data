@@ -1,5 +1,7 @@
 from django.urls import path
 from courses.views import (
+    ExerciseVerifyView,
+    LessonExercisesView,
     CertificateVerificationView,
     CourseCertificateView,
     UserCertificatesListView,
@@ -28,6 +30,7 @@ urlpatterns = [
     path('notes/<int:pk>/', LessonNoteDetailView.as_view(), name='lesson-note-detail'),
     path('questions/<int:pk>/answers/', LessonQuestionAnswerView.as_view(), name='question-answer'),
     path('certificates/<str:code>/verify/', CertificateVerificationView.as_view(), name='certificate-verify'),
+    path('exercises/<int:pk>/verify/', ExerciseVerifyView.as_view(), name='exercise-verify'),
     path('my-certificates/', UserCertificatesListView.as_view(), name='my-certificates'),
     path('<slug:slug>/', CourseDetailView.as_view(), name='course-detail'),
     path('<slug:slug>/certificate/', CourseCertificateView.as_view(), name='course-certificate'),
@@ -39,4 +42,5 @@ urlpatterns = [
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/quiz/submit/', LessonQuizSubmitView.as_view(), name='lesson-quiz-submit'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/notes/', LessonNotesView.as_view(), name='lesson-notes'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/questions/', LessonQuestionsView.as_view(), name='lesson-questions'),
+    path('<slug:course_slug>/lessons/<slug:lesson_slug>/exercises/', LessonExercisesView.as_view(), name='lesson-exercises'),
 ]

@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.core.management.base import BaseCommand
 from courses.models import (
+    InteractiveExercise,
     Course,
     Lesson,
     LessonAnswer,
@@ -149,6 +150,67 @@ class Command(BaseCommand):
                 ),
                 'code_snippet': '# ##0 "FCFA"',
                 'status': LessonTranslation.Status.REVIEWED,
+            },
+        )
+
+        # Interactive Exercises 1.1 (F1.18, R10)
+        InteractiveExercise.objects.update_or_create(
+            lesson=c1_l1_1,
+            order=1,
+            defaults={
+                'title': "Atelier 1.1 : Formule de consolidation des ventes FCFA (Texte à trous)",
+                'exercise_type': InteractiveExercise.ExerciseType.FILL_BLANKS,
+                'bloom_level': QuizQuestion.BloomLevel.APPLY,
+                'instruction': (
+                    "Kamer SARL souhaite calculer le chiffre d'affaires total HT en FCFA de ses agences de Douala. "
+                    "Les montants se situent dans la colonne C, de la ligne 2 à la ligne 15. "
+                    "Complétez les arguments manquants de la formule ci-dessous."
+                ),
+                'prompt_template': "=SOMME({{blank_1}}:{{blank_2}})",
+                'options_or_tokens': ["C2", "C15", "D2", "Clients", "FAUX", "1500000"],
+                'solution': {
+                    'blank_1': "C2",
+                    'blank_2': "C15",
+                },
+                'hints': [
+                    "La colonne des montants HT en FCFA est la colonne C.",
+                    "La plage démarre à la première ligne de données (ligne 2) et se termine à la ligne 15.",
+                ],
+                'explanation': (
+                    "Excellent ! La formule =SOMME(C2:C15) agrège correctement l'ensemble des transactions "
+                    "des points de vente sans inclure la ligne d'en-tête."
+                ),
+                'is_published': True,
+            },
+        )
+
+        InteractiveExercise.objects.update_or_create(
+            lesson=c1_l1_1,
+            order=2,
+            defaults={
+                'title': "Atelier 1.2 : Diagnostic d'erreur de calcul #VALEUR! (Repérage d'erreur)",
+                'exercise_type': InteractiveExercise.ExerciseType.ERROR_SPOTTING,
+                'bloom_level': QuizQuestion.BloomLevel.ANALYZE,
+                'instruction': (
+                    "Sur le fichier de facturation de l'agence Bonabéri, la formule =C5 * 19.25% renvoie l'erreur #VALEUR!. "
+                    "En inspectant la cellule C5, vous découvrez le texte brut '1 500 000 FCFA' saisi manuellement au lieu d'un nombre. "
+                    "Indiquez la cause exacte de l'anomalie et la solution recommandée."
+                ),
+                'prompt_template': "=C5 * 19.25%  ==>  Erreur détectée : {{cause}}  |  Action recommandée : {{remede}}",
+                'options_or_tokens': ["TEXTE_DANS_NOMBRE", "DIVISION_PAR_ZERO", "FORMAT_MONETAIRE", "SUPPRIMER_LIGNE"],
+                'solution': {
+                    'cause': "TEXTE_DANS_NOMBRE",
+                    'remede': "FORMAT_MONETAIRE",
+                },
+                'hints': [
+                    "Une multiplication échoue dès qu'elle rencontre des lettres ou du texte dans la cellule opérande.",
+                    "La solution propre consiste à saisir 1500000 en nombre pur et appliquer le format de cellule personnalisé # ##0 'FCFA'.",
+                ],
+                'explanation': (
+                    "Très bon réflexe d'analyste ! Dans Excel, taper 'FCFA' dans une cellule la convertit en texte irrécupérable "
+                    "pour les calculs. Il faut toujours séparer la valeur numérique du masque d'affichage monétaire."
+                ),
+                'is_published': True,
             },
         )
 

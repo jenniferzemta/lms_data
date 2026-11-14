@@ -3,6 +3,8 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from courses.models import (
+    InteractiveExercise,
+    ExerciseAttempt,
     Certificate,
     Course,
     Lesson,
@@ -859,3 +861,100 @@ class CourseSyllabusAndObjectivesTests(TestCase):
         # 5. General metrics
         self.assertEqual(res.data['duration_hours'], 16)
         self.assertEqual(res.data['level'], 'INTERMEDIATE')
+
+
+class InteractiveExerciseTests(TestCase):
+    def setUp(self):
+        from accounts.models import User
+        self.learner = User.objects.create_user(
+            email='exercise_learner@datamboa.cm',
+            password='Password123!',
+            first_name='Jean',
+            last_name='Etoa',
+        )
+        self.track = Track.objects.create(name='Excel Track', slug='excel-ex-track', tool=Track.Tool.EXCEL, order=1)
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel Pratique',
+            slug='excel-pratique',
+            level=Course.Level.BEGINNER,
+            price_tier=Course.PriceTier.FREE,
+            order=1,
+            is_published=True,
+        )
+        self.module = Module.objects.create(course=self.course, title='Module 1', order=1, is_published=True)
+        self.lesson = Lesson.objects.create(
+            module=self.module,
+            title='Formules Fondamentales',
+            slug='formules-fondamentales',
+            order=1,
+            is_published=True,
+        )
+        self.fill_exercise = InteractiveExercise.objects.create(
+            lesson=self.lesson,
+            title='Formule SOMME à trous',
+            exercise_type=InteractiveExercise.ExerciseType.FILL_BLANKS,
+            bloom_level=QuizQuestion.BloomLevel.APPLY,
+            instruction='Calculez la somme des ventes C2 à C15.',
+            prompt_template='=SOMME({{b1}}:{{b2}})',
+            options_or_tokens=['C2', 'C15', 'D2'],
+            solution={'b1': 'C2', 'b2': 'C15'},
+            hints=['Démarre à la ligne 2', 'Termine à la ligne 15'],
+            explanation='La formule =SOMME(C2:C15) est exacte.',
+            order=1,
+            is_published=True,
+        )
+        self.error_exercise = InteractiveExercise.objects.create(
+            lesson=self.lesson,
+            title='Diagnostic #VALEUR!',
+            exercise_type=InteractiveExercise.ExerciseType.ERROR_SPOTTING,
+            bloom_level=QuizQuestion.BloomLevel.ANALYZE,
+            instruction='Identifiez l’erreur de saisie.',
+            prompt_template='=C5 * 19.25%  ==>  {{cause}}',
+            options_or_tokens=['TEXTE_DANS_NOMBRE', 'DIVISION_ZERO'],
+            solution={'cause': 'TEXTE_DANS_NOMBRE'},
+            explanation='Ne jamais insérer FCFA à la main dans une cellule.',
+            order=2,
+            is_published=True,
+        )
+        self.client = APIClient()
+
+    def test_list_lesson_exercises_api(self):
+        url = f'/api/v1/courses/{self.course.slug}/lessons/{self.lesson.slug}/exercises/'
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(len(res.data), 2)
+
+        first = res.data[0]
+        self.assertEqual(first['title'], 'Formule SOMME à trous')
+        self.assertEqual(first['exercise_type'], 'FILL_BLANKS')
+        self.assertEqual(first['bloom_level'], 'APPLY')
+        self.assertIn('C2', first['options_or_tokens'])
+        self.assertNotIn('solution', first)
+        self.assertNotIn('explanation', first)
+
+    def test_verify_fill_blanks_exercise_api(self):
+        url = f'/api/v1/courses/exercises/{self.fill_exercise.id}/verify/'
+        self.client.force_authenticate(user=self.learner)
+
+        # Wrong submission
+        wrong_res = self.client.post(url, {'answers': {'b1': 'C2', 'b2': 'C99'}}, format='json')
+        self.assertEqual(wrong_res.status_code, 200)
+        self.assertFalse(wrong_res.data['is_correct'])
+        self.assertEqual(wrong_res.data['explanation'], '')
+
+        # Correct submission (case-insensitive test: c2 and c15)
+        good_res = self.client.post(url, {'answers': {'b1': 'c2', 'b2': 'c15'}}, format='json')
+        self.assertEqual(good_res.status_code, 200)
+        self.assertTrue(good_res.data['is_correct'])
+        self.assertEqual(good_res.data['explanation'], 'La formule =SOMME(C2:C15) est exacte.')
+
+        # Attempt was recorded
+        self.assertTrue(ExerciseAttempt.objects.filter(user=self.learner, exercise=self.fill_exercise, is_correct=True).exists())
+
+    def test_verify_error_spotting_exercise_api(self):
+        url = f'/api/v1/courses/exercises/{self.error_exercise.id}/verify/'
+        res = self.client.post(url, {'answers': {'cause': 'texte_dans_nombre'}}, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['is_correct'])
+        self.assertIn('FCFA', res.data['explanation'])

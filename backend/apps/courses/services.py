@@ -3,6 +3,8 @@ from decimal import Decimal
 from django.db.models import F
 from django.utils import timezone
 from courses.models import (
+    InteractiveExercise,
+    ExerciseAttempt,
     Certificate,
     Course,
     CourseEnrollment,
@@ -330,3 +332,73 @@ def issue_course_certificate(enrollment: CourseEnrollment) -> Certificate:
         instructor_name="Alain FOTSO / DataMboa",
         skills_summary=skills_summary,
     )
+
+
+def normalize_answer(val: str) -> str:
+    """
+    Normalizes a formula or token for fair pedagogical comparison:
+    removes extra spaces, normalizes quotes and case.
+    """
+    if not isinstance(val, str):
+        val = str(val or '')
+    cleaned = val.strip()
+    cleaned = cleaned.replace('"', '').replace("'", '')
+    return cleaned.upper()
+
+
+def verify_interactive_exercise(user, exercise: InteractiveExercise, submitted_answers: dict) -> tuple[bool, str, dict]:
+    """
+    Verifies user answers for an interactive exercise (F1.18, R10, R24).
+    Returns (is_correct, feedback_message, per_item_details).
+    """
+    solution = exercise.solution or {}
+    details = {}
+    is_correct = True
+
+    if exercise.exercise_type == InteractiveExercise.ExerciseType.FILL_BLANKS:
+        for key, expected in solution.items():
+            user_val = submitted_answers.get(key, '')
+            norm_user = normalize_answer(user_val)
+            norm_expected = normalize_answer(expected)
+            item_match = (norm_user == norm_expected)
+            details[key] = {
+                'submitted': user_val,
+                'is_correct': item_match,
+            }
+            if not item_match:
+                is_correct = False
+
+    elif exercise.exercise_type == InteractiveExercise.ExerciseType.ERROR_SPOTTING:
+        for key, expected in solution.items():
+            user_val = submitted_answers.get(key, '')
+            item_match = (normalize_answer(user_val) == normalize_answer(expected))
+            details[key] = {
+                'submitted': user_val,
+                'is_correct': item_match,
+            }
+            if not item_match:
+                is_correct = False
+
+    elif exercise.exercise_type == InteractiveExercise.ExerciseType.REORDER:
+        expected_order = solution.get('order', [])
+        user_order = submitted_answers.get('order', [])
+        is_correct = (user_order == expected_order)
+        details['order'] = {
+            'is_correct': is_correct,
+            'expected_count': len(expected_order),
+        }
+    else:
+        is_correct = False
+
+    feedback = exercise.explanation if is_correct else "Certains éléments de votre formule ou analyse comportent encore une erreur. Consultez l'indice ou vérifiez la syntaxe."
+
+    if user and user.is_authenticated:
+        ExerciseAttempt.objects.create(
+            user=user,
+            exercise=exercise,
+            submitted_answers=submitted_answers,
+            is_correct=is_correct,
+            feedback=feedback,
+        )
+
+    return is_correct, feedback, details

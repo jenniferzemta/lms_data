@@ -2,6 +2,8 @@ import urllib.parse
 from rest_framework import serializers
 
 from courses.models import (
+    InteractiveExercise,
+    ExerciseAttempt,
     Certificate,
     Course,
     Lesson,
@@ -425,3 +427,54 @@ class CertificateDetailSerializer(CertificatePublicSerializer):
             'certId': obj.certificate_code,
         }
         return f"https://www.linkedin.com/profile/add?{urllib.parse.urlencode(params)}"
+
+
+
+# =====================================================================
+# INTERACTIVE EXERCISE SERIALIZERS (F1.18, R10, R24)
+# =====================================================================
+
+class InteractiveExercisePublicSerializer(serializers.ModelSerializer):
+    """
+    Public interactive exercise representation.
+    Omits expected solution and raw explanation for academic integrity until submission.
+    """
+    is_completed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = InteractiveExercise
+        fields = (
+            'id',
+            'title',
+            'exercise_type',
+            'bloom_level',
+            'instruction',
+            'prompt_template',
+            'options_or_tokens',
+            'hints',
+            'order',
+            'is_completed',
+        )
+
+    def get_is_completed(self, obj: InteractiveExercise) -> bool:
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return False
+        return ExerciseAttempt.objects.filter(user=request.user, exercise=obj, is_correct=True).exists()
+
+
+class ExerciseSubmissionSerializer(serializers.Serializer):
+    """
+    Submitted answers dictionary, e.g. {"b1": "D5", "b2": "Clients!A:F", "b3": "FAUX"}
+    """
+    answers = serializers.DictField(child=serializers.CharField(allow_blank=True))
+
+
+class ExerciseVerificationResponseSerializer(serializers.Serializer):
+    """
+    Immediate verification feedback response without page reload (R24).
+    """
+    is_correct = serializers.BooleanField()
+    feedback = serializers.CharField()
+    explanation = serializers.CharField()
+    details = serializers.DictField()

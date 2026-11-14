@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 
 from courses.models import Course, Lesson
 from courses.selectors import (
+    get_exercise_by_id,
+    list_lesson_exercises,
     get_certificate_by_code,
     get_user_certificates,
     get_user_course_certificate,
@@ -25,6 +27,9 @@ from courses.selectors import (
     list_published_courses,
 )
 from courses.serializers import (
+    InteractiveExercisePublicSerializer,
+    ExerciseSubmissionSerializer,
+    ExerciseVerificationResponseSerializer,
     CertificateDetailSerializer,
     CertificatePublicSerializer,
     CourseDetailSerializer,
@@ -42,6 +47,7 @@ from courses.serializers import (
     QuizSubmitSerializer,
 )
 from courses.services import (
+    verify_interactive_exercise,
     issue_course_certificate,
     can_access_attachment,
     create_lesson_answer,
@@ -542,3 +548,56 @@ class UserCertificatesListView(APIView):
         certs = get_user_certificates(request.user)
         serializer = CertificateDetailSerializer(certs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+# =====================================================================
+# INTERACTIVE EXERCISE VIEWS (F1.18, R10, R24)
+# =====================================================================
+
+class LessonExercisesView(APIView):
+    """
+    GET /api/v1/courses/<slug:course_slug>/lessons/<slug:lesson_slug>/exercises/
+    Lists all hands-on exercises attached to a lesson.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, course_slug: str, lesson_slug: str) -> Response:
+        exercises = list_lesson_exercises(course_slug=course_slug, lesson_slug=lesson_slug)
+        serializer = InteractiveExercisePublicSerializer(exercises, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ExerciseVerifyView(APIView):
+    """
+    POST /api/v1/courses/exercises/<int:pk>/verify/
+    Verifies user answers for an interactive exercise without page refresh (R24).
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request, pk: int) -> Response:
+        exercise = get_exercise_by_id(pk)
+        if not exercise:
+            return Response({'detail': 'Exercice introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ExerciseSubmissionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user if request.user.is_authenticated else None
+        is_correct, feedback, details = verify_interactive_exercise(
+            user=user,
+            exercise=exercise,
+            submitted_answers=serializer.validated_data['answers'],
+        )
+
+        return Response(
+            {
+                'is_correct': is_correct,
+                'feedback': feedback,
+                'explanation': exercise.explanation if is_correct else '',
+                'details': details,
+            },
+            status=status.HTTP_200_OK,
+        )

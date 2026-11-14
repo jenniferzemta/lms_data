@@ -777,8 +777,126 @@ class Certificate(models.Model):
         first = getattr(self.user, 'first_name', '') or ''
         last = getattr(self.user, 'last_name', '') or ''
         full = f"{first} {last}".strip()
-        return full if full else self.user.email.split('@')[0]
+        return full if full else self.user.username
 
     @property
     def verification_url(self) -> str:
         return f"/verify/{self.certificate_code}"
+
+
+
+class InteractiveExercise(models.Model):
+    """
+    Hands-on practical exercise integrated into a lesson (F1.18, R10, R24).
+    Supports:
+    - FILL_BLANKS: completing missing formula arguments (e.g. VLOOKUP, INDEX/MATCH).
+    - ERROR_SPOTTING: identifying and repairing Excel calculation errors (#N/A, #VALUE!, #REF!).
+    - REORDER: reconstructing chronological or logical steps of a data analysis pipeline.
+    """
+    class ExerciseType(models.TextChoices):
+        FILL_BLANKS = 'FILL_BLANKS', _('Texte / Formule à trous')
+        ERROR_SPOTTING = 'ERROR_SPOTTING', _('Repérage et correction d\'erreur')
+        REORDER = 'REORDER', _('Réorganisation d\'étapes')
+
+    lesson = models.ForeignKey(
+        'Lesson',
+        on_delete=models.CASCADE,
+        related_name='interactive_exercises',
+        verbose_name=_('Leçon associée'),
+    )
+    title = models.CharField(max_length=255, verbose_name=_('Titre de l\'exercice'))
+    exercise_type = models.CharField(
+        max_length=30,
+        choices=ExerciseType.choices,
+        default=ExerciseType.FILL_BLANKS,
+        verbose_name=_('Type d\'exercice'),
+    )
+    bloom_level = models.CharField(
+        max_length=20,
+        choices=QuizQuestion.BloomLevel.choices,
+        default=QuizQuestion.BloomLevel.APPLY,
+        verbose_name=_('Niveau de Bloom'),
+    )
+    instruction = models.TextField(
+        verbose_name=_('Consigne ou mise en situation métier'),
+        help_text=_('Contexte professionnel réel (ex: factures impayées Douala en FCFA)'),
+    )
+    prompt_template = models.TextField(
+        verbose_name=_('Gabarit de formule ou texte'),
+        help_text=_('Contient des placeholders comme {{b1}}, {{b2}} ou l\'erreur à corriger'),
+    )
+    options_or_tokens = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_('Options ou étiquettes proposées'),
+        help_text=_('Liste d\'étiquettes proposées pour aider l\'apprenant'),
+    )
+    solution = models.JSONField(
+        default=dict,
+        verbose_name=_('Solution attendue'),
+        help_text=_('Ex: {"b1": "D5", "b2": "Clients!A:F", "b3": "FAUX"}'),
+    )
+    hints = models.JSONField(
+        default=list,
+        blank=True,
+        verbose_name=_('Indices progressifs'),
+        help_text=_('Liste d\'indices affichés si l\'apprenant bloque'),
+    )
+    explanation = models.TextField(
+        verbose_name=_('Rétroaction pédagogique détaillée'),
+        help_text=_('Explication complète affichée lors de la validation'),
+    )
+    order = models.PositiveIntegerField(default=1, verbose_name=_('Ordre'))
+    is_published = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Exercice interactif')
+        verbose_name_plural = _('Exercices interactifs')
+        ordering = ('order', 'id')
+
+    def __str__(self) -> str:
+        return f"[{self.get_exercise_type_display()}] {self.title} (L: {self.lesson.title})"
+
+
+class ExerciseAttempt(models.Model):
+    """
+    Learner attempt on an interactive exercise (F1.18).
+    Tracks submission, accuracy, and feedback.
+    """
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='exercise_attempts',
+        verbose_name=_('Apprenant'),
+    )
+    exercise = models.ForeignKey(
+        InteractiveExercise,
+        on_delete=models.CASCADE,
+        related_name='attempts',
+        verbose_name=_('Exercice interactif'),
+    )
+    submitted_answers = models.JSONField(
+        default=dict,
+        verbose_name=_('Réponses soumises'),
+    )
+    is_correct = models.BooleanField(
+        default=False,
+        verbose_name=_('Réussi'),
+    )
+    feedback = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Rétroaction envoyée'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = _('Tentative d\'exercice interactif')
+        verbose_name_plural = _('Tentatives d\'exercices interactifs')
+        ordering = ('-created_at',)
+
+    def __str__(self) -> str:
+        status = 'Réussi' if self.is_correct else 'À corriger'
+        return f"{self.user} - {self.exercise.title} ({status})"

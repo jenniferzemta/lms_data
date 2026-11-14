@@ -241,3 +241,25 @@ export interface Certificate {
   share_linkedin_url?: string;
   is_valid?: boolean;
 }
+
+
+
+export interface InteractiveExercise {
+  id: number;
+  title: string;
+  exercise_type: 'FILL_BLANKS' | 'ERROR_SPOTTING' | 'REORDER' | string;
+  bloom_level: string;
+  instruction: string;
+  prompt_template: string;
+  options_or_tokens: string[];
+  hints: string[];
+  order: number;
+  is_completed?: boolean;
+}
+
+export interface ExerciseVerificationResult {
+  is_correct: boolean;
+  feedback: string;
+  explanation: string;
+  details: Record<string, { submitted: string; is_correct: boolean }>;
+}

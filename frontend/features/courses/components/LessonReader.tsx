@@ -3,13 +3,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
-import { LessonDetail, ModuleCurriculum, CourseProgress, LessonNote, LessonQuestion, Certificate } from '../types';
+import { LessonDetail, ModuleCurriculum, CourseProgress, LessonNote, LessonQuestion, Certificate, InteractiveExercise } from '../types';
 import { coursesService } from '../services/courses.service';
 import { FallbackLanguageBanner } from './FallbackLanguageBanner';
 import { CourseSyllabus } from './CourseSyllabus';
 import { LessonAttachmentsList } from './LessonAttachmentsList';
 import { LessonContentRenderer } from './LessonContentRenderer';
 import { LessonQuizInteractive } from './LessonQuizInteractive';
+import { LessonExerciseInteractive } from './LessonExerciseInteractive';
 import {
   ChevronLeft,
   ChevronRight,
@@ -99,6 +100,10 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [replyInputs, setReplyInputs] = useState<Record<number, string>>({});
   const [isSubmittingReply, setIsSubmittingReply] = useState<Record<number, boolean>>({});
 
+  // Interactive Exercises state (F1.18)
+  const [exercises, setExercises] = useState<InteractiveExercise[]>([]);
+  const [isLoadingExercises, setIsLoadingExercises] = useState(false);
+
   // Fetch course progression, notes and community questions
   useEffect(() => {
     let isMounted = true;
@@ -124,6 +129,16 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
         setQuestions(res);
         setIsLoadingQuestions(false);
       }
+    });
+
+    setIsLoadingExercises(true);
+    coursesService.getLessonExercises(lesson.course_slug, lesson.slug).then((res) => {
+      if (isMounted) {
+        setExercises(res);
+        setIsLoadingExercises(false);
+      }
+    }).catch(() => {
+      if (isMounted) setIsLoadingExercises(false);
     });
 
     return () => {
@@ -933,6 +948,32 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                 </button>
               </form>
             </div>
+
+            {/* Interactive Practical Exercises (F1.18 - Textes à trous & Diagnostic d'erreur) */}
+            {exercises.length > 0 && (
+              <div className="space-y-4 pt-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 rounded-full bg-[#13b8a6]" />
+                    <h3 className="text-sm sm:text-base font-bold text-[#121c2a]">
+                      Exercices Pratiques ({exercises.length})
+                    </h3>
+                  </div>
+                  <span className="text-xs font-semibold text-[#006b5f] bg-teal-50 px-2.5 py-1 rounded-full border border-teal-200">
+                    Auto-correction immédiate
+                  </span>
+                </div>
+                {exercises.map((exercise) => (
+                  <LessonExerciseInteractive
+                    key={exercise.id}
+                    exercise={exercise}
+                    onSuccess={() => {
+                      // Optionally refresh exercises or progress
+                    }}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Interactive Formative Assessment Quiz (F1.7) */}
             <LessonQuizInteractive

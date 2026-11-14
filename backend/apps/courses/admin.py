@@ -1,5 +1,7 @@
 from django.contrib import admin
 from courses.models import (
+    InteractiveExercise,
+    ExerciseAttempt,
     Certificate,
     Course,
     CourseEnrollment,
@@ -174,3 +176,18 @@ class CertificateAdmin(admin.ModelAdmin):
     list_filter = ('is_revoked', 'course')
     search_fields = ('certificate_code', 'user__email', 'user__username', 'course__title')
     readonly_fields = ('certificate_code', 'issued_at', 'created_at', 'updated_at')
+
+
+@admin.register(InteractiveExercise)
+class InteractiveExerciseAdmin(admin.ModelAdmin):
+    list_display = ('title', 'lesson', 'exercise_type', 'bloom_level', 'order', 'is_published')
+    list_filter = ('exercise_type', 'bloom_level', 'is_published', 'lesson__module__course')
+    search_fields = ('title', 'instruction', 'lesson__title')
+
+
+@admin.register(ExerciseAttempt)
+class ExerciseAttemptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'exercise', 'is_correct', 'created_at')
+    list_filter = ('is_correct', 'exercise__exercise_type')
+    search_fields = ('user__email', 'exercise__title')
+    readonly_fields = ('created_at',)
