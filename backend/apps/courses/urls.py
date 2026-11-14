@@ -1,5 +1,6 @@
 from django.urls import path
 from courses.views import (
+    LearnerDashboardView,
     ExerciseVerifyView,
     LessonExercisesView,
     CertificateVerificationView,
@@ -25,6 +26,7 @@ app_name = 'courses'
 
 urlpatterns = [
     path('', CourseListView.as_view(), name='course-list'),
+    path('dashboard/', LearnerDashboardView.as_view(), name='learner-dashboard'),
     path('attachments/<int:pk>/download/', LessonAttachmentDownloadView.as_view(), name='attachment-download'),
     path('videos/<str:filename>/', VideoStreamView.as_view(), name='video-stream'),
     path('notes/<int:pk>/', LessonNoteDetailView.as_view(), name='lesson-note-detail'),

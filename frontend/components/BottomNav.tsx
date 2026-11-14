@@ -36,9 +36,9 @@ export const BottomNav: React.FC = () => {
     {
       key: 'progress',
       label: 'Progrès',
-      href: '/courses',
+      href: '/dashboard',
       icon: TrendingUp,
-      isActive: false
+      isActive: pathname.startsWith('/dashboard')
     },
     {
       key: 'profile',

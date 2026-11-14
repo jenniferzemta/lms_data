@@ -263,3 +263,77 @@ export interface ExerciseVerificationResult {
   explanation: string;
   details: Record<string, { submitted: string; is_correct: boolean }>;
 }
+
+
+export interface DashboardStats {
+  enrolled_courses_count: number;
+  completed_courses_count: number;
+  completed_lessons_count: number;
+  total_learning_time_minutes: number;
+  certificates_count: number;
+  xp_points: number;
+}
+
+export interface DashboardResumeLesson {
+  course_title: string;
+  course_slug: string;
+  tool: string;
+  level: string;
+  lesson_title: string;
+  lesson_slug: string;
+  module_title: string;
+  duration_minutes: number;
+  progress_percentage: number;
+}
+
+export interface DashboardEnrolledCourse {
+  enrollment_id: number;
+  course_id: number;
+  course_title: string;
+  course_slug: string;
+  tool: string;
+  level: string;
+  progress_percentage: number;
+  status: string;
+  total_lessons_count: number;
+  completed_lessons_count: number;
+  updated_at: string | null;
+  certificate_code?: string | null;
+  next_lesson_slug?: string | null;
+  next_lesson_title?: string | null;
+}
+
+export interface DashboardCertificateItem {
+  id: number;
+  certificate_code: string;
+  course_title: string;
+  course_slug: string;
+  tool: string;
+  issued_at: string | null;
+  final_grade: number | null;
+  instructor_name: string;
+  verification_path: string;
+}
+
+export interface DashboardRecommendation {
+  id: number;
+  title: string;
+  slug: string;
+  tool: string;
+  level: string;
+  price_tier: string;
+  duration_hours: number;
+}
+
+export interface LearnerDashboardData {
+  user: {
+    id: number | null;
+    name: string;
+    email: string;
+  };
+  stats: DashboardStats;
+  resume_lesson: DashboardResumeLesson | null;
+  enrolled_courses: DashboardEnrolledCourse[];
+  certificates: DashboardCertificateItem[];
+  recommendations: DashboardRecommendation[];
+}

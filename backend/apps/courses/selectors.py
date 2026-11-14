@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, Dict, Any, List
+from django.db.models import Sum
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
@@ -391,4 +392,210 @@ def get_user_exercise_status(user, exercise: InteractiveExercise) -> dict:
     return {
         'is_completed': has_passed,
         'attempts_count': attempts.count(),
+    }
+
+
+def get_learner_dashboard_summary(user) -> Dict[str, Any]:
+    """
+    Aggregates full learner overview for the centralized dashboard (F1.13, R16).
+    Answers:
+    1. Where I am: enrolled courses, progress per course/tool, certificates.
+    2. What I'm doing: 1-click resume lesson card.
+    3. Next step: recommended upcoming modules and courses, XP and streak.
+    """
+    if not user or not user.is_authenticated:
+        return {
+            'user': {'id': None, 'name': 'Invité', 'email': ''},
+            'stats': {
+                'enrolled_courses_count': 0,
+                'completed_courses_count': 0,
+                'completed_lessons_count': 0,
+                'total_learning_time_minutes': 0,
+                'certificates_count': 0,
+                'xp_points': 0,
+            },
+            'resume_lesson': None,
+            'enrolled_courses': [],
+            'certificates': [],
+            'recommendations': [],
+        }
+
+    user_name = f"{user.first_name} {user.last_name}".strip() or user.username
+
+    # 1. Enrollments
+    enrollments = (
+        CourseEnrollment.objects.filter(user=user)
+        .select_related('course', 'course__track', 'last_lesson', 'last_lesson__module')
+        .order_by('-updated_at')
+    )
+
+    enrolled_course_ids = [e.course_id for e in enrollments]
+
+    # 2. Certificates map
+    certs = Certificate.objects.filter(user=user, is_revoked=False).select_related('course')
+    certs_by_course_id = {c.course_id: c for c in certs}
+
+    # 3. Lesson Progress stats
+    completed_progresses = (
+        LessonProgress.objects.filter(user=user, is_completed=True)
+        .select_related('lesson')
+    )
+    completed_lessons_count = completed_progresses.count()
+    total_minutes = (
+        completed_progresses.aggregate(total=Sum('lesson__duration_minutes'))['total'] or 0
+    )
+
+    # 4. Interactive exercises and quizzes completed count for XP calculation
+    correct_exercises_count = (
+        ExerciseAttempt.objects.filter(user=user, is_correct=True)
+        .values('exercise_id')
+        .distinct()
+        .count()
+    )
+    passed_quizzes_count = (
+        QuizAttempt.objects.filter(user=user, is_passed=True)
+        .values('quiz_id')
+        .distinct()
+        .count()
+    )
+
+    xp_points = (
+        (completed_lessons_count * 25)
+        + (correct_exercises_count * 30)
+        + (passed_quizzes_count * 50)
+        + (certs.count() * 200)
+    )
+
+    # 5. Build Enrolled Courses list
+    enrolled_courses_data: List[Dict[str, Any]] = []
+    resume_target = None
+
+    for enr in enrollments:
+        course = enr.course
+        total_lessons = course.total_lessons_count
+        completed_in_course = completed_progresses.filter(lesson__module__course=course).count()
+        cert = certs_by_course_id.get(course.id)
+
+        # Determine last or next lesson for this course
+        target_lesson = None
+        if enr.last_lesson and not completed_progresses.filter(lesson=enr.last_lesson).exists():
+            target_lesson = enr.last_lesson
+        else:
+            # Pick first uncompleted lesson
+            all_course_lessons = get_course_curriculum_lessons(course)
+            completed_lesson_ids = set(
+                completed_progresses.filter(lesson__module__course=course).values_list('lesson_id', flat=True)
+            )
+            for l in all_course_lessons:
+                if l.id not in completed_lesson_ids:
+                    target_lesson = l
+                    break
+            # If all completed, fallback to first lesson
+            if not target_lesson and all_course_lessons:
+                target_lesson = all_course_lessons[0]
+
+        course_item = {
+            'enrollment_id': enr.id,
+            'course_id': course.id,
+            'course_title': course.title,
+            'course_slug': course.slug,
+            'tool': course.track.tool if course.track else 'EXCEL',
+            'level': course.level,
+            'progress_percentage': enr.progress_percentage,
+            'status': enr.status,
+            'total_lessons_count': total_lessons,
+            'completed_lessons_count': completed_in_course,
+            'updated_at': enr.updated_at.isoformat() if enr.updated_at else None,
+            'certificate_code': cert.certificate_code if cert else None,
+            'next_lesson_slug': target_lesson.slug if target_lesson else None,
+            'next_lesson_title': target_lesson.title if target_lesson else None,
+        }
+        enrolled_courses_data.append(course_item)
+
+        # For the global 1-click resume card: pick the most recent course that is NOT yet 100% completed
+        if not resume_target and target_lesson and enr.progress_percentage < 100:
+            resume_target = {
+                'course_title': course.title,
+                'course_slug': course.slug,
+                'tool': course.track.tool if course.track else 'EXCEL',
+                'level': course.level,
+                'lesson_title': target_lesson.title,
+                'lesson_slug': target_lesson.slug,
+                'module_title': target_lesson.module.title,
+                'duration_minutes': target_lesson.duration_minutes,
+                'progress_percentage': enr.progress_percentage,
+            }
+
+    # Fallback resume_target if all courses are 100% or only 1 course enrolled
+    if not resume_target and enrolled_courses_data and enrolled_courses_data[0].get('next_lesson_slug'):
+        first_c = enrollments.first()
+        if first_c and first_c.last_lesson:
+            resume_target = {
+                'course_title': first_c.course.title,
+                'course_slug': first_c.course.slug,
+                'tool': first_c.course.track.tool if first_c.course.track else 'EXCEL',
+                'level': first_c.course.level,
+                'lesson_title': first_c.last_lesson.title,
+                'lesson_slug': first_c.last_lesson.slug,
+                'module_title': first_c.last_lesson.module.title,
+                'duration_minutes': first_c.last_lesson.duration_minutes,
+                'progress_percentage': first_c.progress_percentage,
+            }
+
+    # 6. Certificates data
+    certificates_data = [
+        {
+            'id': c.id,
+            'certificate_code': c.certificate_code,
+            'course_title': c.course.title,
+            'course_slug': c.course.slug,
+            'tool': c.course.track.tool if c.course.track else 'EXCEL',
+            'issued_at': c.issued_at.isoformat() if c.issued_at else None,
+            'final_grade': c.final_grade,
+            'instructor_name': c.instructor_name,
+            'verification_path': f"/verify/{c.certificate_code}",
+        }
+        for c in certs
+    ]
+
+    # 7. Recommendations: published courses not yet enrolled
+    recommended_qs = (
+        Course.objects.filter(is_published=True)
+        .exclude(id__in=enrolled_course_ids)
+        .select_related('track')
+        .order_by('order', 'id')[:2]
+    )
+    recommendations_data = [
+        {
+            'id': rc.id,
+            'title': rc.title,
+            'slug': rc.slug,
+            'tool': rc.track.tool if rc.track else 'EXCEL',
+            'level': rc.level,
+            'price_tier': rc.price_tier,
+            'duration_hours': rc.duration_hours,
+        }
+        for rc in recommended_qs
+    ]
+
+    completed_courses_count = sum(1 for e in enrolled_courses_data if e['progress_percentage'] >= 100)
+
+    return {
+        'user': {
+            'id': user.id,
+            'name': user_name,
+            'email': user.email,
+        },
+        'stats': {
+            'enrolled_courses_count': len(enrolled_courses_data),
+            'completed_courses_count': completed_courses_count,
+            'completed_lessons_count': completed_lessons_count,
+            'total_learning_time_minutes': total_minutes,
+            'certificates_count': len(certificates_data),
+            'xp_points': xp_points,
+        },
+        'resume_lesson': resume_target,
+        'enrolled_courses': enrolled_courses_data,
+        'certificates': certificates_data,
+        'recommendations': recommendations_data,
     }

@@ -3,6 +3,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from courses.models import (
+    CourseEnrollment,
     InteractiveExercise,
     ExerciseAttempt,
     Certificate,
@@ -958,3 +959,103 @@ class InteractiveExerciseTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertTrue(res.data['is_correct'])
         self.assertIn('FCFA', res.data['explanation'])
+
+
+class LearnerDashboardTests(TestCase):
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.learner = User.objects.create_user(
+            email='kamga.learner@datamboa.cm',
+            password='TestPassword123!',
+            first_name='Jean',
+            last_name='Kamga',
+        )
+        self.track = Track.objects.create(name='Excel Track', slug='excel-dash-track', tool=Track.Tool.EXCEL, order=1)
+        self.course1 = Course.objects.create(
+            track=self.track,
+            title='Excel Niveau 1 : Fondamentaux',
+            slug='excel-n1-fondamentaux',
+            level=Course.Level.BEGINNER,
+            order=1,
+            is_published=True,
+        )
+        self.course2 = Course.objects.create(
+            track=self.track,
+            title='Excel Niveau 2 : Power Query',
+            slug='excel-n2-power-query',
+            level=Course.Level.INTERMEDIATE,
+            order=2,
+            is_published=True,
+        )
+        self.module = Module.objects.create(course=self.course1, title='Module 1', order=1, is_published=True)
+        self.lesson1 = Lesson.objects.create(
+            module=self.module,
+            title='Leçon 1.1 Somme',
+            slug='lecon-1-1-somme',
+            duration_minutes=15,
+            order=1,
+            is_published=True,
+        )
+        self.lesson2 = Lesson.objects.create(
+            module=self.module,
+            title='Leçon 1.2 Moyenne',
+            slug='lecon-1-2-moyenne',
+            duration_minutes=20,
+            order=2,
+            is_published=True,
+        )
+
+        # Enroll learner in course 1
+        self.enrollment = CourseEnrollment.objects.create(
+            user=self.learner,
+            course=self.course1,
+            progress_percentage=50,
+            last_lesson=self.lesson1,
+        )
+        # Mark lesson 1 as completed
+        LessonProgress.objects.create(
+            user=self.learner,
+            lesson=self.lesson1,
+            is_completed=True,
+        )
+
+    def test_dashboard_unauthenticated_forbidden(self):
+        url = '/api/v1/courses/dashboard/'
+        res = self.client.get(url)
+        self.assertIn(res.status_code, [401, 403])
+
+    def test_dashboard_authenticated_success(self):
+        self.client.force_authenticate(user=self.learner)
+        url = '/api/v1/courses/dashboard/'
+        res = self.client.get(url)
+        self.assertEqual(res.status_code, 200)
+        data = res.data
+
+        # Check user
+        self.assertEqual(data['user']['name'], 'Jean Kamga')
+        self.assertEqual(data['user']['email'], 'kamga.learner@datamboa.cm')
+
+        # Check stats
+        stats = data['stats']
+        self.assertEqual(stats['enrolled_courses_count'], 1)
+        self.assertEqual(stats['completed_lessons_count'], 1)
+        self.assertEqual(stats['total_learning_time_minutes'], 15)
+
+        # Check resume lesson card points to next uncompleted lesson (lesson 1.2)
+        resume = data['resume_lesson']
+        self.assertIsNotNone(resume)
+        self.assertEqual(resume['course_slug'], 'excel-n1-fondamentaux')
+        self.assertEqual(resume['lesson_slug'], 'lecon-1-2-moyenne')
+        self.assertEqual(resume['duration_minutes'], 20)
+
+        # Check enrolled courses
+        enrolled = data['enrolled_courses']
+        self.assertEqual(len(enrolled), 1)
+        self.assertEqual(enrolled[0]['course_slug'], 'excel-n1-fondamentaux')
+        self.assertEqual(enrolled[0]['progress_percentage'], 50)
+
+        # Check recommendations includes course 2 (not yet enrolled)
+        recs = data['recommendations']
+        self.assertEqual(len(recs), 1)
+        self.assertEqual(recs[0]['slug'], 'excel-n2-power-query')

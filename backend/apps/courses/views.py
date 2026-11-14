@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from courses.models import Course, Lesson
 from courses.selectors import (
+    get_learner_dashboard_summary,
     get_exercise_by_id,
     list_lesson_exercises,
     get_certificate_by_code,
@@ -27,6 +28,7 @@ from courses.selectors import (
     list_published_courses,
 )
 from courses.serializers import (
+    LearnerDashboardSerializer,
     InteractiveExercisePublicSerializer,
     ExerciseSubmissionSerializer,
     ExerciseVerificationResponseSerializer,
@@ -601,3 +603,23 @@ class ExerciseVerifyView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+# =====================================================================
+# LEARNER DASHBOARD VIEW (F1.13, R16)
+# =====================================================================
+
+class LearnerDashboardView(APIView):
+    """
+    GET /api/v1/courses/dashboard/
+    Centralized learner dashboard aggregate endpoint (F1.13, R16).
+    Returns metrics, active courses, 1-click resume lesson, certificates, and recommendations.
+    Requires authentication.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        summary = get_learner_dashboard_summary(request.user)
+        serializer = LearnerDashboardSerializer(summary)
+        return Response(serializer.data, status=status.HTTP_200_OK)

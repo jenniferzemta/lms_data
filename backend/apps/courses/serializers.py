@@ -478,3 +478,76 @@ class ExerciseVerificationResponseSerializer(serializers.Serializer):
     feedback = serializers.CharField()
     explanation = serializers.CharField()
     details = serializers.DictField()
+
+
+# =====================================================================
+# LEARNER DASHBOARD SERIALIZERS (F1.13, R16)
+# =====================================================================
+
+class DashboardStatsSerializer(serializers.Serializer):
+    enrolled_courses_count = serializers.IntegerField()
+    completed_courses_count = serializers.IntegerField()
+    completed_lessons_count = serializers.IntegerField()
+    total_learning_time_minutes = serializers.IntegerField()
+    certificates_count = serializers.IntegerField()
+    xp_points = serializers.IntegerField()
+
+
+class DashboardResumeLessonSerializer(serializers.Serializer):
+    course_title = serializers.CharField()
+    course_slug = serializers.CharField()
+    tool = serializers.CharField()
+    level = serializers.CharField()
+    lesson_title = serializers.CharField()
+    lesson_slug = serializers.CharField()
+    module_title = serializers.CharField()
+    duration_minutes = serializers.IntegerField()
+    progress_percentage = serializers.IntegerField()
+
+
+class DashboardEnrolledCourseSerializer(serializers.Serializer):
+    enrollment_id = serializers.IntegerField()
+    course_id = serializers.IntegerField()
+    course_title = serializers.CharField()
+    course_slug = serializers.CharField()
+    tool = serializers.CharField()
+    level = serializers.CharField()
+    progress_percentage = serializers.IntegerField()
+    status = serializers.CharField()
+    total_lessons_count = serializers.IntegerField()
+    completed_lessons_count = serializers.IntegerField()
+    updated_at = serializers.CharField(allow_null=True)
+    certificate_code = serializers.CharField(allow_null=True, required=False)
+    next_lesson_slug = serializers.CharField(allow_null=True, required=False)
+    next_lesson_title = serializers.CharField(allow_null=True, required=False)
+
+
+class DashboardCertificateItemSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    certificate_code = serializers.CharField()
+    course_title = serializers.CharField()
+    course_slug = serializers.CharField()
+    tool = serializers.CharField()
+    issued_at = serializers.CharField(allow_null=True)
+    final_grade = serializers.FloatField(allow_null=True)
+    instructor_name = serializers.CharField()
+    verification_path = serializers.CharField()
+
+
+class DashboardRecommendationSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField()
+    slug = serializers.CharField()
+    tool = serializers.CharField()
+    level = serializers.CharField()
+    price_tier = serializers.CharField()
+    duration_hours = serializers.IntegerField()
+
+
+class LearnerDashboardSerializer(serializers.Serializer):
+    user = serializers.DictField()
+    stats = DashboardStatsSerializer()
+    resume_lesson = DashboardResumeLessonSerializer(allow_null=True)
+    enrolled_courses = DashboardEnrolledCourseSerializer(many=True)
+    certificates = DashboardCertificateItemSerializer(many=True)
+    recommendations = DashboardRecommendationSerializer(many=True)

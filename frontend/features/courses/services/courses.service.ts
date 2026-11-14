@@ -13,6 +13,7 @@ import {
   Certificate,
   InteractiveExercise,
   ExerciseVerificationResult,
+  LearnerDashboardData,
 } from '../types';
 
 export const coursesService = {
@@ -296,5 +297,12 @@ export const coursesService = {
         body: JSON.stringify({ answers }),
       }
     );
+  },
+
+  /**
+   * Fetches the full learner dashboard summary (F1.13, R16)
+   */
+  async getDashboardSummary(): Promise<LearnerDashboardData> {
+    return await apiClient<LearnerDashboardData>('/courses/dashboard/');
   },
 };

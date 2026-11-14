@@ -51,9 +51,9 @@ export const DesktopSidebar: React.FC = () => {
     {
       key: 'progress',
       label: 'Progrès & Certificats',
-      href: '/courses',
+      href: '/dashboard',
       icon: Award,
-      isActive: false
+      isActive: pathname.startsWith('/dashboard')
     },
     {
       key: 'pricing',
