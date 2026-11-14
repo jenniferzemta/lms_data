@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { User, Search, Bell, LogOut } from 'lucide-react';
 import { useAuth } from '@/features/auth';
+import { DataSaverToggle } from '@/lib/data-saver';
 
 export const AppHeader: React.FC = () => {
   const tCommon = useTranslations('Common');
@@ -46,14 +47,11 @@ export const AppHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Slot: Network Status + Language + Notifications + User Profile */}
+        {/* Right Slot: Network Status + Data Saver + Language + Notifications + User Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Synchronized Network Badge */}
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/50 text-teal-900 text-xs font-semibold">
-            <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-            <span className="text-[11px] font-bold tracking-wide">
-              {tCommon('online')}
-            </span>
+          {/* Data Saver Mode Toggle (F1.14) */}
+          <div className="hidden sm:inline-flex">
+            <DataSaverToggle variant="badge" />
           </div>
 
           {/* Language Switcher Button */}

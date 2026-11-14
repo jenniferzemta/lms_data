@@ -11,6 +11,7 @@ import { LessonAttachmentsList } from './LessonAttachmentsList';
 import { LessonContentRenderer } from './LessonContentRenderer';
 import { LessonQuizInteractive } from './LessonQuizInteractive';
 import { LessonExerciseInteractive } from './LessonExerciseInteractive';
+import { useDataSaver, DataSaverToggle } from '@/lib/data-saver';
 import {
   ChevronLeft,
   ChevronRight,
@@ -66,14 +67,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1.0);
-  const [isDataSaver, setIsDataSaver] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return localStorage.getItem('datamboa_data_saver') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const { isDataSaver } = useDataSaver();
 
   // UI state & Progression
   const [progress, setProgress] = useState<CourseProgress | null>(null);
@@ -460,18 +454,20 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* 2. STATUS CONTEXT BAR (Low Data / 3G Indicator)                */}
+      {/* 2. STATUS CONTEXT BAR (Data Saver & Network Optimizer F1.14)   */}
       {/* ------------------------------------------------------------- */}
       <div className="bg-[#e6eeff] px-4 py-1.5 flex items-center justify-between border-b border-slate-200/50">
-        <div className="max-w-4xl mx-auto w-full flex items-center justify-between">
+        <div className="max-w-4xl mx-auto w-full flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="w-2 h-2 rounded-full bg-[#d29b24] animate-pulse shrink-0" />
-            <span className="text-xs text-slate-700 truncate font-medium">
-              Mode Éco 3G actif • Optimisé pour connexions douces
+            <DataSaverToggle variant="badge" />
+            <span className="text-xs text-slate-600 truncate font-medium hidden sm:inline">
+              {isDataSaver
+                ? 'Consommation vidéo réduite pour connexion mobile'
+                : 'Qualité maximale (recommandé en Wi-Fi)'}
             </span>
           </div>
-          <span className="text-[11px] font-bold text-[#7c5800] bg-[#ffdea7] px-2 py-0.5 rounded-full shrink-0">
-            360p
+          <span className="text-[11px] text-slate-500 font-semibold shrink-0">
+            {isDataSaver ? 'Budget < 300 Ko' : 'HD'}
           </span>
         </div>
       </div>
@@ -528,6 +524,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               <video
                 ref={videoRef}
                 src={translation.video_url}
+                preload={isDataSaver ? 'none' : 'metadata'}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={() => setIsPlaying(false)}

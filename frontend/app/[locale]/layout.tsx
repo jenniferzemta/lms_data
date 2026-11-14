@@ -5,6 +5,7 @@ import type { Viewport } from 'next';
 import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/features/auth';
+import { DataSaverProvider } from '@/lib/data-saver';
 import '../globals.css';
 
 export const viewport: Viewport = {
@@ -49,7 +50,9 @@ export default async function LocaleLayout({
       <body className="bg-brand-canvas text-brand-text antialiased min-h-screen">
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
-            {children}
+            <DataSaverProvider>
+              {children}
+            </DataSaverProvider>
           </AuthProvider>
         </NextIntlClientProvider>
       </body>

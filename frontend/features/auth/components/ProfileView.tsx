@@ -22,6 +22,7 @@ import {
 import { Button } from '@/ui/Button';
 import { ApiError } from '@/lib/api-client';
 import { User } from '../types';
+import { DataSaverToggle } from '@/lib/data-saver';
 
 interface AccountSettingsFormProps {
   user: User;
@@ -583,31 +584,7 @@ export const ProfileView: React.FC = () => {
               </div>
 
               {/* Data Saver Mode (Lightweight Mode F1.14) */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-                <div className="flex items-start gap-3">
-                  <Zap className="w-5 h-5 text-brand-amber mt-0.5 shrink-0" />
-                  <div>
-                    <span className="text-xs font-bold text-brand-primary block">
-                      {tProfile('lightweightMode')}
-                    </span>
-                    <span className="text-[11px] text-brand-muted max-w-md block">
-                      {tProfile('lightweightModeDesc')}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleToggleLightweight(!lightweightMode)}
-                  aria-pressed={lightweightMode}
-                  className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                    lightweightMode
-                      ? 'bg-brand-teal text-white shadow-xs'
-                      : 'bg-white border border-brand-border text-brand-muted hover:text-brand-primary'
-                  }`}
-                >
-                  {lightweightMode ? 'Activé (Économie)' : 'Standard'}
-                </button>
-              </div>
+              <DataSaverToggle variant="full" />
 
               {/* Connection Status Indicator */}
               <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/80">
