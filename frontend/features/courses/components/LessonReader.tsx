@@ -11,6 +11,7 @@ import { LessonAttachmentsList } from './LessonAttachmentsList';
 import { LessonContentRenderer } from './LessonContentRenderer';
 import { LessonQuizInteractive } from './LessonQuizInteractive';
 import { LessonExerciseInteractive } from './LessonExerciseInteractive';
+import { CourseFeedbackModal } from './CourseFeedbackModal';
 import { useDataSaver, DataSaverToggle } from '@/lib/data-saver';
 import {
   ChevronLeft,
@@ -40,6 +41,7 @@ import {
   Trash2,
   Plus,
   Award,
+  Star,
 } from 'lucide-react';
 
 interface LessonReaderProps {
@@ -74,6 +76,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [isCompleting, setIsCompleting] = useState(false);
   const [earnedCertificate, setEarnedCertificate] = useState<Certificate | null>(null);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [isSyllabusDrawerOpen, setIsSyllabusDrawerOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [shareSuccess, setShareSuccess] = useState(false);
@@ -444,12 +447,22 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               Félicitations ! Vous avez validé 100% de la formation. Votre Certificat Officiel est disponible.
             </span>
           </div>
-          <Link
-            href={`/verify/${earnedCertificate.certificate_code}`}
-            className="px-3.5 py-1.5 bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-lg shrink-0 ml-2 shadow-xs transition text-xs flex items-center gap-1"
-          >
-            <span>Voir mon Certificat</span>
-          </Link>
+          <div className="flex items-center gap-2 shrink-0 ml-2">
+            <button
+              type="button"
+              onClick={() => setShowFeedbackModal(true)}
+              className="min-h-[44px] px-3 py-1.5 bg-white/90 hover:bg-white text-amber-900 border border-amber-300 font-bold rounded-lg shadow-2xs transition text-xs flex items-center gap-1.5"
+            >
+              <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>Avis ADDIE</span>
+            </button>
+            <Link
+              href={`/verify/${earnedCertificate.certificate_code}`}
+              className="min-h-[44px] px-3.5 py-1.5 bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-lg shadow-xs transition text-xs flex items-center gap-1"
+            >
+              <span>Voir mon Certificat</span>
+            </Link>
+          </div>
         </div>
       )}
 
@@ -1361,7 +1374,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               {earnedCertificate && (
                 <Link
                   href={`/verify/${earnedCertificate.certificate_code}`}
-                  className="w-full py-3 bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
+                  className="w-full min-h-[48px] bg-[#006b5f] hover:bg-[#005249] text-white font-bold rounded-xl text-sm transition shadow-sm flex items-center justify-center gap-2"
                 >
                   <Award className="w-4 h-4" />
                   <span>Consulter et Partager mon Certificat</span>
@@ -1369,8 +1382,19 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               )}
               <button
                 type="button"
+                onClick={() => {
+                  setShowCertificateModal(false);
+                  setShowFeedbackModal(true);
+                }}
+                className="w-full min-h-[44px] py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2"
+              >
+                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                <span>Donner mon avis sur la formation (ADDIE)</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowCertificateModal(false)}
-                className="w-full py-2.5 text-slate-600 hover:bg-slate-100 font-medium rounded-xl text-sm transition"
+                className="w-full min-h-[44px] py-2.5 text-slate-600 hover:bg-slate-100 font-medium rounded-xl text-sm transition"
               >
                 Continuer
               </button>
@@ -1378,6 +1402,16 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
           </div>
         </div>
       )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 9. COURSE EVALUATION MODAL (F1.20, R17 - ADDIE Evaluation)    */}
+      {/* ------------------------------------------------------------- */}
+      <CourseFeedbackModal
+        courseSlug={lesson.course_slug}
+        courseTitle={lesson.course_title}
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+      />
     </div>
   );
 };

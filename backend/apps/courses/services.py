@@ -8,6 +8,7 @@ from courses.models import (
     Certificate,
     Course,
     CourseEnrollment,
+    CourseFeedback,
     LearningEvent,
     Lesson,
     LessonAnswer,
@@ -517,3 +518,62 @@ def verify_interactive_exercise(user, exercise: InteractiveExercise, submitted_a
         )
 
     return is_correct, feedback, details
+
+
+def submit_course_feedback(
+    user,
+    course: Course,
+    rating: int,
+    clarity_rating: int = 5,
+    usefulness_rating: int = 5,
+    difficulty_level: str = CourseFeedback.DifficultyLevel.BALANCED,
+    pace_rating: str = CourseFeedback.PaceRating.BALANCED,
+    recommend_score: int = 10,
+    strengths: str = '',
+    improvements: str = '',
+    comment: str = '',
+    is_public_testimonial: bool = True,
+) -> CourseFeedback:
+    """
+    Creates or updates a course evaluation feedback (F1.20, R17).
+    Also emits an xAPI learning event (evaluated).
+    """
+    feedback, _ = CourseFeedback.objects.update_or_create(
+        user=user,
+        course=course,
+        defaults={
+            'rating': rating,
+            'clarity_rating': clarity_rating,
+            'usefulness_rating': usefulness_rating,
+            'difficulty_level': difficulty_level,
+            'pace_rating': pace_rating,
+            'recommend_score': recommend_score,
+            'strengths': strengths.strip(),
+            'improvements': improvements.strip(),
+            'comment': comment.strip(),
+            'is_public_testimonial': is_public_testimonial,
+        },
+    )
+
+    record_learning_event(
+        user=user,
+        verb=LearningEvent.Verb.COMPLETED,
+        object_id=course.slug,
+        object_type=LearningEvent.ObjectType.COURSE,
+        object_name=f"Évaluation - {course.title}",
+        result_score_raw=float(rating),
+        result_score_max=5.0,
+        result_score_scaled=float(rating) / 5.0,
+        result_success=True,
+        result_completion=True,
+        context_course_slug=course.slug,
+        extra_payload={
+            'feedback_rating': rating,
+            'clarity_rating': clarity_rating,
+            'usefulness_rating': usefulness_rating,
+            'recommend_score': recommend_score,
+        },
+    )
+
+    return feedback
+

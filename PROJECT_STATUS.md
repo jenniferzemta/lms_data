@@ -2,7 +2,7 @@
 
 > **Source de vérité du niveau d'avancement.** Toute IA lit ce fichier juste après `MASTER_PROMPT.md` (protocole §0.2) et le met à jour à la fin de chaque tâche (skill `finish-task`).
 > **Légende** : ⬜ à faire · 🟨 en cours · 🔎 code terminé, à valider · ✅ terminé (définition de « terminé » §15 respectée) · ⏸ reporté · **M** = indispensable · **S** = souhaitable.
-> **Mise à jour du 15 nov. 2026** : validation de l'exigence F1.19 (Journal d'événements d'apprentissage au format acteur-verbe-objet prêt pour xAPI/LRS, critère R15) et dynamisation de la page d'accueil selon l'authentification (accueil visiteur vs tableau de bord apprenant).
+> **Mise à jour du 15 nov. 2026** : validation de l'exigence F1.20 (Évaluation de la formation & questionnaire de fin de cours ADDIE, critère R17) et de l'exigence F1.19 (Journal d'événements d'apprentissage xAPI/LRS, critère R15).
 
 ---
 
@@ -11,16 +11,16 @@
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-11-15]
 Phase globale     : V1 SOCLE
-Version suivante  : V1 Socle — phase SAM : Développement (F1.20 Évaluation satisfaction ADDIE, ou F1.12/F1.17 Outil d'auteur & Checklist)
-Avancement (M)    : V1 17/19 validé (F1.1 ✅, F1.2 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.9 ✅, F1.10 ✅, F1.11 ✅, F1.13 ✅, F1.14 ✅, F1.15 ✅, F1.16 ✅, F1.18 ✅, F1.19 ✅) · V2 0/11 · V3 0/7 · V4 0/4
+Version suivante  : V1 Socle — phase SAM : Développement (F1.12/F1.17 Outil d'auteur & Checklist de publication qualité)
+Avancement (M)    : V1 18/19 validé (F1.1 ✅, F1.2 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.9 ✅, F1.10 ✅, F1.11 ✅, F1.13 ✅, F1.14 ✅, F1.15 ✅, F1.16 ✅, F1.18 ✅, F1.19 ✅, F1.20 ✅) · V2 0/11 · V3 0/7 · V4 0/4
 Conformité péda.  : 26/26 critères R ✅ validés dans le code (R1 à R26 complets)
-Fait              : F1.19 terminé — Journal d'événements d'apprentissage standard xAPI 1.0.3 (modèle LearningEvent, émission automatique lors de la complétion de leçon, quiz passé/échoué, exercices interactifs, certificats et téléchargements d'annexes ; endpoints REST et flux exportable /xapi/) ; dynamisation de la page d'accueil (/fr) selon l'état de connexion visiteur/apprenant. 70 tests Django passants, tsc 0 erreur.
-En cours          : V1 Socle — Dernières exigences V1 : F1.20 (Questionnaire de satisfaction ADDIE) et F1.12/F1.17 (Outil d'auteur & Checklist qualité).
-Prochaine tâche   : F1.20 (Questionnaire d'évaluation de la formation ADDIE de fin de cours avec note et retours qualitatifs, critère R17).
-Décisions         : Structure Acteur-Verbe-Objet standardisée selon ADL xAPI 1.0.3 pour compatibilité directe avec tout LRS moderne (Learning Locker, Ralph) ; page d'accueil adaptative sans données fictives pour les visiteurs.
+Fait              : F1.20 terminé — Évaluation de la formation selon le cadre ADDIE (modèle CourseFeedback, migration 0010, notation globale 1-5 étoiles, clarté, utilité en contexte FCFA, difficulté perçue, rythme, NPS 1-10, points forts/axes d'amélioration, sélecteurs d'agrégation formateur, endpoints REST et composant tactile CourseFeedbackModal dans LessonReader). 73 tests Django passants, tsc 0 erreur.
+En cours          : V1 Socle — Dernière exigence V1 : F1.12/F1.17 (Espace formateur / Outil d'auteur & Checklist qualité bloquante).
+Prochaine tâche   : F1.12 / F1.17 (Éditeur de cours formateur et checklist qualité empêchant la publication sans objectifs SMART/Bloom et syllabus complet).
+Décisions         : Structure d'évaluation ADDIE combinant métriques quantitatives (note, clarté, utilité, NPS) et retour qualitatif pour le formateur ; émission conjointe d'un événement xAPI.
 Questions ouvertes: Agrégateur Mobile Money V4 ; tableur labo Excel V2 ; hébergement VPS+Docker.
-Dépôt             : Branche main synchronisée, 70 tests passants, tsc 0 erreur.
-Dernière commande : git commit -m "feat(xapi): implement standard learning event log and xAPI statements feed (F1.19, R15)"
+Dépôt             : Branche main synchronisée, 73 tests passants, tsc 0 erreur.
+Dernière commande : git commit -m "feat(evaluation): implement course feedback evaluation and ADDIE survey modal (F1.20, R17)"
 ```
 
 ---
@@ -31,7 +31,7 @@ Dernière commande : git commit -m "feat(xapi): implement standard learning even
 |---|---|
 | Phase globale | V1 — Socle |
 | Version cible suivante | V1 — Socle |
-| Phase SAM de la version cible | Développement (F1.20 / F1.12 / F1.17) |
+| Phase SAM de la version cible | Développement (F1.12 / F1.17 — Dernière exigence V1 !) |
 | Dernière mise à jour | 2026-11-15 |
 | Dépôt | Synchronisé sur GitHub (`origin/main`) |
 | Conformité pédagogique | 26/26 critères R ✅ validés dans le code |
@@ -60,6 +60,7 @@ Dernière commande : git commit -m "feat(xapi): implement standard learning even
 | Tableau de bord apprenant centralisé (F1.13, R16, R26) | ✅ | Reprise en 1 clic, métriques d'apprentissage, certificats obtenus et recommandations cursus |
 | Mode Léger & Économiseur de Données (F1.14, R13, R24) | ✅ | Détection 3G, bascule manuelle en 1 clic, blocage preload vidéo, budget < 300 Ko et suivi Mo économisés |
 | Journal d'apprentissage standard xAPI (F1.19, R15) | ✅ | Modèle LearningEvent, Acteur-Verbe-Objet, xAPI 1.0.3, émission auto (leçons, quiz, exercices, certificats), flux /xapi/ |
+| Évaluation de formation & Questionnaire ADDIE (F1.20, R17) | ✅ | Modèle CourseFeedback, 1-5 étoiles, clarté, utilité FCFA, difficulté/rythme, NPS, axes d'amélioration, CourseFeedbackModal |
 
 ---
 
@@ -67,6 +68,7 @@ Dernière commande : git commit -m "feat(xapi): implement standard learning even
 
 | Date | Exigence / Tâche | Fait | Fichiers clés |
 |---|---|---|---|
+| 2026-11-15 | F1.20 (Évaluation de formation ADDIE) | Implémentation complète backend (modèle `CourseFeedback`, migration 0010, service `submit_course_feedback` avec émission xAPI, sélecteurs d'agrégation note/clarté/utilité/NPS/témoignages, endpoints REST `/feedback/` et `/feedback/summary/`, 3 tests unitaires) et frontend (composant tactile `CourseFeedbackModal.tsx`, intégration dans `LessonReader.tsx` sur complétion 100%, client API et traductions FR/EN). 73 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `CourseFeedbackModal.tsx`, `LessonReader.tsx`, `fr.json`, `en.json` |
 | 2026-11-15 | F1.19 (Journal xAPI/LRS) & Accueil dynamique | Implémentation complète backend (modèle `LearningEvent`, migration 0009, sélecteurs, sérialiseurs xAPI 1.0.3, endpoints `/learning-events/` et `/learning-events/xapi/`, tests unitaires dédiés) et refonte réactive de la page d'accueil (`page.tsx`) connectée à `useAuth` (vue visiteur sans stats fictives vs vue apprenant connecté). 70 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `frontend/app/[locale]/page.tsx`, `fr.json`, `en.json` |
 | 2026-11-14 | F1.14 (Mode léger / Data Saver) | Implémentation du système complet d'économie de forfait data : Provider `DataSaverProvider`, hook `useDataSaver`, détection réseau 3G/saveData, persistance `localStorage`, composant interactif tactile `DataSaverToggle`, intégration dans `LessonReader` (preload="none"), `AppHeader` et `ProfileView`. tsc 0 erreur. | `frontend/lib/data-saver/`, `LessonReader.tsx`, `AppHeader.tsx`, `ProfileView.tsx` |
 | 2026-11-14 | F1.13 (Tableau de bord apprenant) | Implémentation complète backend (sélecteur `get_learner_dashboard_summary`, sérialiseurs `LearnerDashboardSerializer`, endpoint `/api/v1/courses/dashboard/`, tests `LearnerDashboardTests`) et frontend (`LearnerDashboardView.tsx`, page Next.js `/dashboard`, intégration BottomNav et DesktopSidebar, gestion des états loading/vide/erreur). 37 tests Django passants, compilation TypeScript 0 erreur. | `backend/apps/courses/`, `frontend/features/courses/`, `frontend/app/[locale]/dashboard/` |

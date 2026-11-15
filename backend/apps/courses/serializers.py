@@ -6,6 +6,7 @@ from courses.models import (
     ExerciseAttempt,
     Certificate,
     Course,
+    CourseFeedback,
     LearningEvent,
     Lesson,
     LessonAnswer,
@@ -594,4 +595,53 @@ class ClientLearningEventCreateSerializer(serializers.Serializer):
     result_score_raw = serializers.FloatField(required=False, allow_null=True)
     result_duration_seconds = serializers.IntegerField(required=False, allow_null=True)
     context_course_slug = serializers.CharField(max_length=150, required=False, allow_blank=True)
+
+
+class CourseFeedbackSerializer(serializers.ModelSerializer):
+    author_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CourseFeedback
+        fields = (
+            'id',
+            'rating',
+            'clarity_rating',
+            'usefulness_rating',
+            'difficulty_level',
+            'pace_rating',
+            'recommend_score',
+            'strengths',
+            'improvements',
+            'comment',
+            'is_public_testimonial',
+            'author_name',
+            'created_at',
+            'updated_at',
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at', 'author_name')
+
+    def get_author_name(self, obj) -> str:
+        return obj.user.first_name or obj.user.get_full_name() or 'Apprenant'
+
+
+class CourseFeedbackSubmitSerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+    clarity_rating = serializers.IntegerField(min_value=1, max_value=5, default=5, required=False)
+    usefulness_rating = serializers.IntegerField(min_value=1, max_value=5, default=5, required=False)
+    difficulty_level = serializers.ChoiceField(
+        choices=CourseFeedback.DifficultyLevel.choices,
+        default=CourseFeedback.DifficultyLevel.BALANCED,
+        required=False,
+    )
+    pace_rating = serializers.ChoiceField(
+        choices=CourseFeedback.PaceRating.choices,
+        default=CourseFeedback.PaceRating.BALANCED,
+        required=False,
+    )
+    recommend_score = serializers.IntegerField(min_value=1, max_value=10, default=10, required=False)
+    strengths = serializers.CharField(required=False, allow_blank=True, default='')
+    improvements = serializers.CharField(required=False, allow_blank=True, default='')
+    comment = serializers.CharField(required=False, allow_blank=True, default='')
+    is_public_testimonial = serializers.BooleanField(default=True, required=False)
+
 

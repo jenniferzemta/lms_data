@@ -337,3 +337,58 @@ export interface LearnerDashboardData {
   certificates: DashboardCertificateItem[];
   recommendations: DashboardRecommendation[];
 }
+
+export type DifficultyLevel = 'TOO_EASY' | 'BALANCED' | 'TOO_HARD';
+export type PaceRating = 'TOO_SLOW' | 'BALANCED' | 'TOO_FAST';
+
+export interface CourseFeedback {
+  id: number;
+  rating: number;
+  clarity_rating: number;
+  usefulness_rating: number;
+  difficulty_level: DifficultyLevel;
+  pace_rating: PaceRating;
+  recommend_score: number;
+  strengths: string;
+  improvements: string;
+  comment: string;
+  is_public_testimonial: boolean;
+  author_name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CourseFeedbackPayload {
+  rating: number;
+  clarity_rating?: number;
+  usefulness_rating?: number;
+  difficulty_level?: DifficultyLevel;
+  pace_rating?: PaceRating;
+  recommend_score?: number;
+  strengths?: string;
+  improvements?: string;
+  comment?: string;
+  is_public_testimonial?: boolean;
+}
+
+export interface CourseFeedbackSummary {
+  course_slug: string;
+  course_title: string;
+  total_reviews: number;
+  average_rating: number;
+  average_clarity: number;
+  average_usefulness: number;
+  recommendation_percentage: number;
+  ratings_breakdown: Record<number, number>;
+  difficulty_breakdown: Record<DifficultyLevel, number>;
+  pace_breakdown: Record<PaceRating, number>;
+  recent_testimonials: Array<{
+    id: number;
+    author_name: string;
+    rating: number;
+    comment: string;
+    strengths: string;
+    created_at: string;
+  }>;
+}
+

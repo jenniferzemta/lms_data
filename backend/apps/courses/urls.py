@@ -1,5 +1,8 @@
 from django.urls import path
 from courses.views import (
+    CourseFeedbackSubmitView,
+    UserCourseFeedbackView,
+    CourseFeedbackSummaryView,
     LearningEventListView,
     XApiStatementFeedView,
     LearnerDashboardView,
@@ -40,6 +43,9 @@ urlpatterns = [
     path('learning-events/xapi/', XApiStatementFeedView.as_view(), name='xapi-feed'),
     path('<slug:slug>/', CourseDetailView.as_view(), name='course-detail'),
     path('<slug:slug>/certificate/', CourseCertificateView.as_view(), name='course-certificate'),
+    path('<slug:slug>/feedback/', CourseFeedbackSubmitView.as_view(), name='course-feedback-submit'),
+    path('<slug:slug>/feedback/my/', UserCourseFeedbackView.as_view(), name='course-feedback-my'),
+    path('<slug:slug>/feedback/summary/', CourseFeedbackSummaryView.as_view(), name='course-feedback-summary'),
     path('<slug:slug>/progress/', CourseProgressView.as_view(), name='course-progress'),
     path('<slug:slug>/enroll/', CourseEnrollView.as_view(), name='course-enroll'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/', LessonDetailView.as_view(), name='lesson-detail'),

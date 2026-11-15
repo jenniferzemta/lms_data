@@ -8,6 +8,7 @@ from courses.models import (
     ExerciseAttempt,
     Certificate,
     Course,
+    CourseFeedback,
     LearningEvent,
     Lesson,
     LessonAnswer,
@@ -1271,4 +1272,129 @@ class LearningEventAndXApiTests(TestCase):
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.data['verb'], 'interacted')
         self.assertEqual(res.data['object_id'], 'video-douala-timecode-45')
+
+
+class CourseFeedbackTests(TestCase):
+    """
+    Test suite for CourseFeedback and ADDIE Evaluation framework (F1.20, R17).
+    """
+
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(
+            email='paul.talla@datamboa.cm',
+            password='Password123!',
+            first_name='Paul',
+            last_name='Talla',
+            role=User.Role.LEARNER,
+        )
+        self.user2 = User.objects.create_user(
+            email='brigitte.mbi@datamboa.cm',
+            password='Password123!',
+            first_name='Brigitte',
+            last_name='Mbi',
+            role=User.Role.LEARNER,
+        )
+        self.track = Track.objects.create(
+            name='Excel Analytique',
+            slug='excel-analytique-eval',
+            tool=Track.Tool.EXCEL,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel — Bases & Tableaux de bord',
+            slug='excel-bases-analyse',
+            duration_hours=14,
+            is_published=True,
+        )
+
+    def test_submit_course_feedback_service_and_xapi(self):
+        from courses.services import submit_course_feedback
+        feedback = submit_course_feedback(
+            user=self.user1,
+            course=self.course,
+            rating=5,
+            clarity_rating=5,
+            usefulness_rating=5,
+            difficulty_level=CourseFeedback.DifficultyLevel.BALANCED,
+            pace_rating=CourseFeedback.PaceRating.BALANCED,
+            recommend_score=10,
+            strengths='Cas réel avec factures en FCFA très pertinent.',
+            improvements='Ajouter encore plus d exercices sur RECHERCHEX.',
+            comment='Excellente formation pratique !',
+        )
+        self.assertEqual(feedback.rating, 5)
+        self.assertEqual(feedback.recommend_score, 10)
+
+        # Check emitted xAPI learning event
+        event = LearningEvent.objects.filter(
+            user=self.user1,
+            verb=LearningEvent.Verb.COMPLETED,
+            object_type=LearningEvent.ObjectType.COURSE,
+        ).first()
+        self.assertIsNotNone(event)
+        self.assertEqual(event.result_score_raw, 5.0)
+
+    def test_submit_course_feedback_api(self):
+        self.client.force_authenticate(user=self.user1)
+        payload = {
+            'rating': 4,
+            'clarity_rating': 5,
+            'usefulness_rating': 4,
+            'difficulty_level': 'BALANCED',
+            'pace_rating': 'BALANCED',
+            'recommend_score': 9,
+            'strengths': 'Vidéos courtes adaptées au téléphone',
+            'improvements': 'Plus de données sur le commerce de gros',
+            'comment': 'Formation recommandée !',
+            'is_public_testimonial': True,
+        }
+        res = self.client.post(f'/api/v1/courses/{self.course.slug}/feedback/', data=payload, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['rating'], 4)
+        self.assertEqual(res.data['author_name'], 'Paul')
+
+        # Check GET /feedback/my/
+        res_my = self.client.get(f'/api/v1/courses/{self.course.slug}/feedback/my/')
+        self.assertEqual(res_my.status_code, 200)
+        self.assertTrue(res_my.data['has_feedback'])
+        self.assertEqual(res_my.data['feedback']['rating'], 4)
+
+    def test_course_feedback_summary_api(self):
+        from courses.services import submit_course_feedback
+        # Feedback 1
+        submit_course_feedback(
+            user=self.user1,
+            course=self.course,
+            rating=5,
+            clarity_rating=5,
+            usefulness_rating=5,
+            recommend_score=10,
+            strengths='Top cas pratiques',
+            comment='Très formateur !',
+        )
+        # Feedback 2
+        submit_course_feedback(
+            user=self.user2,
+            course=self.course,
+            rating=4,
+            clarity_rating=4,
+            usefulness_rating=5,
+            recommend_score=8,
+            strengths='Accessible hors ligne avec mode léger',
+            comment='Super utile pour le bureau',
+        )
+
+        res = self.client.get(f'/api/v1/courses/{self.course.slug}/feedback/summary/')
+        self.assertEqual(res.status_code, 200)
+        data = res.data
+
+        self.assertEqual(data['total_reviews'], 2)
+        self.assertEqual(data['average_rating'], 4.5)
+        self.assertEqual(data['recommendation_percentage'], 100)
+        self.assertEqual(data['ratings_breakdown'][5], 1)
+        self.assertEqual(data['ratings_breakdown'][4], 1)
+        self.assertEqual(len(data['recent_testimonials']), 2)
+
 

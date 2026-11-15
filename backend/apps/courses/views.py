@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 
 from courses.models import Course, Lesson
 from courses.selectors import (
+    get_course_feedback_summary,
+    get_user_course_feedback,
     get_learner_dashboard_summary,
     list_user_learning_events,
     get_user_xapi_feed,
@@ -30,6 +32,8 @@ from courses.selectors import (
     list_published_courses,
 )
 from courses.serializers import (
+    CourseFeedbackSerializer,
+    CourseFeedbackSubmitSerializer,
     LearnerDashboardSerializer,
     LearningEventSerializer,
     ClientLearningEventCreateSerializer,
@@ -53,6 +57,7 @@ from courses.serializers import (
     QuizSubmitSerializer,
 )
 from courses.services import (
+    submit_course_feedback,
     record_learning_event,
     verify_interactive_exercise,
     issue_course_certificate,
@@ -705,4 +710,90 @@ class XApiStatementFeedView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+# =====================================================================
+# COURSE EVALUATION & FEEDBACK VIEWS (F1.20, R17 - ADDIE Evaluation)
+# =====================================================================
+
+class CourseFeedbackSubmitView(APIView):
+    """
+    POST /api/v1/courses/<slug>/feedback/
+    Submits or updates the learner's course evaluation questionnaire (F1.20, R17).
+    Requires authentication.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug)
+        if not course:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CourseFeedbackSubmitSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        feedback = submit_course_feedback(
+            user=request.user,
+            course=course,
+            rating=data['rating'],
+            clarity_rating=data.get('clarity_rating', 5),
+            usefulness_rating=data.get('usefulness_rating', 5),
+            difficulty_level=data.get('difficulty_level', 'BALANCED'),
+            pace_rating=data.get('pace_rating', 'BALANCED'),
+            recommend_score=data.get('recommend_score', 10),
+            strengths=data.get('strengths', ''),
+            improvements=data.get('improvements', ''),
+            comment=data.get('comment', ''),
+            is_public_testimonial=data.get('is_public_testimonial', True),
+        )
+
+        return Response(CourseFeedbackSerializer(feedback).data, status=status.HTTP_200_OK)
+
+
+class UserCourseFeedbackView(APIView):
+    """
+    GET /api/v1/courses/<slug>/feedback/my/
+    Returns the authenticated user's submitted feedback for the course, if any.
+    Requires authentication.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug)
+        if not course:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        feedback = get_user_course_feedback(request.user, course)
+        if not feedback:
+            return Response({'has_feedback': False, 'feedback': None}, status=status.HTTP_200_OK)
+
+        return Response(
+            {
+                'has_feedback': True,
+                'feedback': CourseFeedbackSerializer(feedback).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class CourseFeedbackSummaryView(APIView):
+    """
+    GET /api/v1/courses/<slug>/feedback/summary/
+    Returns aggregate ratings, score distribution, and public reviews for the course.
+    """
+
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug)
+        if not course:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        summary = get_course_feedback_summary(course)
+        return Response(summary, status=status.HTTP_200_OK)
+
 

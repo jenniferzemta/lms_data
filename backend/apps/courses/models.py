@@ -1,5 +1,6 @@
 import uuid
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -1101,4 +1102,110 @@ class LearningEvent(models.Model):
             statement["result"] = result
 
         return statement
+
+
+class CourseFeedback(models.Model):
+    """
+    Course evaluation questionnaire compliant with the ADDIE framework (Evaluation phase).
+    F1.20 and Criterion R17.
+    Gathers quantitative ratings, difficulty & pace perception, and qualitative feedback
+    for continuous pedagogical improvement.
+    """
+
+    class DifficultyLevel(models.TextChoices):
+        TOO_EASY = 'TOO_EASY', _('Trop facile')
+        BALANCED = 'BALANCED', _('Équilibré / Adapté')
+        TOO_HARD = 'TOO_HARD', _('Trop difficile')
+
+    class PaceRating(models.TextChoices):
+        TOO_SLOW = 'TOO_SLOW', _('Trop lent')
+        BALANCED = 'BALANCED', _('Bien rythmé')
+        TOO_FAST = 'TOO_FAST', _('Trop rapide')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='course_feedbacks',
+        verbose_name=_('Apprenant'),
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='feedbacks',
+        verbose_name=_('Formation évaluée'),
+    )
+    # Ratings 1 to 5 stars
+    rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name=_('Note globale (1-5)'),
+        help_text=_('Satisfaction globale sur la formation'),
+    )
+    clarity_rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        default=5,
+        verbose_name=_('Clarté des explications (1-5)'),
+        help_text=_('Clarté pédagogique des vidéos et concepts'),
+    )
+    usefulness_rating = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        default=5,
+        verbose_name=_('Utilité professionnelle (1-5)'),
+        help_text=_('Applicabilité directe aux cas réels en entreprise africaine'),
+    )
+    # Perception of difficulty and duration
+    difficulty_level = models.CharField(
+        max_length=20,
+        choices=DifficultyLevel.choices,
+        default=DifficultyLevel.BALANCED,
+        verbose_name=_('Niveau de difficulté perçu'),
+    )
+    pace_rating = models.CharField(
+        max_length=20,
+        choices=PaceRating.choices,
+        default=PaceRating.BALANCED,
+        verbose_name=_('Rythme et durée'),
+    )
+    # Net Promoter Score (NPS) 1-10
+    recommend_score = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
+        default=10,
+        verbose_name=_('Recommandation à un pair (1-10)'),
+        help_text=_('Probabilité de recommander cette formation à un collègue'),
+    )
+    # Qualitative fields (ADDIE Evaluation)
+    strengths = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Points forts de la formation'),
+        help_text=_('Ce qui a le plus aidé l\'apprenant à progresser'),
+    )
+    improvements = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Axes d\'amélioration souhaités'),
+        help_text=_('Ce qui pourrait être clarifié ou approfondi'),
+    )
+    comment = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Commentaire ou témoignage libre'),
+    )
+    is_public_testimonial = models.BooleanField(
+        default=True,
+        verbose_name=_('Autorise l\'affichage comme avis apprenant'),
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Évaluation de formation (ADDIE)')
+        verbose_name_plural = _('Évaluations de formation (ADDIE)')
+        ordering = ('-created_at',)
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'course'], name='unique_learner_course_feedback'),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} - {self.course.title} ({self.rating}/5)"
+
 

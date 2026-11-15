@@ -14,6 +14,9 @@ import {
   InteractiveExercise,
   ExerciseVerificationResult,
   LearnerDashboardData,
+  CourseFeedback,
+  CourseFeedbackPayload,
+  CourseFeedbackSummary,
 } from '../types';
 
 export const coursesService = {
@@ -307,5 +310,49 @@ export const coursesService = {
    */
   async getDashboardSummary(): Promise<LearnerDashboardData> {
     return await apiClient<LearnerDashboardData>('/courses/dashboard/');
+  },
+
+  /**
+   * Submits or updates course evaluation feedback (F1.20, R17 - ADDIE Evaluation)
+   */
+  async submitCourseFeedback(
+    courseSlug: string,
+    payload: CourseFeedbackPayload
+  ): Promise<CourseFeedback> {
+    return await apiClient<CourseFeedback>(
+      `/courses/${encodeURIComponent(courseSlug)}/feedback/`,
+      {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }
+    );
+  },
+
+  /**
+   * Retrieves the current user's course feedback (F1.20)
+   */
+  async getMyCourseFeedback(
+    courseSlug: string
+  ): Promise<{ has_feedback: boolean; feedback: CourseFeedback | null }> {
+    try {
+      return await apiClient<{ has_feedback: boolean; feedback: CourseFeedback | null }>(
+        `/courses/${encodeURIComponent(courseSlug)}/feedback/my/`
+      );
+    } catch {
+      return { has_feedback: false, feedback: null };
+    }
+  },
+
+  /**
+   * Retrieves the aggregated course evaluation summary and public testimonials (F1.20, R17)
+   */
+  async getCourseFeedbackSummary(courseSlug: string): Promise<CourseFeedbackSummary | null> {
+    try {
+      return await apiClient<CourseFeedbackSummary>(
+        `/courses/${encodeURIComponent(courseSlug)}/feedback/summary/`
+      );
+    } catch {
+      return null;
+    }
   },
 };

@@ -1,11 +1,12 @@
 from typing import Optional, Dict, Any, List
-from django.db.models import Sum
+from django.db.models import Sum, Avg, Count
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
     Certificate,
     Course,
     CourseEnrollment,
+    CourseFeedback,
     LearningEvent,
     Lesson,
     LessonAnswer,
@@ -644,4 +645,92 @@ def get_user_xapi_feed(
     """
     events = list_user_learning_events(user, course_slug=course_slug, limit=limit)
     return [ev.to_xapi_statement() for ev in events]
+
+
+def get_user_course_feedback(user, course: Course) -> Optional[CourseFeedback]:
+    """
+    Returns the user's feedback for a course if existing (F1.20).
+    """
+    if not user or not user.is_authenticated:
+        return None
+    return CourseFeedback.objects.filter(user=user, course=course).first()
+
+
+def get_course_feedback_summary(course: Course) -> Dict[str, Any]:
+    """
+    Aggregates course ratings and qualitative statistics for instructor & public views (F1.20, R17).
+    """
+    feedbacks = CourseFeedback.objects.filter(course=course)
+    total_count = feedbacks.count()
+
+    if total_count == 0:
+        return {
+            'course_slug': course.slug,
+            'course_title': course.title,
+            'total_reviews': 0,
+            'average_rating': 0.0,
+            'average_clarity': 0.0,
+            'average_usefulness': 0.0,
+            'recommendation_percentage': 100,
+            'ratings_breakdown': {5: 0, 4: 0, 3: 0, 2: 0, 1: 0},
+            'difficulty_breakdown': {'TOO_EASY': 0, 'BALANCED': 0, 'TOO_HARD': 0},
+            'pace_breakdown': {'TOO_SLOW': 0, 'BALANCED': 0, 'TOO_FAST': 0},
+            'recent_testimonials': [],
+        }
+
+    aggregates = feedbacks.aggregate(
+        avg_rating=Avg('rating'),
+        avg_clarity=Avg('clarity_rating'),
+        avg_usefulness=Avg('usefulness_rating'),
+        avg_recommend=Avg('recommend_score'),
+    )
+
+    ratings_counts = {i: 0 for i in range(1, 6)}
+    for row in feedbacks.values('rating').annotate(c=Count('id')):
+        ratings_counts[row['rating']] = row['c']
+
+    diff_counts = {'TOO_EASY': 0, 'BALANCED': 0, 'TOO_HARD': 0}
+    for row in feedbacks.values('difficulty_level').annotate(c=Count('id')):
+        diff_counts[row['difficulty_level']] = row['c']
+
+    pace_counts = {'TOO_SLOW': 0, 'BALANCED': 0, 'TOO_FAST': 0}
+    for row in feedbacks.values('pace_rating').annotate(c=Count('id')):
+        pace_counts[row['pace_rating']] = row['c']
+
+    promoters_count = feedbacks.filter(recommend_score__gte=8).count()
+    recommend_pct = int((promoters_count / total_count) * 100)
+
+    recent_feedbacks = (
+        feedbacks.filter(is_public_testimonial=True)
+        .select_related('user')
+        .order_by('-created_at')[:5]
+    )
+
+    testimonials = [
+        {
+            'id': f.id,
+            'author_name': f.user.first_name or f.user.get_full_name() or 'Apprenant',
+            'rating': f.rating,
+            'comment': f.comment,
+            'strengths': f.strengths,
+            'created_at': f.created_at.strftime('%d/%m/%Y'),
+        }
+        for f in recent_feedbacks
+        if f.comment or f.strengths
+    ]
+
+    return {
+        'course_slug': course.slug,
+        'course_title': course.title,
+        'total_reviews': total_count,
+        'average_rating': round(aggregates['avg_rating'] or 0.0, 1),
+        'average_clarity': round(aggregates['avg_clarity'] or 0.0, 1),
+        'average_usefulness': round(aggregates['avg_usefulness'] or 0.0, 1),
+        'recommendation_percentage': recommend_pct,
+        'ratings_breakdown': ratings_counts,
+        'difficulty_breakdown': diff_counts,
+        'pace_breakdown': pace_counts,
+        'recent_testimonials': testimonials,
+    }
+
 
