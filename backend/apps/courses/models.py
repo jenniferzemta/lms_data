@@ -1,3 +1,5 @@
+import uuid
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -900,3 +902,203 @@ class ExerciseAttempt(models.Model):
     def __str__(self) -> str:
         status = 'Réussi' if self.is_correct else 'À corriger'
         return f"{self.user} - {self.exercise.title} ({status})"
+
+
+class LearningEvent(models.Model):
+    """
+    Learning event log compliant with xAPI / Experience API (F1.19, Criterion R15).
+    Stores learning statements in standard Actor-Verb-Object (AVO) schema ready for LRS export.
+    """
+
+    class Verb(models.TextChoices):
+        INITIALIZED = 'initialized', _('Initialized')
+        LAUNCHED = 'launched', _('Launched')
+        EXPERIENCED = 'experienced', _('Experienced')
+        ATTEMPTED = 'attempted', _('Attempted')
+        ANSWERED = 'answered', _('Answered')
+        COMPLETED = 'completed', _('Completed')
+        PASSED = 'passed', _('Passed')
+        FAILED = 'failed', _('Failed')
+        INTERACTED = 'interacted', _('Interacted')
+        DOWNLOADED = 'downloaded', _('Downloaded')
+        SHARED = 'shared', _('Shared')
+
+    class ObjectType(models.TextChoices):
+        COURSE = 'course', _('Course')
+        MODULE = 'module', _('Module')
+        LESSON = 'lesson', _('Lesson')
+        QUIZ = 'quiz', _('Quiz')
+        EXERCISE = 'exercise', _('Exercise')
+        ATTACHMENT = 'attachment', _('Attachment')
+        CERTIFICATE = 'certificate', _('Certificate')
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='learning_events',
+        verbose_name=_('Acteur (Apprenant)'),
+    )
+    verb = models.CharField(
+        max_length=50,
+        choices=Verb.choices,
+        default=Verb.EXPERIENCED,
+        db_index=True,
+        verbose_name=_('Verbe xAPI'),
+    )
+    object_id = models.CharField(
+        max_length=255,
+        db_index=True,
+        verbose_name=_('Identifiant de l\'objet (URI / Slug)'),
+    )
+    object_type = models.CharField(
+        max_length=50,
+        choices=ObjectType.choices,
+        default=ObjectType.LESSON,
+        db_index=True,
+        verbose_name=_('Type d\'activité'),
+    )
+    object_name = models.CharField(
+        max_length=255,
+        verbose_name=_('Nom de l\'objet'),
+    )
+    # Result facet
+    result_success = models.BooleanField(
+        null=True,
+        blank=True,
+        verbose_name=_('Succès'),
+    )
+    result_completion = models.BooleanField(
+        null=True,
+        blank=True,
+        verbose_name=_('Complétion'),
+    )
+    result_score_raw = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('Score brut'),
+    )
+    result_score_max = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('Score maximum'),
+    )
+    result_score_scaled = models.FloatField(
+        null=True,
+        blank=True,
+        verbose_name=_('Score normalisé (0.0 à 1.0)'),
+    )
+    result_duration_seconds = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_('Durée (secondes)'),
+    )
+    # Context facet
+    context_course_slug = models.CharField(
+        max_length=150,
+        blank=True,
+        default='',
+        db_index=True,
+        verbose_name=_('Slug du cours parent'),
+    )
+    context_platform = models.CharField(
+        max_length=100,
+        default='DataMboa E-Learning Platform',
+        verbose_name=_('Plateforme'),
+    )
+    # Full xAPI payload statement
+    payload = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_('Déclaration xAPI complète (JSON)'),
+    )
+    timestamp = models.DateTimeField(
+        default=timezone.now,
+        db_index=True,
+        verbose_name=_('Horodatage de l\'événement'),
+    )
+
+    class Meta:
+        verbose_name = _('Événement d\'apprentissage (xAPI)')
+        verbose_name_plural = _('Journal d\'événements d\'apprentissage (xAPI)')
+        ordering = ('-timestamp',)
+        indexes = [
+            models.Index(fields=['user', '-timestamp']),
+            models.Index(fields=['verb', '-timestamp']),
+            models.Index(fields=['context_course_slug', '-timestamp']),
+        ]
+
+    def __str__(self) -> str:
+        return f"[{self.timestamp.strftime('%Y-%m-%d %H:%M')}] {self.user} {self.verb} {self.object_name}"
+
+    def to_xapi_statement(self) -> dict:
+        """
+        Generates standard xAPI 1.0.3 statement JSON: Actor-Verb-Object-Result-Context.
+        """
+        actor_name = getattr(self.user, 'full_name', '') or self.user.get_full_name() or self.user.email
+        actor_mbox = f"mailto:{self.user.email}"
+
+        statement = {
+            "id": str(self.id),
+            "timestamp": self.timestamp.isoformat(),
+            "actor": {
+                "objectType": "Agent",
+                "name": actor_name,
+                "mbox": actor_mbox,
+            },
+            "verb": {
+                "id": f"http://adlnet.gov/expapi/verbs/{self.verb}",
+                "display": {
+                    "en-US": self.verb,
+                    "fr-FR": self.get_verb_display(),
+                },
+            },
+            "object": {
+                "objectType": "Activity",
+                "id": self.object_id if self.object_id.startswith('http') else f"https://datamboa.com/xapi/activities/{self.object_type}/{self.object_id}",
+                "definition": {
+                    "name": {
+                        "fr-FR": self.object_name,
+                        "en-US": self.object_name,
+                    },
+                    "type": f"http://adlnet.gov/expapi/activities/{self.object_type}",
+                },
+            },
+            "context": {
+                "platform": self.context_platform,
+                "language": "fr-FR",
+            },
+        }
+
+        if self.context_course_slug:
+            statement["context"]["contextActivities"] = {
+                "parent": [
+                    {
+                        "id": f"https://datamboa.com/xapi/activities/course/{self.context_course_slug}",
+                        "objectType": "Activity",
+                    }
+                ]
+            }
+
+        result = {}
+        if self.result_success is not None:
+            result["success"] = self.result_success
+        if self.result_completion is not None:
+            result["completion"] = self.result_completion
+        if self.result_duration_seconds is not None:
+            result["duration"] = f"PT{self.result_duration_seconds}S"
+        if self.result_score_raw is not None or self.result_score_scaled is not None:
+            score = {}
+            if self.result_score_raw is not None:
+                score["raw"] = self.result_score_raw
+            if self.result_score_max is not None:
+                score["max"] = self.result_score_max
+            if self.result_score_scaled is not None:
+                score["scaled"] = self.result_score_scaled
+            result["score"] = score
+
+        if result:
+            statement["result"] = result
+
+        return statement
+

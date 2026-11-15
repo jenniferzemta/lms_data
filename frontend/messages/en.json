@@ -26,6 +26,12 @@
   "Home": {
     "greeting": "Welcome to DataMboa",
     "greetingSubtitle": "Ready to level up your data skills today?",
+    "visitorGreeting": "Practical data analytics training for Africa.",
+    "visitorSubtitle": "Master Excel, SQL, Power BI and Python through hands-on local business cases in FCFA.",
+    "startFree": "Start learning for free",
+    "exploreCatalog": "Explore catalog",
+    "learnerGreeting": "Welcome back, {name}",
+    "welcomeBack": "Ready to continue your learning path today?",
     "syncLightMode": "Synced · Data-saver active",
     "daysStreak": "days",
     "streakTitle": "Current streak",

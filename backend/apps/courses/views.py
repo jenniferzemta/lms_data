@@ -12,6 +12,8 @@ from rest_framework.views import APIView
 from courses.models import Course, Lesson
 from courses.selectors import (
     get_learner_dashboard_summary,
+    list_user_learning_events,
+    get_user_xapi_feed,
     get_exercise_by_id,
     list_lesson_exercises,
     get_certificate_by_code,
@@ -29,6 +31,8 @@ from courses.selectors import (
 )
 from courses.serializers import (
     LearnerDashboardSerializer,
+    LearningEventSerializer,
+    ClientLearningEventCreateSerializer,
     InteractiveExercisePublicSerializer,
     ExerciseSubmissionSerializer,
     ExerciseVerificationResponseSerializer,
@@ -49,6 +53,7 @@ from courses.serializers import (
     QuizSubmitSerializer,
 )
 from courses.services import (
+    record_learning_event,
     verify_interactive_exercise,
     issue_course_certificate,
     can_access_attachment,
@@ -623,3 +628,81 @@ class LearnerDashboardView(APIView):
         summary = get_learner_dashboard_summary(request.user)
         serializer = LearnerDashboardSerializer(summary)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# =====================================================================
+# LEARNING EVENTS & xAPI VIEWS (F1.19, R15)
+# =====================================================================
+
+class LearningEventListView(APIView):
+    """
+    GET /api/v1/courses/learning-events/
+    Returns the user's chronological learning events log (F1.19, R15).
+    Filterable by ?course=<course_slug> and ?verb=<verb>.
+
+    POST /api/v1/courses/learning-events/
+    Allows client-side event tracking (video interactions, time spent, custom actions).
+    Requires authentication.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        course_slug = request.query_params.get('course')
+        verb = request.query_params.get('verb')
+        events = list_user_learning_events(
+            user=request.user,
+            course_slug=course_slug,
+            verb=verb,
+        )
+        serializer = LearningEventSerializer(events, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request: Request) -> Response:
+        serializer = ClientLearningEventCreateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = serializer.validated_data
+        event = record_learning_event(
+            user=request.user,
+            verb=data['verb'],
+            object_id=data['object_id'],
+            object_type=data['object_type'],
+            object_name=data['object_name'],
+            result_success=data.get('result_success'),
+            result_completion=data.get('result_completion'),
+            result_score_raw=data.get('result_score_raw'),
+            result_duration_seconds=data.get('result_duration_seconds'),
+            context_course_slug=data.get('context_course_slug', ''),
+        )
+        if not event:
+            return Response({'error': 'Event could not be recorded.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(LearningEventSerializer(event).data, status=status.HTTP_201_CREATED)
+
+
+class XApiStatementFeedView(APIView):
+    """
+    GET /api/v1/courses/learning-events/xapi/
+    Returns standard RFC/ADL xAPI 1.0.3 statements array ready for LRS sync / export (F1.19, R15).
+    Requires authentication.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        course_slug = request.query_params.get('course')
+        statements = get_user_xapi_feed(
+            user=request.user,
+            course_slug=course_slug,
+        )
+        return Response(
+            {
+                'version': '1.0.3',
+                'statements': statements,
+                'count': len(statements),
+            },
+            status=status.HTTP_200_OK,
+        )
+

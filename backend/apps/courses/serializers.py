@@ -6,6 +6,7 @@ from courses.models import (
     ExerciseAttempt,
     Certificate,
     Course,
+    LearningEvent,
     Lesson,
     LessonAnswer,
     LessonAttachment,
@@ -551,3 +552,46 @@ class LearnerDashboardSerializer(serializers.Serializer):
     enrolled_courses = DashboardEnrolledCourseSerializer(many=True)
     certificates = DashboardCertificateItemSerializer(many=True)
     recommendations = DashboardRecommendationSerializer(many=True)
+
+
+class LearningEventSerializer(serializers.ModelSerializer):
+    xapi_statement = serializers.SerializerMethodField()
+    verb_display = serializers.CharField(source='get_verb_display', read_only=True)
+
+    class Meta:
+        model = LearningEvent
+        fields = (
+            'id',
+            'verb',
+            'verb_display',
+            'object_id',
+            'object_type',
+            'object_name',
+            'result_success',
+            'result_completion',
+            'result_score_raw',
+            'result_score_max',
+            'result_score_scaled',
+            'result_duration_seconds',
+            'context_course_slug',
+            'context_platform',
+            'payload',
+            'xapi_statement',
+            'timestamp',
+        )
+
+    def get_xapi_statement(self, obj):
+        return obj.to_xapi_statement()
+
+
+class ClientLearningEventCreateSerializer(serializers.Serializer):
+    verb = serializers.ChoiceField(choices=LearningEvent.Verb.choices)
+    object_id = serializers.CharField(max_length=255)
+    object_type = serializers.ChoiceField(choices=LearningEvent.ObjectType.choices)
+    object_name = serializers.CharField(max_length=255)
+    result_success = serializers.BooleanField(required=False, allow_null=True)
+    result_completion = serializers.BooleanField(required=False, allow_null=True)
+    result_score_raw = serializers.FloatField(required=False, allow_null=True)
+    result_duration_seconds = serializers.IntegerField(required=False, allow_null=True)
+    context_course_slug = serializers.CharField(max_length=150, required=False, allow_blank=True)
+

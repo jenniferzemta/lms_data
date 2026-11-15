@@ -26,6 +26,12 @@
   "Home": {
     "greeting": "Bienvenue sur DataMboa",
     "greetingSubtitle": "Prêt(e) à progresser aujourd'hui ?",
+    "visitorGreeting": "L'analyse de données par la pratique, chez nous.",
+    "visitorSubtitle": "Maîtrise Excel, SQL, Power BI et Python avec des cas concrets d'entreprises locales en FCFA.",
+    "startFree": "Commencer gratuitement",
+    "exploreCatalog": "Découvrir le catalogue",
+    "learnerGreeting": "Bonjour, {name}",
+    "welcomeBack": "Prêt(e) à continuer ton parcours aujourd'hui ?",
     "syncLightMode": "Synchronisé · Mode léger actif",
     "daysStreak": "jours",
     "streakTitle": "Série en cours",

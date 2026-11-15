@@ -8,6 +8,7 @@ from courses.models import (
     ExerciseAttempt,
     Certificate,
     Course,
+    LearningEvent,
     Lesson,
     LessonAnswer,
     LessonAttachment,
@@ -1059,3 +1060,215 @@ class LearnerDashboardTests(TestCase):
         recs = data['recommendations']
         self.assertEqual(len(recs), 1)
         self.assertEqual(recs[0]['slug'], 'excel-n2-power-query')
+
+
+class LearningEventAndXApiTests(TestCase):
+    """
+    Test suite for LearningEvent and xAPI / LRS specification compliance (F1.19, R15).
+    """
+
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            email='audrey.data@datamboa.cm',
+            password='SecurePassword123!',
+            first_name='Audrey',
+            last_name='Ngue',
+            role=User.Role.LEARNER,
+        )
+        self.track = Track.objects.create(
+            name='Excel Analytique',
+            slug='excel-analytique',
+            tool=Track.Tool.EXCEL,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel — Fondamentaux & TCD',
+            slug='excel-bases-analyse',
+            duration_hours=14,
+            is_published=True,
+        )
+        self.module = Module.objects.create(
+            course=self.course,
+            title='Module 1 : Nettoyage',
+            order=1,
+            is_published=True,
+        )
+        self.lesson = Lesson.objects.create(
+            module=self.module,
+            title='Nettoyer des ventes à Douala',
+            slug='nettoyer-donnees-ventes-douala',
+            duration_minutes=25,
+            order=1,
+            is_published=True,
+        )
+
+    def test_record_learning_event_and_xapi_statement_structure(self):
+        from courses.services import record_learning_event
+        event = record_learning_event(
+            user=self.user,
+            verb=LearningEvent.Verb.COMPLETED,
+            object_id=self.lesson.slug,
+            object_type=LearningEvent.ObjectType.LESSON,
+            object_name=self.lesson.title,
+            result_completion=True,
+            result_success=True,
+            result_score_raw=90.0,
+            result_score_max=100.0,
+            result_score_scaled=0.9,
+            result_duration_seconds=1500,
+            context_course_slug=self.course.slug,
+        )
+        self.assertIsNotNone(event)
+        self.assertEqual(event.verb, 'completed')
+
+        # Verify xAPI Statement Compliance (ADL xAPI 1.0.3)
+        statement = event.to_xapi_statement()
+        self.assertIn('id', statement)
+        self.assertIn('timestamp', statement)
+
+        # Actor
+        self.assertEqual(statement['actor']['objectType'], 'Agent')
+        self.assertEqual(statement['actor']['mbox'], 'mailto:audrey.data@datamboa.cm')
+        self.assertEqual(statement['actor']['name'], 'Audrey Ngue')
+
+        # Verb
+        self.assertEqual(statement['verb']['id'], 'http://adlnet.gov/expapi/verbs/completed')
+        self.assertIn('fr-FR', statement['verb']['display'])
+
+        # Object
+        self.assertEqual(statement['object']['objectType'], 'Activity')
+        self.assertIn('nettoyer-donnees-ventes-douala', statement['object']['id'])
+        self.assertEqual(statement['object']['definition']['type'], 'http://adlnet.gov/expapi/activities/lesson')
+        self.assertEqual(statement['object']['definition']['name']['fr-FR'], 'Nettoyer des ventes à Douala')
+
+        # Result
+        self.assertTrue(statement['result']['success'])
+        self.assertTrue(statement['result']['completion'])
+        self.assertEqual(statement['result']['score']['scaled'], 0.9)
+        self.assertEqual(statement['result']['score']['raw'], 90.0)
+        self.assertEqual(statement['result']['duration'], 'PT1500S')
+
+        # Context
+        self.assertEqual(statement['context']['language'], 'fr-FR')
+        self.assertIn('excel-bases-analyse', statement['context']['contextActivities']['parent'][0]['id'])
+
+    def test_lesson_completion_triggers_completed_event(self):
+        from courses.services import mark_lesson_completed
+        mark_lesson_completed(self.user, self.lesson)
+
+        event = LearningEvent.objects.filter(
+            user=self.user,
+            verb=LearningEvent.Verb.COMPLETED,
+            object_id=self.lesson.slug,
+        ).first()
+        self.assertIsNotNone(event)
+        self.assertEqual(event.object_type, LearningEvent.ObjectType.LESSON)
+        self.assertEqual(event.context_course_slug, self.course.slug)
+
+    def test_quiz_evaluation_triggers_events(self):
+        from courses.services import evaluate_quiz_submission
+        quiz = Quiz.objects.create(
+            lesson=self.lesson,
+            title='Quiz de validation Excel',
+            passing_score_percentage=70,
+        )
+        q1 = QuizQuestion.objects.create(
+            quiz=quiz,
+            prompt='Quelle formule calcule la somme ?',
+            question_type=QuizQuestion.QuestionType.SINGLE_CHOICE,
+            order=1,
+        )
+        opt_correct = QuizAnswerOption.objects.create(
+            question=q1,
+            text='SOMME',
+            is_correct=True,
+            order=1,
+        )
+
+        # Successful submission
+        attempt, _ = evaluate_quiz_submission(
+            user=self.user,
+            quiz=quiz,
+            answers={str(q1.id): str(opt_correct.id)},
+        )
+        self.assertTrue(attempt.is_passed)
+
+        # Verify attempted and passed events
+        attempted_event = LearningEvent.objects.filter(
+            user=self.user,
+            verb=LearningEvent.Verb.ATTEMPTED,
+            object_id=str(quiz.id),
+        ).first()
+        self.assertIsNotNone(attempted_event)
+        self.assertEqual(attempted_event.result_score_raw, 100.0)
+
+        passed_event = LearningEvent.objects.filter(
+            user=self.user,
+            verb=LearningEvent.Verb.PASSED,
+            object_id=str(quiz.id),
+        ).first()
+        self.assertIsNotNone(passed_event)
+        self.assertTrue(passed_event.result_success)
+
+    def test_learning_events_list_api(self):
+        from courses.services import record_learning_event
+        record_learning_event(
+            user=self.user,
+            verb=LearningEvent.Verb.EXPERIENCED,
+            object_id='video-intro-excel',
+            object_type=LearningEvent.ObjectType.LESSON,
+            object_name='Vidéo introductive',
+            context_course_slug=self.course.slug,
+        )
+
+        self.client.force_authenticate(user=self.user)
+        res = self.client.get('/api/v1/courses/learning-events/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(len(res.data) >= 1)
+        first_item = res.data[0]
+        self.assertIn('xapi_statement', first_item)
+        self.assertEqual(first_item['verb'], 'experienced')
+
+        # Filter by course
+        res_course = self.client.get(f'/api/v1/courses/learning-events/?course={self.course.slug}')
+        self.assertEqual(res_course.status_code, 200)
+        self.assertTrue(len(res_course.data) >= 1)
+
+    def test_xapi_feed_api(self):
+        from courses.services import record_learning_event
+        record_learning_event(
+            user=self.user,
+            verb=LearningEvent.Verb.PASSED,
+            object_id='excel-cert-1',
+            object_type=LearningEvent.ObjectType.CERTIFICATE,
+            object_name='Certificat Excel',
+            context_course_slug=self.course.slug,
+        )
+
+        self.client.force_authenticate(user=self.user)
+        res = self.client.get('/api/v1/courses/learning-events/xapi/')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['version'], '1.0.3')
+        self.assertIn('statements', res.data)
+        self.assertTrue(len(res.data['statements']) >= 1)
+        first_stmt = res.data['statements'][0]
+        self.assertEqual(first_stmt['actor']['mbox'], 'mailto:audrey.data@datamboa.cm')
+        self.assertEqual(first_stmt['verb']['id'], 'http://adlnet.gov/expapi/verbs/passed')
+
+    def test_client_post_learning_event(self):
+        self.client.force_authenticate(user=self.user)
+        payload = {
+            'verb': 'interacted',
+            'object_id': 'video-douala-timecode-45',
+            'object_type': 'lesson',
+            'object_name': 'Interruption vidéo 45s',
+            'result_duration_seconds': 45,
+            'context_course_slug': self.course.slug,
+        }
+        res = self.client.post('/api/v1/courses/learning-events/', data=payload, format='json')
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res.data['verb'], 'interacted')
+        self.assertEqual(res.data['object_id'], 'video-douala-timecode-45')
+

@@ -6,6 +6,7 @@ from courses.models import (
     Certificate,
     Course,
     CourseEnrollment,
+    LearningEvent,
     Lesson,
     LessonAnswer,
     LessonAttachment,
@@ -614,3 +615,33 @@ def get_learner_dashboard_summary(user) -> Dict[str, Any]:
         'certificates': certificates_data,
         'recommendations': recommendations_data,
     }
+
+
+def list_user_learning_events(
+    user,
+    course_slug: Optional[str] = None,
+    verb: Optional[str] = None,
+    limit: int = 50,
+):
+    """
+    Returns the user's chronological learning events log (F1.19, R15).
+    """
+    qs = LearningEvent.objects.filter(user=user)
+    if course_slug:
+        qs = qs.filter(context_course_slug=course_slug)
+    if verb:
+        qs = qs.filter(verb=verb)
+    return qs.order_by('-timestamp')[:limit]
+
+
+def get_user_xapi_feed(
+    user,
+    course_slug: Optional[str] = None,
+    limit: int = 50,
+) -> List[Dict[str, Any]]:
+    """
+    Generates standard RFC/ADL xAPI statements list for LRS integration.
+    """
+    events = list_user_learning_events(user, course_slug=course_slug, limit=limit)
+    return [ev.to_xapi_statement() for ev in events]
+

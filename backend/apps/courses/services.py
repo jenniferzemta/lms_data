@@ -8,6 +8,7 @@ from courses.models import (
     Certificate,
     Course,
     CourseEnrollment,
+    LearningEvent,
     Lesson,
     LessonAnswer,
     LessonAttachment,
@@ -20,12 +21,66 @@ from courses.models import (
 )
 
 
+def record_learning_event(
+    user,
+    verb: str,
+    object_id: str,
+    object_type: str,
+    object_name: str,
+    result_success: bool | None = None,
+    result_completion: bool | None = None,
+    result_score_raw: float | None = None,
+    result_score_max: float | None = None,
+    result_score_scaled: float | None = None,
+    result_duration_seconds: int | None = None,
+    context_course_slug: str = '',
+    context_platform: str = 'DataMboa Web',
+    extra_payload: dict | None = None,
+) -> LearningEvent | None:
+    """
+    Creates and persists a standard xAPI learning event (F1.19, Criterion R15).
+    """
+    if not user or not user.is_authenticated:
+        return None
+
+    event = LearningEvent(
+        user=user,
+        verb=verb,
+        object_id=object_id,
+        object_type=object_type,
+        object_name=object_name,
+        result_success=result_success,
+        result_completion=result_completion,
+        result_score_raw=result_score_raw,
+        result_score_max=result_score_max,
+        result_score_scaled=result_score_scaled,
+        result_duration_seconds=result_duration_seconds,
+        context_course_slug=context_course_slug,
+        context_platform=context_platform,
+    )
+    statement = event.to_xapi_statement()
+    if extra_payload:
+        statement.setdefault('context', {}).update(extra_payload)
+    event.payload = statement
+    event.save()
+    return event
+
+
 def record_attachment_download(attachment: LessonAttachment, user=None) -> int:
     """
     Increments download count atomically for an attachment.
     """
     LessonAttachment.objects.filter(pk=attachment.pk).update(download_count=F('download_count') + 1)
     attachment.refresh_from_db(fields=['download_count'])
+    if user and user.is_authenticated:
+        record_learning_event(
+            user=user,
+            verb=LearningEvent.Verb.DOWNLOADED,
+            object_id=str(attachment.id),
+            object_type=LearningEvent.ObjectType.ATTACHMENT,
+            object_name=attachment.title,
+            context_course_slug=getattr(attachment.lesson.module.course, 'slug', ''),
+        )
     return attachment.download_count
 
 
@@ -135,6 +190,16 @@ def mark_lesson_completed(user, lesson: Lesson) -> tuple[LessonProgress, CourseE
     enrollment.save(update_fields=['last_lesson', 'updated_at'])
 
     update_course_enrollment_progress(enrollment)
+    record_learning_event(
+        user=user,
+        verb=LearningEvent.Verb.COMPLETED,
+        object_id=lesson.slug,
+        object_type=LearningEvent.ObjectType.LESSON,
+        object_name=lesson.title,
+        result_completion=True,
+        result_success=True,
+        context_course_slug=course.slug,
+    )
     return progress, enrollment
 
 
@@ -222,6 +287,33 @@ def evaluate_quiz_submission(user, quiz: Quiz, answers: dict) -> tuple[QuizAttem
         submitted_answers=answers,
         feedback_summary=feedback_list,
     )
+
+    if user and user.is_authenticated:
+        course_slug = getattr(quiz.lesson.module.course, 'slug', '')
+        record_learning_event(
+            user=user,
+            verb=LearningEvent.Verb.ATTEMPTED,
+            object_id=str(quiz.id),
+            object_type=LearningEvent.ObjectType.QUIZ,
+            object_name=quiz.title,
+            result_score_raw=float(score_pct),
+            result_score_max=100.0,
+            result_score_scaled=float(score_pct) / 100.0,
+            result_success=is_passed,
+            context_course_slug=course_slug,
+        )
+        record_learning_event(
+            user=user,
+            verb=LearningEvent.Verb.PASSED if is_passed else LearningEvent.Verb.FAILED,
+            object_id=str(quiz.id),
+            object_type=LearningEvent.ObjectType.QUIZ,
+            object_name=quiz.title,
+            result_score_raw=float(score_pct),
+            result_score_max=100.0,
+            result_score_scaled=float(score_pct) / 100.0,
+            result_success=is_passed,
+            context_course_slug=course_slug,
+        )
 
     if is_passed and user and user.is_authenticated:
         mark_lesson_completed(user, quiz.lesson)
@@ -323,7 +415,7 @@ def issue_course_certificate(enrollment: CourseEnrollment) -> Certificate:
     module_titles = list(course.modules.filter(is_published=True).order_by("order").values_list("title", flat=True)[:4])
     skills_summary = " · ".join(module_titles) if module_titles else course.title
 
-    return Certificate.objects.create(
+    cert = Certificate.objects.create(
         user=enrollment.user,
         course=course,
         enrollment=enrollment,
@@ -332,6 +424,20 @@ def issue_course_certificate(enrollment: CourseEnrollment) -> Certificate:
         instructor_name="Alain FOTSO / DataMboa",
         skills_summary=skills_summary,
     )
+    record_learning_event(
+        user=enrollment.user,
+        verb=LearningEvent.Verb.PASSED,
+        object_id=course.slug,
+        object_type=LearningEvent.ObjectType.CERTIFICATE,
+        object_name=f"Certificat - {course.title}",
+        result_score_raw=float(final_score),
+        result_score_max=100.0,
+        result_score_scaled=float(final_score) / 100.0,
+        result_success=True,
+        result_completion=True,
+        context_course_slug=course.slug,
+    )
+    return cert
 
 
 def normalize_answer(val: str) -> str:
@@ -399,6 +505,15 @@ def verify_interactive_exercise(user, exercise: InteractiveExercise, submitted_a
             submitted_answers=submitted_answers,
             is_correct=is_correct,
             feedback=feedback,
+        )
+        record_learning_event(
+            user=user,
+            verb=LearningEvent.Verb.ANSWERED,
+            object_id=str(exercise.id),
+            object_type=LearningEvent.ObjectType.EXERCISE,
+            object_name=exercise.title,
+            result_success=is_correct,
+            context_course_slug=getattr(exercise.lesson.module.course, 'slug', ''),
         )
 
     return is_correct, feedback, details
