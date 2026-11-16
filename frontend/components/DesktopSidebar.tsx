@@ -20,7 +20,8 @@ import {
   Table,
   Briefcase,
   Brain,
-  FolderKanban
+  FolderKanban,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -75,6 +76,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/labs/python',
       icon: FileCode,
       isActive: pathname.startsWith('/labs/python')
+    },
+    {
+      key: 'labs-powerbi',
+      label: 'Laboratoire Power BI & DAX',
+      href: '/labs/powerbi',
+      icon: BarChart3,
+      isActive: pathname.startsWith('/labs/powerbi')
     },
     {
       key: 'my-courses',

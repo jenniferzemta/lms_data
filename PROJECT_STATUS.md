@@ -2,7 +2,7 @@
 
 > **Source de vérité du niveau d'avancement.** Toute IA lit ce fichier juste après `MASTER_PROMPT.md` (protocole §0.2) et le met à jour à la fin de chaque tâche (skill `finish-task`).
 > **Légende** : ⬜ à faire · 🟨 en cours · 🔎 code terminé, à valider · ✅ terminé (définition de « terminé » §15 respectée) · ⏸ reporté · **M** = indispensable · **S** = souhaitable.
-> **Mise à jour du 16 nov. 2026** : avancée majeure sur la **V2 Pratique** avec validation de **F2.8 (Système de badges d'acquisition de compétences)**, **F2.7 (Missions Scénarios d'entreprise africaine)**, **F2.3 (Laboratoire Tableur Excel interactif)**, **F2.2 (Laboratoire Python & Pandas)**, **F2.13 (Vidéos interactives)**, **F2.4 (Socle `LabShell` & Pattern Adapter `LabEngine`)** et **F2.1 (Laboratoire SQL)**. V1 Socle à 19/19 (100% M), V2 Pratique à 7/11 (64% M).
+> **Mise à jour du 16 nov. 2026** : validation de **F3.5 (Laboratoire interactif Power BI & DAX dans le navigateur)**. **V1 Socle** 19/19 (100% M), **V2 Pratique** 11/11 (100% M), **V3 Intelligence** 1/7 en cours.
 
 ---
 
@@ -10,17 +10,17 @@
 
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-11-16]
-Phase globale     : V2 PRATIQUE
-Version suivante  : V2 Pratique — phase SAM : Développement (F2.9 Répétition espacée SRS)
-Avancement (M)    : V1 19/19 validé (100% M) · V2 7/11 validé (64% M : F2.1 ✅, F2.2 ✅, F2.3 ✅, F2.4 ✅, F2.7 ✅, F2.8 ✅, F2.13 ✅) · V3 0/7 · V4 0/4
+Phase globale     : V3 INTELLIGENCE
+Version suivante  : V3 Intelligence — phase SAM : Développement (F3.3 Lab Git / F3.7 Test positionnement)
+Avancement (M)    : V1 19/19 validé (100% M) · V2 11/11 validé (100% M) · V3 1/7 validé (F3.5 ✅) · V4 0/4
 Conformité péda.  : 26/26 critères R ✅ validés dans le code (R23 adaptatif ciblé, R11 cas réels FCFA, R12 vidéo interactive, R15 xAPI, R16 valorisation, R24 correction immédiate)
-Fait              : F2.8 terminé — Implémentation complète du Système de badges d'acquisition de compétences (modèles Django BadgeDefinition et UserBadgeEarned, migration 0012, sélecteurs avec statut débloqué, service award_badge_to_user avec déclencheurs automatiques sur labos, quiz et missions, émission xAPI verb='earned', commande seed_badges avec 8 badges standard, 8 tests unitaires Django passants). Frontend Next.js avec composant BadgeCard, filtrage par catégorie BadgeGrid, cumul de points XP, page dédiée /badges et intégration dans la sidebar. 92 tests Django passants, tsc 0 erreur.
-En cours          : V2 Pratique — Système de révision espacée SRS (F2.9) et suite des laboratoires (Git F2.5).
-Prochaine tâche   : F2.9 (Système de révision espacée SRS basé sur l'algorithme SuperMemo-2 / SM-2 pour ancrage mémoriel).
-Décisions         : Badges débloqués automatiquement dès la réussite des ateliers pratiques, xAPI statement émis pour chaque badge débloqué avec points XP.
+Fait              : F3.5 terminé — Implémentation complète du Laboratoire Power BI & DAX dans le navigateur (moteur de calcul DAX client in-memory PowerBiLabEngine avec CALCULATE, SUM, DIVIDE, FILTER, ALL ; dataset réaliste camerounais Kamer Boissons SARL 12 ventes FCFA réparties sur 4 villes ; barre de formule DAX avec jetons rapides tactiles >= 44px ; KPI cards dynamiques ; filtre slicer interactif par ville ; graphiques CSS réactifs en bâtons et donut ; 3 ateliers Bloom progressifs avec consigne métier et critères attendus ; indices progressifs et modal d'aide ; export du modèle de données ; émission xAPI ; page /labs/powerbi et intégration sidebar). 90 tests Django passants, tsc 0 erreur.
+En cours          : V3 Intelligence — Laboratoire Git interactif (F3.3) ou Test de positionnement adaptatif (F3.7).
+Prochaine tâche   : F3.3 (Laboratoire interactif GitHub / Git dans le navigateur avec simulateur client de commandes et graphe visuel de commits).
+Décisions         : Exécution DAX et visualisations Power BI 100% côté client sans dépendance de licence ni serveur cloud coûteux, données en FCFA.
 Questions ouvertes: Agrégateur Mobile Money V4 ; hébergement VPS+Docker.
 Dépôt             : Branche main synchronisée, tests Django passants, tsc 0 erreur.
-Dernière commande : git commit -m "feat(badges): implement skill acquisition Open Badges system with automatic triggers (F2.8, R15, R16)"
+Dernière commande : git commit -m "feat(labs): implement interactive in-browser Power BI and DAX engine laboratory (F3.5, R23, R24)"
 ```
 
 ---
@@ -62,6 +62,7 @@ Dernière commande : git commit -m "feat(badges): implement skill acquisition Op
 | Journal d'apprentissage standard xAPI (F1.19, R15) | ✅ | Modèle LearningEvent, Acteur-Verbe-Objet, xAPI 1.0.3, émission auto (leçons, quiz, exercices, certificats), flux /xapi/ |
 | Évaluation de formation & Questionnaire ADDIE (F1.20, R17) | ✅ | Modèle CourseFeedback, 1-5 étoiles, clarté, utilité FCFA, difficulté/rythme, NPS, axes d'amélioration, CourseFeedbackModal |
 | Espace formateur & Checklist qualité bloquante (F1.12, F1.17, R14) | ✅ | Moteur de contrôle qualité 5 piliers, blocage publication, endpoint /quality-check/ et /publish/, vue /instructor |
+| Laboratoire Power BI & DAX interactif (F3.5, R23, R24) | ✅ | Moteur client DAX in-memory (CALCULATE, SUM, DIVIDE, FILTER, ALL), dataset Kamer Boissons FCFA, KPI cards, slicers et graphiques réactifs |
 | Socle commun des laboratoires LabShell (F2.4, R23) | ✅ | Interface LabEngine, LabShell unifié avec consigne, critères, 3 indices progressifs, sauvegarde auto, adaptatif 360px |
 | Laboratoire SQL dans le navigateur (F2.1, R11, R23) | ✅ | Moteur SQL in-memory, base Microfinance Cameroun FCFA (4 tables), explorateur de schéma, table de résultats, 4 ateliers Bloom |
 | Laboratoire Python dans le navigateur (F2.2, R23) | ✅ | Moteur client Pandas in-memory, dataset ventes_cameroun.csv FCFA, console stdout, explorateur, 4 ateliers Bloom |
@@ -94,6 +95,7 @@ Dernière commande : git commit -m "feat(badges): implement skill acquisition Op
 
 | Date | Exigence / Tâche | Fait | Fichiers clés |
 |---|---|---|---|
+| 2026-11-16 | F3.5 (Laboratoire interactif Power BI & DAX dans le navigateur) | Implémentation complète du laboratoire Power BI et moteur DAX in-browser (F3.5, critères R23, R24, R26) : moteur d'évaluation `PowerBiLabEngine` exécuté côté client (< 20 ms, aucun coût de serveur ni licence externe) avec support des fonctions DAX maîtresses (`CALCULATE`, `SUM`, `DIVIDE`, `FILTER`, `ALL`, ratios et marges), dataset réaliste camerounais `Kamer Boissons SARL` (12 lignes de ventes FCFA sur Douala, Yaoundé, Bafoussam, Garoua), barre de formule DAX avec jetons d'insertion rapide tactiles >= 44px, filtre slicer par ville interactif, 3 KPI cards dynamiques (CA, volume, marge), graphiques CSS animés (bâtons par ville et répartition catégorielle donut), 3 ateliers Bloom progressifs, modal d'indices, export DAX/données, émission automatique xAPI `completed`, page `/labs/powerbi` et intégration dans la barre latérale. 90 tests Django passants, tsc 0 erreur. | `frontend/features/labs/`, `frontend/app/[locale]/labs/powerbi/`, `DesktopSidebar.tsx`, `PowerBiLabEngine.ts`, `PowerBiLabView.tsx`, `PowerBiLabContainer.tsx` |
 | 2026-11-16 | F2.6 & F2.12 (Correction formateur & Suivi des objectifs Bloom R18) | Implémentation complète de la correction formateur (F2.6, critère R24) et du suivi d'atteinte des objectifs pédagogiques avec remédiation (F2.12, critère R18) : backend Django (enrichissement de `MissionSubmission` avec `instructor_grade`, `instructor_feedback`, `graded_by` et `graded_at`, migration 0016, sélecteurs `list_submissions_for_instructor` et `get_learning_objectives_analytics`, service `grade_mission_submission` avec validation et émission xAPI `evaluated`, endpoints REST `/instructor/submissions/`, `/instructor/submissions/<id>/grade/`, `/instructor/learning-objectives-analytics/`, 5 tests unitaires passants). Côté frontend Next.js : refonte de l'espace formateur `/instructor` avec 3 onglets (Qualité des cours F1.12, Correction des devoirs F2.6, Atteinte des objectifs & remédiation F2.12/R18), composant `InstructorSubmissionsList` avec modal de notation interactive, et tableau de bord `LearningObjectivesDashboard` avec jauges Bloom et notions critiques à retravailler (> 30% d'échec). 117 tests Django passants, tsc 0 erreur. **V2 Pratique certifiée à 100% (11/11 M)**. | `backend/apps/courses/`, `frontend/features/instructor/`, `frontend/app/[locale]/instructor/` |
 | 2026-11-16 | F2.8 & F2.9 (Portfolio professionnel & Ajout en 1 clic) | Implémentation complète du portfolio professionnel de projets de données (F2.8, F2.9, critères R11, R15) : backend Django (modèles `LearnerPortfolio` et `PortfolioProject`, migration 0015, sélecteurs `get_public_portfolio` avec badges et diplômes, service `add_mission_to_portfolio` avec publication en 1 clic et émission xAPI `shared`, endpoints REST `/portfolio/my/`, `/portfolio/add-mission/`, `/portfolio/<user>/`, 6 tests unitaires passants). Côté frontend Next.js : composant `PortfolioHeader` avec partage WhatsApp/LinkedIn/copie de lien, `PortfolioProjectCard` avec métriques d'impact FCFA, `AddToPortfolioButton` tactile >= 44px intégré dans les missions, page publique `/portfolio/[username]` et lien sidebar. 112 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `frontend/features/portfolio/`, `frontend/app/[locale]/portfolio/`, `DesktopSidebar.tsx` |
 | 2026-11-16 | F2.5 (Dépôt de fichiers par morceaux / Chunked Upload) | Implémentation du téléversement résilient par morceaux (F2.5, critères R4, R15) adapté aux réseaux mobiles instables africains : backend Django (modèle `ChunkedUpload`, migration 0014, service d'init/save/finalize atomique avec SHA-256 et nettoyage des fragments temporaires, émission xAPI `uploaded`, endpoints REST `/uploads/init/`, `/uploads/<id>/chunk/`, `/uploads/<id>/status/`, 5 tests unitaires passants). Côté frontend Next.js : classe `ResumableChunkedUploader` avec auto-reprise, retry exponentiel, calcul de débit (Ko/s) et ETA, composant accessible `ChunkedFileUploader` et intégration dans l'espace de rendu des missions. 106 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `frontend/features/uploads/`, `frontend/features/missions/` |
