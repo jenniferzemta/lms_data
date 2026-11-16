@@ -198,3 +198,4 @@ print(df[['produit', 'montant_total_fcfa', 'marge_fcfa']].head(3))`,
     ]
   }
 ];
+

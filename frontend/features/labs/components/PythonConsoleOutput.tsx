@@ -119,3 +119,4 @@ export const PythonConsoleOutput: React.FC<PythonConsoleOutputProps> = ({ result
     </div>
   );
 };
+

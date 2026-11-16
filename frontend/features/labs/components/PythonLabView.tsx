@@ -528,3 +528,4 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
     </div>
   );
 };
+

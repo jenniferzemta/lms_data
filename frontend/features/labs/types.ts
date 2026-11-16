@@ -103,3 +103,25 @@ export interface PythonLabState {
   activeExercise: LabExercise | null;
 }
 
+export interface ExcelCell {
+  raw: string;
+  value: string | number | boolean | null;
+  formula?: string;
+  formatted?: string;
+  error?: string;
+  isHeader?: boolean;
+}
+
+export type ExcelGridMap = Record<string, ExcelCell>;
+
+export interface ExcelLabState {
+  cells: ExcelGridMap;
+  activeCell: string;
+  formulaInput: string;
+  selectedRange?: string;
+  activeExercise: LabExercise | null;
+  rowCount: number;
+  colCount: number;
+}
+
+

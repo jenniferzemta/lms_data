@@ -16,7 +16,8 @@ import {
   LogIn,
   ShieldCheck,
   Terminal,
-  FileCode
+  FileCode,
+  Table
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -43,6 +44,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/courses',
       icon: Compass,
       isActive: isCourses
+    },
+    {
+      key: 'labs-excel',
+      label: 'Laboratoire Excel',
+      href: '/labs/excel',
+      icon: Table,
+      isActive: pathname.startsWith('/labs/excel')
     },
     {
       key: 'labs-sql',

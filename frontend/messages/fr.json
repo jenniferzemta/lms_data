@@ -268,6 +268,9 @@
     "pythonTitle": "Laboratoire Python & Pandas",
     "pythonSubtitle": "Analysez des jeux de données d'entreprises locales en FCFA avec la bibliothèque Pandas.",
     "runPython": "Exécuter le script Python",
-    "pythonSuccessTitle": "Atelier Python Validé avec Succès !"
+    "pythonSuccessTitle": "Atelier Python Validé avec Succès !",
+    "excelTitle": "Laboratoire Tableur Excel",
+    "excelSubtitle": "Maîtrisez les formules SOMME, SI, SOMME.SI et RECHERCHEV sur les données d'une entreprise locale.",
+    "excelSuccessTitle": "Feuille de calcul validée avec succès !"
   }
 }

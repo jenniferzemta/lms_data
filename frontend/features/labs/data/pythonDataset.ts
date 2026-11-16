@@ -38,3 +38,4 @@ TXN-109,Kamer Logistique Port,Douala,Ordinateur Portable HP,Informatique,5,31500
 TXN-110,Restaurant Saveurs Yaoundé,Yaoundé,Huile Diamaor Carton 5L,Agro-alimentaire,8,6800,54400,2024-03-22
 TXN-111,Boulangerie du Centre,Garoua,Sucre En Poudre Sac 25kg,Agro-alimentaire,20,19000,380000,2024-03-25
 TXN-112,Société Générale Matériaux,Bafoussam,Sac Ciment Dangote 50kg,BTP,120,4900,588000,2024-03-28`;
+
