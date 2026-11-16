@@ -42,6 +42,8 @@ import {
   Plus,
   Award,
   Star,
+  Terminal,
+  ExternalLink,
 } from 'lucide-react';
 
 interface LessonReaderProps {
@@ -991,6 +993,30 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               lessonSlug={lesson.slug}
               onQuizPassed={handleQuizPassed}
             />
+
+            {/* Direct Laboratory Access Banner (V2 Pratique, F2.1, F2.4) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs border border-slate-700">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 border border-teal-500/30">
+                  <Terminal className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-white font-heading">
+                    Laboratoire SQL Intégré (Base Microfinance FCFA)
+                  </h4>
+                  <p className="text-[11px] text-slate-300">
+                    Mettez en pratique vos requêtes SELECT, WHERE et GROUP BY directement dans le navigateur.
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/labs/sql"
+                className="min-h-[44px] px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-1.5 shrink-0 self-stretch sm:self-auto justify-center"
+              >
+                <span>Ouvrir le labo SQL</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         )}
 

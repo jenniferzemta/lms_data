@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
-import { Home, Compass, BookOpen, TrendingUp, User } from 'lucide-react';
+import { Home, Compass, BookOpen, TrendingUp, User, Terminal } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
 export const BottomNav: React.FC = () => {
@@ -28,10 +28,10 @@ export const BottomNav: React.FC = () => {
     },
     {
       key: 'practice',
-      label: tNav('practice'),
-      href: '/courses',
-      icon: BookOpen,
-      isActive: false
+      label: 'Labo SQL',
+      href: '/labs/sql',
+      icon: Terminal,
+      isActive: pathname.startsWith('/labs')
     },
     {
       key: 'progress',

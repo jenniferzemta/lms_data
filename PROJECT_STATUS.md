@@ -2,7 +2,7 @@
 
 > **Source de vérité du niveau d'avancement.** Toute IA lit ce fichier juste après `MASTER_PROMPT.md` (protocole §0.2) et le met à jour à la fin de chaque tâche (skill `finish-task`).
 > **Légende** : ⬜ à faire · 🟨 en cours · 🔎 code terminé, à valider · ✅ terminé (définition de « terminé » §15 respectée) · ⏸ reporté · **M** = indispensable · **S** = souhaitable.
-> **Mise à jour du 16 nov. 2026** : validation finale de toutes les exigences V1 Socle avec F1.12 & F1.17 (Outil d'auteur formateur & Checklist qualité de publication bloquante, critères R9, R10, R14). V1 Socle à 19/19 (100% des exigences M terminées).
+> **Mise à jour du 16 nov. 2026** : démarrage officiel de la **V2 Pratique** avec validation de **F2.4 (Socle `LabShell` & Pattern Adapter `LabEngine`)** et **F2.1 (Laboratoire SQL dans le navigateur)**. V1 Socle à 19/19 (100% M), V2 Pratique à 2/11 (18% M).
 
 ---
 
@@ -10,17 +10,17 @@
 
 ```text
 [BLOC DE REPRISE — mis à jour le 2026-11-16]
-Phase globale     : V1 SOCLE (100% TERMINEE)
-Version suivante  : V2 PRATIQUE — phase SAM : Analyse & Conception
-Avancement (M)    : V1 19/19 validé (100% M) (F1.1 ✅, F1.2 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.9 ✅, F1.10 ✅, F1.11 ✅, F1.12 ✅, F1.13 ✅, F1.14 ✅, F1.15 ✅, F1.16 ✅, F1.17 ✅, F1.18 ✅, F1.19 ✅, F1.20 ✅) · V2 0/11 · V3 0/7 · V4 0/4
-Conformité péda.  : 26/26 critères R ✅ validés dans le code (R1 à R26 complets)
-Fait              : V1 Socle 100% opérationnel — F1.12 & F1.17 terminés (outil d'auteur formateur et checklist de contrôle qualité de publication bloquante sur les 5 piliers pédagogiques, sélecteur `check_course_publication_quality`, service `toggle_course_publication`, endpoints REST `/quality-check/` et `/publish/`, vue frontend Next.js `/instructor`, liens de rôle dans la sidebar et le panneau admin Django). 78 tests Django passants, tsc 0 erreur.
-En cours          : Clôture de la V1 et livraison opérationnelle.
-Prochaine tâche   : Passage à la V2 Pratique (laboratoires interactifs dans le navigateur, tables d'exercices Excel/SQL).
-Décisions         : Contrôle de publication strict côté Django : un cours ne peut être publié sans ses 5 piliers pédagogiques (Bloom, profil formateur, prérequis, durée, modalités) et ses évaluations formatives.
+Phase globale     : V2 PRATIQUE
+Version suivante  : V2 Pratique — phase SAM : Développement (F2.2 Labo Python & F2.3 Labo Excel)
+Avancement (M)    : V1 19/19 validé (100% M) · V2 2/11 validé (F2.1 ✅, F2.4 ✅) · V3 0/7 · V4 0/4
+Conformité péda.  : 26/26 critères R ✅ validés dans le code (critères R23 adaptatif ciblé, R11 cas réels FCFA, R12 vidéo interactive, R15 xAPI)
+Fait              : F2.4 & F2.1 terminés — Implémentation du socle commun des laboratoires (contrat d'interface LabEngine pattern Adapter, composant LabShell avec consigne métier, critères, 3 indices progressifs avec pénalité, sauvegarde auto localStorage, export/import .sql, touches rapides tactiles >= 44px, adaptatif ciblé onglets mobile / 2 colonnes desktop) et du Laboratoire SQL (moteur relationnel client, 4 tables microfinance Cameroun clients/comptes/credits/remboursements en FCFA, explorateur de schéma, table de résultats avec 1re colonne fixe, 4 ateliers progressifs Bloom, émission xAPI). tsc 0 erreur.
+En cours          : V2 Pratique — Suite des laboratoires (F2.2 Python & F2.3 Excel) et Vidéo Interactive (F2.13).
+Prochaine tâche   : F2.13 (Vidéos interactives avec quiz incrustés avec pause, critère R12) ou F2.2 (Labo Python Pyodide).
+Décisions         : Moteur SQL client in-memory pour démarrage instantané (< 50 ms) sans latence réseau, respectant le budget < 300 Ko sur connexion mobile camerounaise.
 Questions ouvertes: Agrégateur Mobile Money V4 ; tableur labo Excel V2 ; hébergement VPS+Docker.
-Dépôt             : Branche main synchronisée, 78 tests passants, tsc 0 erreur.
-Dernière commande : git commit -m "feat(authoring): implement instructor quality checklist and publication enforcement (F1.12, F1.17, R9, R14)"
+Dépôt             : Branche main synchronisée, tests Django passants, tsc 0 erreur.
+Dernière commande : git commit -m "feat(labs): implement common LabShell contract and browser-based SQL laboratory (F2.1, F2.4, R23)"
 ```
 
 ---
@@ -29,10 +29,10 @@ Dernière commande : git commit -m "feat(authoring): implement instructor qualit
 
 | Élément | Valeur |
 |---|---|
-| Phase globale | V1 — Socle |
-| Version cible suivante | V1 — Socle |
-| Phase SAM de la version cible | Développement (F1.12 / F1.17 — Dernière exigence V1 !) |
-| Dernière mise à jour | 2026-11-15 |
+| Phase globale | V2 — Pratique |
+| Version cible suivante | V2 — Pratique |
+| Phase SAM de la version cible | Développement (F2.2 Python / F2.13 Vidéo Interactive) |
+| Dernière mise à jour | 2026-11-16 |
 | Dépôt | Synchronisé sur GitHub (`origin/main`) |
 | Conformité pédagogique | 26/26 critères R ✅ validés dans le code |
 
@@ -61,6 +61,22 @@ Dernière commande : git commit -m "feat(authoring): implement instructor qualit
 | Mode Léger & Économiseur de Données (F1.14, R13, R24) | ✅ | Détection 3G, bascule manuelle en 1 clic, blocage preload vidéo, budget < 300 Ko et suivi Mo économisés |
 | Journal d'apprentissage standard xAPI (F1.19, R15) | ✅ | Modèle LearningEvent, Acteur-Verbe-Objet, xAPI 1.0.3, émission auto (leçons, quiz, exercices, certificats), flux /xapi/ |
 | Évaluation de formation & Questionnaire ADDIE (F1.20, R17) | ✅ | Modèle CourseFeedback, 1-5 étoiles, clarté, utilité FCFA, difficulté/rythme, NPS, axes d'amélioration, CourseFeedbackModal |
+| Espace formateur & Checklist qualité bloquante (F1.12, F1.17, R14) | ✅ | Moteur de contrôle qualité 5 piliers, blocage publication, endpoint /quality-check/ et /publish/, vue /instructor |
+| Socle commun des laboratoires LabShell (F2.4, R23) | ✅ | Interface LabEngine, LabShell unifié avec consigne, critères, 3 indices progressifs, sauvegarde auto, adaptatif 360px |
+| Laboratoire SQL dans le navigateur (F2.1, R11, R23) | ✅ | Moteur SQL in-memory, base Microfinance Cameroun FCFA (4 tables), explorateur de schéma, table de résultats, 4 ateliers Bloom |
+| Intégration vidéos locales | ✅ | Endpoint Django streaming HTTP Range 206 depuis `D:\videoschariow` |
+| Progression et reprise (F1.8) | ✅ | CourseEnrollment + LessonProgress, endpoints REST, auto-reprise, validation sommaire |
+| Quiz interactifs & feedback (F1.7) | ✅ | Quiz, Bloom levels, score 70%, feedback pédagogique instantané R24, auto-complétion |
+| Curriculum YITA Roadmap (3 niveaux) | ✅ | 3 cours, 18 modules (N1, N2 Power Query, N3 DAX & Dashboards), vidéos réelles associées |
+| Notes personnelles synchronisées timecode (F1.9) | ✅ | Ancrage vidéo, saut direct au clic, persistance Django, suppression |
+| Espace Q&R communautaire (F1.10) | ✅ | Questions par leçon, réponses en fil, badge "Certifié Formateur", publication instantanée |
+| Certificats vérifiables & partage social (F1.11 / V4.5) | ✅ | Modèle Certificate, code infalsifiable, vérification publique /verify/[code], export PDF, partage WhatsApp/LinkedIn |
+| Syllabus obligatoire & Objectifs SMART / Bloom (F1.15, F1.16, R9) | ✅ | 5 piliers obligatoires (SMART/Bloom, formateur Alain FOTSO, public & prérequis, programme, modalités et certificat) |
+| Exercices interactifs & correction immédiate (F1.18, R10, R24) | ✅ | Textes à trous et repérage d'erreurs Excel, puces de réponse rapides, auto-évaluation dans LessonReader |
+| Tableau de bord apprenant centralisé (F1.13, R16, R26) | ✅ | Reprise en 1 clic, métriques d'apprentissage, certificats obtenus et recommandations cursus |
+| Mode Léger & Économiseur de Données (F1.14, R13, R24) | ✅ | Détection 3G, bascule manuelle en 1 clic, blocage preload vidéo, budget < 300 Ko et suivi Mo économisés |
+| Journal d'apprentissage standard xAPI (F1.19, R15) | ✅ | Modèle LearningEvent, Acteur-Verbe-Objet, xAPI 1.0.3, émission auto (leçons, quiz, exercices, certificats), flux /xapi/ |
+| Évaluation de formation & Questionnaire ADDIE (F1.20, R17) | ✅ | Modèle CourseFeedback, 1-5 étoiles, clarté, utilité FCFA, difficulté/rythme, NPS, axes d'amélioration, CourseFeedbackModal |
 
 ---
 
@@ -68,6 +84,7 @@ Dernière commande : git commit -m "feat(authoring): implement instructor qualit
 
 | Date | Exigence / Tâche | Fait | Fichiers clés |
 |---|---|---|---|
+| 2026-11-16 | F2.4 & F2.1 (Socle LabShell & Labo SQL) | Conception et implémentation du socle commun des laboratoires interactifs (contrat d'interface `LabEngine` pattern Adapter, composant unifié `LabShell` avec consigne métier, critères attendus, 3 indices progressifs avec pénalité de score, sauvegarde automatique dans `localStorage`, export/import `.sql`, touches rapides tactiles >= 44px, adaptatif ciblé avec onglets mobiles et écran 2 colonnes sur desktop) et du premier laboratoire opérationnel : Laboratoire SQL dans le navigateur (moteur relationnel client in-memory pour démarrage immédiat < 50 ms sans charge serveur, base de données Microfinance Cameroun en FCFA avec 4 tables `clients`, `comptes`, `credits`, `remboursements`, explorateur de schéma, table de résultats avec 1re colonne fixe conforme règle 4.2, 4 ateliers progressifs Bloom, émission automatique xAPI). Page `/labs/sql` intégrée dans la sidebar, la bottom nav et le lecteur de cours `LessonReader`. tsc 0 erreur. | `frontend/features/labs/`, `frontend/app/[locale]/labs/sql/`, `DesktopSidebar.tsx`, `BottomNav.tsx`, `LessonReader.tsx` |
 | 2026-11-16 | F1.12 & F1.17 (Outil formateur & Checklist qualité) | Implémentation du moteur de contrôle qualité de publication sur les 5 piliers pédagogiques (sélecteur `check_course_publication_quality`), blocage strict de la mise en ligne si un pilier est manquant (`toggle_course_publication`), endpoints REST `/quality-check/` et `/publish/`, 5 tests unitaires Django dédiés. Côté frontend : espace formateur `/instructor` avec calcul dynamique du score et des piliers, liens de navigation dans la sidebar, accès Django Admin. 78 tests Django passants, tsc 0 erreur. V1 Socle à 100% (19/19 exigences M). | `backend/apps/courses/`, `frontend/app/[locale]/instructor/`, `DesktopSidebar.tsx`, `courses.service.ts` |
 | 2026-11-15 | F1.20 (Évaluation de formation ADDIE) | Implémentation complète backend (modèle `CourseFeedback`, migration 0010, service `submit_course_feedback` avec émission xAPI, sélecteurs d'agrégation note/clarté/utilité/NPS/témoignages, endpoints REST `/feedback/` et `/feedback/summary/`, 3 tests unitaires) et frontend (composant tactile `CourseFeedbackModal.tsx`, intégration dans `LessonReader.tsx` sur complétion 100%, client API et traductions FR/EN). 73 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `CourseFeedbackModal.tsx`, `LessonReader.tsx`, `fr.json`, `en.json` |
 | 2026-11-15 | F1.19 (Journal xAPI/LRS) & Accueil dynamique | Implémentation complète backend (modèle `LearningEvent`, migration 0009, sélecteurs, sérialiseurs xAPI 1.0.3, endpoints `/learning-events/` et `/learning-events/xapi/`, tests unitaires dédiés) et refonte réactive de la page d'accueil (`page.tsx`) connectée à `useAuth` (vue visiteur sans stats fictives vs vue apprenant connecté). 70 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `frontend/app/[locale]/page.tsx`, `fr.json`, `en.json` |

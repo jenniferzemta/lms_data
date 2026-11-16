@@ -382,4 +382,22 @@ export const coursesService = {
       }
     );
   },
+
+  /**
+   * Records a standard xAPI/LRS learning event (F1.19, R15)
+   */
+  async recordLearningEvent(payload: {
+    verb: string;
+    object_id: string;
+    object_type?: string;
+    object_name?: string;
+    success?: boolean;
+    score_scaled?: number;
+    payload?: Record<string, unknown>;
+  }): Promise<{ id: number }> {
+    return await apiClient<{ id: number }>('/courses/learning-events/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };

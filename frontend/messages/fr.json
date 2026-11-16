@@ -245,5 +245,21 @@
     "scoreLabel": "Conformité pédagogique",
     "adminLink": "Ouvrir l'administration Django",
     "noCourses": "Aucun cours assigné pour le moment."
+  },
+  "Labs": {
+    "title": "Laboratoire SQL Intégré",
+    "subtitle": "Pratiquez vos requêtes SQL directement dans le navigateur sur une base de microfinance camerounaise.",
+    "runQuery": "Exécuter la requête",
+    "running": "Exécution...",
+    "verifySolution": "Vérifier la solution",
+    "verifying": "Vérification en cours...",
+    "hints": "Indices",
+    "downloadSql": "Télécharger (.sql)",
+    "importSql": "Importer (.sql)",
+    "autoSaved": "Sauvegardé auto",
+    "rowsReturned": "{count} lignes retournées",
+    "noResults": "Aucun résultat pour le moment",
+    "successTitle": "Atelier SQL Réussi avec Succès !",
+    "nextExercise": "Passer à l'atelier suivant"
   }
 }

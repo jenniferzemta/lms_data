@@ -245,5 +245,21 @@
     "scoreLabel": "Pedagogical compliance",
     "adminLink": "Open Django Admin",
     "noCourses": "No courses assigned yet."
+  },
+  "Labs": {
+    "title": "Integrated SQL Laboratory",
+    "subtitle": "Practice SQL queries directly inside your browser on a Cameroonian microfinance relational database.",
+    "runQuery": "Run Query",
+    "running": "Running...",
+    "verifySolution": "Verify Solution",
+    "verifying": "Verifying...",
+    "hints": "Hints",
+    "downloadSql": "Download (.sql)",
+    "importSql": "Import (.sql)",
+    "autoSaved": "Auto-saved",
+    "rowsReturned": "{count} rows returned",
+    "noResults": "No results yet",
+    "successTitle": "SQL Workshop Completed Successfully!",
+    "nextExercise": "Next Workshop"
   }
 }

@@ -14,7 +14,8 @@ import {
   LogOut,
   ExternalLink,
   LogIn,
-  ShieldCheck
+  ShieldCheck,
+  Terminal
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -41,6 +42,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/courses',
       icon: Compass,
       isActive: isCourses
+    },
+    {
+      key: 'labs',
+      label: 'Laboratoire SQL',
+      href: '/labs/sql',
+      icon: Terminal,
+      isActive: pathname.startsWith('/labs')
     },
     {
       key: 'my-courses',
