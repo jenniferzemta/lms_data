@@ -23,7 +23,8 @@ import {
   FolderKanban,
   BarChart3,
   GitBranch,
-  Target
+  Target,
+  FileCheck2
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -99,6 +100,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/labs/git',
       icon: GitBranch,
       isActive: pathname.startsWith('/labs/git')
+    },
+    {
+      key: 'audit',
+      label: 'Audit Intelligent (Code/Formules)',
+      href: '/audit',
+      icon: FileCheck2,
+      isActive: pathname.startsWith('/audit')
     },
     {
       key: 'my-courses',

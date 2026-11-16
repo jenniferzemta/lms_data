@@ -1334,6 +1334,46 @@ class PlacementTestResultView(APIView):
         return Response({'has_taken_test': True, 'result': result_data}, status=status.HTTP_200_OK)
 
 
+class CodeAuditAnalyzeView(APIView):
+    """
+    POST /api/v1/courses/audit/analyze/
+    Analyzes student code or formulas (Excel, SQL, Python) and returns
+    pedagogical audit report (F3.1, F3.2, R24).
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request) -> Response:
+        from courses.audit_engine import CodeAuditEngine
+        tool = request.data.get('tool', 'excel')
+        content = request.data.get('content', '')
+
+        report = CodeAuditEngine.audit(tool=tool, content=content)
+        return Response(report.to_dict(), status=status.HTTP_200_OK)
+
+
+class CodeAuditDownloadView(APIView):
+    """
+    POST /api/v1/courses/audit/download/
+    Generates and downloads the technical and pedagogical audit report as Markdown file.
+    """
+    permission_classes = [AllowAny]
+
+    def post(self, request: Request) -> Response:
+        from django.http import HttpResponse
+        from courses.audit_engine import CodeAuditEngine
+
+        tool = request.data.get('tool', 'excel')
+        content = request.data.get('content', '')
+
+        report = CodeAuditEngine.audit(tool=tool, content=content)
+        markdown_text = report.to_markdown()
+
+        response = HttpResponse(markdown_text, content_type='text/markdown; charset=utf-8')
+        response['Content-Disposition'] = f'attachment; filename="audit_rapport_{tool.lower()}.md"'
+        return response
+
+
+
 
 
 
