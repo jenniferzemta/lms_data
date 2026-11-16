@@ -21,7 +21,8 @@ import {
   Briefcase,
   Brain,
   FolderKanban,
-  BarChart3
+  BarChart3,
+  GitBranch
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -83,6 +84,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/labs/powerbi',
       icon: BarChart3,
       isActive: pathname.startsWith('/labs/powerbi')
+    },
+    {
+      key: 'labs-git',
+      label: 'Laboratoire Git & GitHub',
+      href: '/labs/git',
+      icon: GitBranch,
+      isActive: pathname.startsWith('/labs/git')
     },
     {
       key: 'my-courses',

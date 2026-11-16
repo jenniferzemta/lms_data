@@ -124,4 +124,46 @@ export interface ExcelLabState {
   colCount: number;
 }
 
+export type GitFileStatus = 'untracked' | 'modified' | 'staged' | 'committed';
+
+export interface GitFile {
+  path: string;
+  content: string;
+  status: GitFileStatus;
+}
+
+export interface GitCommit {
+  hash: string;
+  shortHash: string;
+  message: string;
+  author: string;
+  timestamp: number;
+  parentHash: string | null;
+  branch: string;
+  files: Record<string, string>;
+}
+
+export interface GitTerminalLog {
+  type: 'command' | 'output' | 'error' | 'success';
+  text: string;
+  timestamp: number;
+}
+
+export interface GitLabState {
+  currentBranch: string;
+  branches: Record<string, string>;
+  headHash: string;
+  commits: GitCommit[];
+  workingFiles: Record<string, string>;
+  stagedFiles: Record<string, string>;
+  committedFiles: Record<string, string>;
+  logs: GitTerminalLog[];
+  remoteOrigin: {
+    url: string;
+    branches: Record<string, string>;
+    commits: GitCommit[];
+  };
+  activeExercise: LabExercise | null;
+}
+
 
