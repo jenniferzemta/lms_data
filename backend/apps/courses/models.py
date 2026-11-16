@@ -1307,4 +1307,62 @@ class MissionSubmission(models.Model):
         return f"{self.user} - {self.mission.title} ({self.final_score}/100)"
 
 
+class BadgeDefinition(models.Model):
+    """
+    Skill Acquisition Badge Definition following Open Badges concepts (F2.8, R16).
+    """
+    class Category(models.TextChoices):
+        LAB = 'LAB', _('Laboratoires Pratiques')
+        COURSE = 'COURSE', _('Parcours de Cours')
+        MISSION = 'MISSION', _('Missions Entreprise')
+        STREAK = 'STREAK', _('Assiduité & Régularité')
+        SPECIAL = 'SPECIAL', _('Distinctions Spéciales')
+
+    slug = models.SlugField(max_length=100, unique=True)
+    name = models.CharField(max_length=150, verbose_name=_('Nom du badge'))
+    description = models.TextField(verbose_name=_('Description et condition d\'obtention'))
+    icon = models.CharField(max_length=50, default='award', help_text=_('Nom de l\'icône Lucide (ex: terminal, award, table, database)'))
+    category = models.CharField(max_length=20, choices=Category.choices, default=Category.LAB)
+    points_reward = models.PositiveIntegerField(default=50, verbose_name=_('Points XP accordés'))
+    criteria_rule = models.CharField(
+        max_length=100,
+        blank=True,
+        default='',
+        help_text=_('Identifiant de la règle de déclenchement (ex: first_lab, sql_completed, excel_completed, mission_completed, streak_7)')
+    )
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['order', 'name']
+        verbose_name = _('Définition de badge')
+        verbose_name_plural = _('Définitions de badges')
+
+    def __str__(self) -> str:
+        return f"{self.name} ({self.category})"
+
+
+class UserBadgeEarned(models.Model):
+    """
+    Instance of a badge earned by a learner with verifiable timestamp and metadata (F2.8, R15, R16).
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='earned_badges')
+    badge = models.ForeignKey(BadgeDefinition, on_delete=models.CASCADE, related_name='awarded_instances')
+    earned_at = models.DateTimeField(default=timezone.now, verbose_name=_('Date d\'obtention'))
+    metadata = models.JSONField(default=dict, blank=True, help_text=_('Contexte d\'obtention (score, atelier, slug)'))
+
+    class Meta:
+        ordering = ['-earned_at']
+        verbose_name = _('Badge obtenu par l\'apprenant')
+        verbose_name_plural = _('Badges obtenus par les apprenants')
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'badge'], name='unique_learner_badge_awarded')
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} - {self.badge.name} ({self.earned_at.strftime('%d/%m/%Y')})"
+
+
+
 

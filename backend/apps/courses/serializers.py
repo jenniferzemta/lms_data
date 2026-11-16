@@ -4,6 +4,8 @@ from rest_framework import serializers
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
+    BadgeDefinition,
+    UserBadgeEarned,
     Certificate,
     Course,
     CourseFeedback,
@@ -743,6 +745,51 @@ class MissionSubmitActionSerializer(serializers.Serializer):
     self_evaluation = serializers.DictField(child=serializers.IntegerField(min_value=0, max_value=100))
     learner_notes = serializers.CharField(required=False, allow_blank=True, default='')
     deliverable_link = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+class BadgeDefinitionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BadgeDefinition
+        fields = (
+            'id',
+            'slug',
+            'name',
+            'description',
+            'icon',
+            'category',
+            'points_reward',
+            'criteria_rule',
+            'order',
+        )
+
+
+class UserBadgeEarnedSerializer(serializers.ModelSerializer):
+    badge = BadgeDefinitionSerializer(read_only=True)
+
+    class Meta:
+        model = UserBadgeEarned
+        fields = (
+            'id',
+            'badge',
+            'earned_at',
+            'metadata',
+        )
+
+
+class BadgeStatusSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    slug = serializers.CharField()
+    name = serializers.CharField()
+    description = serializers.CharField()
+    icon = serializers.CharField()
+    category = serializers.CharField()
+    points_reward = serializers.IntegerField()
+    criteria_rule = serializers.CharField(allow_blank=True)
+    order = serializers.IntegerField()
+    is_earned = serializers.BooleanField()
+    earned_at = serializers.DateTimeField(allow_null=True)
+    metadata = serializers.DictField()
+
 
 
 

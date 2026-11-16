@@ -33,6 +33,9 @@ from courses.selectors import (
     list_published_courses,
     list_published_missions,
     get_mission_by_slug,
+    list_active_badges,
+    get_user_earned_badges,
+    get_all_badges_with_user_status,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -62,6 +65,8 @@ from courses.serializers import (
     MissionDetailSerializer,
     MissionSubmitActionSerializer,
     MissionSubmissionSerializer,
+    BadgeStatusSerializer,
+    UserBadgeEarnedSerializer,
 )
 from courses.services import (
     submit_mission_self_evaluation,
@@ -933,6 +938,37 @@ class MissionSubmitView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+# =====================================================================
+# BADGES & SKILL RECOGNITION VIEWS (F2.8, R16)
+# =====================================================================
+
+class BadgeListView(APIView):
+    """
+    GET /api/v1/courses/badges/
+    Lists all active skill badges annotated with current learner earned status.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        data = get_all_badges_with_user_status(request.user)
+        serializer = BadgeStatusSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserBadgesListView(APIView):
+    """
+    GET /api/v1/courses/badges/my/
+    Lists all badges officially earned by the authenticated learner.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        earned_badges = get_user_earned_badges(request.user)
+        serializer = UserBadgeEarnedSerializer(earned_badges, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 

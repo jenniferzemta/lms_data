@@ -184,3 +184,4 @@ class Command(BaseCommand):
             )
             status_str = 'Créée' if created else 'Mise à jour'
             self.stdout.write(self.style.SUCCESS(f"Mission [{mission.slug}] : {status_str}"))
+

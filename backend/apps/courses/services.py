@@ -5,6 +5,8 @@ from django.utils import timezone
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
+    BadgeDefinition,
+    UserBadgeEarned,
     Certificate,
     Course,
     CourseEnrollment,
@@ -66,6 +68,17 @@ def record_learning_event(
         statement.setdefault('context', {}).update(extra_payload)
     event.payload = statement
     event.save()
+
+    # Automatic Badge triggers for laboratories (F2.8, R16)
+    if result_success and object_id.startswith('http://datamboa.cm/labs/'):
+        award_badge_to_user(user, 'first-lab-solved')
+        if '/sql/' in object_id:
+            award_badge_to_user(user, 'sql-pioneer')
+        elif '/python/' in object_id:
+            award_badge_to_user(user, 'python-data-wrangler')
+        elif '/excel/' in object_id:
+            award_badge_to_user(user, 'excel-master')
+
     return event
 
 
@@ -650,7 +663,57 @@ def submit_mission_self_evaluation(
         },
     )
 
+    if is_success:
+        award_badge_to_user(
+            user=user,
+            badge_slug='mission-first-strike',
+            metadata={'mission_slug': mission.slug, 'score': final_score}
+        )
+
     return submission
+
+
+def award_badge_to_user(
+    user,
+    badge_slug: str,
+    metadata: dict | None = None
+) -> tuple[UserBadgeEarned | None, bool]:
+    """
+    Awards an Open Badge to a learner if not already held (F2.8, R16).
+    Emits an xAPI statement upon award (R15).
+    """
+    if not user or not user.is_authenticated:
+        return None, False
+
+    badge = BadgeDefinition.objects.filter(slug=badge_slug, is_active=True).first()
+    if not badge:
+        return None, False
+
+    earned, created = UserBadgeEarned.objects.get_or_create(
+        user=user,
+        badge=badge,
+        defaults={'metadata': metadata or {}}
+    )
+
+    if created:
+        record_learning_event(
+            user=user,
+            verb='earned',
+            object_id=f"badge:{badge.slug}",
+            object_type="badge",
+            object_name=f"Badge - {badge.name}",
+            result_score_raw=float(badge.points_reward),
+            result_success=True,
+            extra_payload={
+                'badge_name': badge.name,
+                'badge_category': badge.category,
+                'points_reward': badge.points_reward,
+                **(metadata or {})
+            }
+        )
+
+    return earned, created
+
 
 
 

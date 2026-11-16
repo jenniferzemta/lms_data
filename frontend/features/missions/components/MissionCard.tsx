@@ -76,3 +76,4 @@ export const MissionCard: React.FC<MissionCardProps> = ({ mission }) => {
     </div>
   );
 };
+

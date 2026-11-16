@@ -89,6 +89,13 @@ export const DesktopSidebar: React.FC = () => {
       isActive: pathname.startsWith('/dashboard')
     },
     {
+      key: 'badges',
+      label: 'Badges & Compétences',
+      href: '/badges',
+      icon: Award,
+      isActive: pathname.startsWith('/badges')
+    },
+    {
       key: 'pricing',
       label: tNav('pricing'),
       href: '/courses',

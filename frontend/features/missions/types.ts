@@ -59,3 +59,4 @@ export interface MissionSubmitResponse {
   submission: MissionSubmission;
   model_solution_summary: string;
 }
+

@@ -3,6 +3,8 @@ from django.db.models import Sum, Avg, Count
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
+    BadgeDefinition,
+    UserBadgeEarned,
     Certificate,
     Course,
     CourseEnrollment,
@@ -960,6 +962,56 @@ def get_learner_mission_submission(mission: Mission, user) -> Optional[MissionSu
         return MissionSubmission.objects.get(mission=mission, user=user)
     except MissionSubmission.DoesNotExist:
         return None
+
+
+def list_active_badges():
+    """
+    Returns all active badge definitions ordered by sequence.
+    """
+    return BadgeDefinition.objects.filter(is_active=True).order_by('order', 'id')
+
+
+def get_user_earned_badges(user):
+    """
+    Returns all badges earned by the specified user with related badge definition.
+    """
+    if not user or not user.is_authenticated:
+        return UserBadgeEarned.objects.none()
+    return UserBadgeEarned.objects.filter(user=user).select_related('badge').order_by('-earned_at')
+
+
+def get_all_badges_with_user_status(user) -> List[Dict[str, Any]]:
+    """
+    Returns list of all active badges annotated with whether the user has earned them (F2.8, R16).
+    """
+    badges = list_active_badges()
+    earned_dict = {}
+    if user and user.is_authenticated:
+        for ub in UserBadgeEarned.objects.filter(user=user):
+            earned_dict[ub.badge_id] = {
+                'earned_at': ub.earned_at,
+                'metadata': ub.metadata
+            }
+
+    result = []
+    for badge in badges:
+        is_earned = badge.id in earned_dict
+        result.append({
+            'id': badge.id,
+            'slug': badge.slug,
+            'name': badge.name,
+            'description': badge.description,
+            'icon': badge.icon,
+            'category': badge.category,
+            'points_reward': badge.points_reward,
+            'criteria_rule': badge.criteria_rule,
+            'order': badge.order,
+            'is_earned': is_earned,
+            'earned_at': earned_dict[badge.id]['earned_at'] if is_earned else None,
+            'metadata': earned_dict[badge.id]['metadata'] if is_earned else {}
+        })
+    return result
+
 
 
 

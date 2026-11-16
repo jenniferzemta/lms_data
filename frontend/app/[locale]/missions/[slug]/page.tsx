@@ -38,3 +38,4 @@ export default async function MissionWorkspacePage({ params }: MissionWorkspaceP
     </div>
   );
 }
+
