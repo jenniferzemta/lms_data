@@ -6,6 +6,8 @@ from courses.models import (
     ExerciseAttempt,
     BadgeDefinition,
     UserBadgeEarned,
+    Flashcard,
+    UserFlashcardProgress,
     Certificate,
     Course,
     CourseFeedback,
@@ -789,6 +791,68 @@ class BadgeStatusSerializer(serializers.Serializer):
     is_earned = serializers.BooleanField()
     earned_at = serializers.DateTimeField(allow_null=True)
     metadata = serializers.DictField()
+
+
+class FlashcardSerializer(serializers.ModelSerializer):
+    user_progress = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Flashcard
+        fields = (
+            'id',
+            'front',
+            'back',
+            'code_snippet',
+            'category',
+            'difficulty',
+            'user_progress',
+        )
+
+    def get_user_progress(self, obj) -> dict | None:
+        user = self.context.get('request').user if self.context.get('request') else None
+        if not user or not user.is_authenticated:
+            return None
+        prog = obj.user_progresses.filter(user=user).first()
+        if not prog:
+            return None
+        return {
+            'repetitions': prog.repetitions,
+            'interval_days': prog.interval_days,
+            'easiness_factor': prog.easiness_factor,
+            'next_review_at': prog.next_review_at,
+            'last_quality': prog.last_quality,
+        }
+
+
+class FlashcardReviewSubmitSerializer(serializers.Serializer):
+    card_id = serializers.IntegerField()
+    quality = serializers.IntegerField(min_value=0, max_value=5)
+
+
+class UserFlashcardProgressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFlashcardProgress
+        fields = (
+            'id',
+            'card',
+            'repetitions',
+            'easiness_factor',
+            'interval_days',
+            'next_review_at',
+            'last_reviewed_at',
+            'last_quality',
+            'total_reviews',
+        )
+
+
+class SrsStatsSerializer(serializers.Serializer):
+    due_today_count = serializers.IntegerField()
+    mastered_count = serializers.IntegerField()
+    learning_count = serializers.IntegerField()
+    total_active_cards = serializers.IntegerField()
+    total_reviewed = serializers.IntegerField()
+    retention_percentage = serializers.IntegerField()
+
 
 
 

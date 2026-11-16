@@ -18,7 +18,8 @@ import {
   Terminal,
   FileCode,
   Table,
-  Briefcase
+  Briefcase,
+  Brain
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -94,6 +95,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/badges',
       icon: Award,
       isActive: pathname.startsWith('/badges')
+    },
+    {
+      key: 'srs',
+      label: 'Révision Flash (SRS)',
+      href: '/srs',
+      icon: Brain,
+      isActive: pathname.startsWith('/srs')
     },
     {
       key: 'pricing',

@@ -109,3 +109,4 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
     </div>
   );
 };
+

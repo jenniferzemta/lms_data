@@ -1,10 +1,13 @@
 from typing import Optional, Dict, Any, List
 from django.db.models import Sum, Avg, Count
+from django.utils import timezone
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
     BadgeDefinition,
     UserBadgeEarned,
+    Flashcard,
+    UserFlashcardProgress,
     Certificate,
     Course,
     CourseEnrollment,
@@ -1011,6 +1014,82 @@ def get_all_badges_with_user_status(user) -> List[Dict[str, Any]]:
             'metadata': earned_dict[badge.id]['metadata'] if is_earned else {}
         })
     return result
+
+
+def get_due_flashcards(user, category: Optional[str] = None, limit: int = 20):
+    """
+    Retrieves flashcards due for review for the user according to the SM-2 schedule,
+    followed by new (unseen) flashcards (F2.9, R16).
+    """
+    now = timezone.now()
+    base_qs = Flashcard.objects.filter(is_active=True)
+    if category:
+        base_qs = base_qs.filter(category=category.upper())
+
+    if not user or not user.is_authenticated:
+        return list(base_qs[:limit])
+
+    # 1. Cards with progress due today
+    due_progress_cards = list(
+        base_qs.filter(
+            user_progresses__user=user,
+            user_progresses__next_review_at__lte=now
+        ).select_related('track')[:limit]
+    )
+
+    remaining_count = limit - len(due_progress_cards)
+    if remaining_count <= 0:
+        return due_progress_cards
+
+    # 2. Unseen cards (never reviewed by user)
+    reviewed_card_ids = UserFlashcardProgress.objects.filter(user=user).values_list('card_id', flat=True)
+    unseen_cards = list(
+        base_qs.exclude(id__in=reviewed_card_ids).select_related('track')[:remaining_count]
+    )
+
+    return due_progress_cards + unseen_cards
+
+
+def get_user_srs_metrics(user) -> Dict[str, Any]:
+    """
+    Aggregates SRS memory retention statistics for the user (F2.9, R16).
+    """
+    now = timezone.now()
+    total_active_cards = Flashcard.objects.filter(is_active=True).count()
+
+    if not user or not user.is_authenticated:
+        return {
+            'due_today_count': total_active_cards,
+            'mastered_count': 0,
+            'learning_count': 0,
+            'total_active_cards': total_active_cards,
+            'total_reviewed': 0,
+            'retention_percentage': 0,
+        }
+
+    progresses = UserFlashcardProgress.objects.filter(user=user)
+    due_today_count = progresses.filter(next_review_at__lte=now).count()
+    # Also add unseen cards to due count
+    unseen_count = total_active_cards - progresses.count()
+    due_total = due_today_count + max(0, unseen_count)
+
+    mastered_count = progresses.filter(interval_days__gte=21).count()
+    learning_count = progresses.filter(interval_days__lt=21, total_reviews__gt=0).count()
+    total_reviews = progresses.aggregate(t=Sum('total_reviews'))['t'] or 0
+
+    successful_reviews = progresses.filter(last_quality__gte=3).count()
+    total_cards_reviewed = progresses.count()
+    retention_pct = int((successful_reviews / total_cards_reviewed) * 100) if total_cards_reviewed > 0 else 100
+
+    return {
+        'due_today_count': due_total,
+        'mastered_count': mastered_count,
+        'learning_count': learning_count,
+        'total_active_cards': total_active_cards,
+        'total_reviewed': total_reviews,
+        'retention_percentage': retention_pct,
+    }
+
 
 
 

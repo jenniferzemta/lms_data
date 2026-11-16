@@ -103,3 +103,4 @@ class Command(BaseCommand):
             )
             status_str = 'Créé' if created else 'Mis à jour'
             self.stdout.write(self.style.SUCCESS(f"Badge [{badge.slug}] : {status_str}"))
+

@@ -25,3 +25,4 @@ export interface UserBadgeEarned {
   earned_at: string;
   metadata: Record<string, unknown>;
 }
+

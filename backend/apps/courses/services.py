@@ -1,4 +1,5 @@
 import secrets
+from datetime import timedelta
 from decimal import Decimal
 from django.db.models import F
 from django.utils import timezone
@@ -713,6 +714,90 @@ def award_badge_to_user(
         )
 
     return earned, created
+
+
+def review_flashcard_sm2(
+    user,
+    card_id: int,
+    quality: int,
+):
+    """
+    Executes a SuperMemo-2 (SM-2) spaced repetition review for a flashcard (F2.9, R16).
+    Quality rating q: 0 to 5.
+    Calculates interval, repetitions and easiness factor EF, and schedules next review.
+    Emits an xAPI statement (R15).
+    """
+    from courses.models import Flashcard, UserFlashcardProgress
+
+    if quality < 0 or quality > 5:
+        raise ValueError("Quality rating must be an integer between 0 and 5 inclusive.")
+
+    card = Flashcard.objects.get(pk=card_id, is_active=True)
+
+    progress, _ = UserFlashcardProgress.objects.get_or_create(
+        user=user,
+        card=card,
+        defaults={
+            'repetitions': 0,
+            'easiness_factor': 2.5,
+            'interval_days': 1,
+            'next_review_at': timezone.now(),
+        }
+    )
+
+    q = quality
+    ef = progress.easiness_factor
+    n = progress.repetitions
+    interval = progress.interval_days
+
+    # SM-2 Algorithm computation
+    if q >= 3:
+        if n == 0:
+            interval = 1
+        elif n == 1:
+            interval = 6
+        else:
+            interval = int(round(interval * ef))
+        n += 1
+    else:
+        n = 0
+        interval = 1
+
+    # Update Easiness Factor: EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+    ef_prime = ef + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+    ef_prime = max(1.3, round(ef_prime, 2))
+
+    now = timezone.now()
+    progress.repetitions = n
+    progress.easiness_factor = ef_prime
+    progress.interval_days = interval
+    progress.next_review_at = now + timedelta(days=interval)
+    progress.last_reviewed_at = now
+    progress.last_quality = q
+    progress.total_reviews += 1
+    progress.save()
+
+    # Emit standard xAPI statement (R15)
+    record_learning_event(
+        user=user,
+        verb='reviewed',
+        object_id=f"flashcard:{card.id}",
+        object_type="flashcard",
+        object_name=f"Flashcard - {card.front[:40]}",
+        result_score_raw=float(q),
+        result_score_max=5.0,
+        result_score_scaled=float(q) / 5.0,
+        result_success=(q >= 3),
+        extra_payload={
+            'card_category': card.category,
+            'repetitions': n,
+            'interval_days': interval,
+            'easiness_factor': ef_prime,
+        }
+    )
+
+    return progress
+
 
 
 

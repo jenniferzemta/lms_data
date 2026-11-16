@@ -6,3 +6,4 @@ export * from './types';
 export * from './services/badges.service';
 export * from './components/BadgeCard';
 export * from './components/BadgeGrid';
+

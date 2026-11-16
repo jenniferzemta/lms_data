@@ -108,3 +108,4 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({ badge }) => {
     </div>
   );
 };
+

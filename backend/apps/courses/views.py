@@ -36,6 +36,8 @@ from courses.selectors import (
     list_active_badges,
     get_user_earned_badges,
     get_all_badges_with_user_status,
+    get_due_flashcards,
+    get_user_srs_metrics,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -67,8 +69,13 @@ from courses.serializers import (
     MissionSubmissionSerializer,
     BadgeStatusSerializer,
     UserBadgeEarnedSerializer,
+    FlashcardSerializer,
+    FlashcardReviewSubmitSerializer,
+    UserFlashcardProgressSerializer,
+    SrsStatsSerializer,
 )
 from courses.services import (
+    review_flashcard_sm2,
     submit_mission_self_evaluation,
     toggle_course_publication,
     submit_course_feedback,
@@ -968,6 +975,75 @@ class UserBadgesListView(APIView):
         earned_badges = get_user_earned_badges(request.user)
         serializer = UserBadgeEarnedSerializer(earned_badges, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# =====================================================================
+# SPACED REPETITION SYSTEM (SRS / SM-2) VIEWS (F2.9, R16)
+# =====================================================================
+
+class SrsDueCardsView(APIView):
+    """
+    GET /api/v1/courses/srs/due/
+    Retrieves flashcards due for review according to SM-2 spaced intervals (F2.9).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        category = request.query_params.get('category')
+        cards = get_due_flashcards(request.user, category=category)
+        serializer = FlashcardSerializer(cards, many=True, context={'request': request})
+        metrics = get_user_srs_metrics(request.user)
+        return Response(
+            {
+                'cards': serializer.data,
+                'metrics': metrics,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class SrsReviewSubmitView(APIView):
+    """
+    POST /api/v1/courses/srs/review/
+    Submits a recall rating (0 to 5) for a card, executes SM-2 algorithm, and schedules next review.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        serializer = FlashcardReviewSubmitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        card_id = serializer.validated_data['card_id']
+        quality = serializer.validated_data['quality']
+
+        progress = review_flashcard_sm2(
+            user=request.user,
+            card_id=card_id,
+            quality=quality,
+        )
+
+        return Response(
+            {
+                'success': True,
+                'progress': UserFlashcardProgressSerializer(progress).data,
+                'message': f"Carte révisée avec succès. Prochain rappel dans {progress.interval_days} jour(s).",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class SrsStatsView(APIView):
+    """
+    GET /api/v1/courses/srs/stats/
+    Retrieves SRS retention and mastery metrics for the learner.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        metrics = get_user_srs_metrics(request.user)
+        serializer = SrsStatsSerializer(metrics)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 
 

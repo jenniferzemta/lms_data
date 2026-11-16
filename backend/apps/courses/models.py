@@ -1364,5 +1364,73 @@ class UserBadgeEarned(models.Model):
         return f"{self.user} - {self.badge.name} ({self.earned_at.strftime('%d/%m/%Y')})"
 
 
+class Flashcard(models.Model):
+    """
+    Spaced Repetition Flashcard for technical memory retention (F2.9, R16).
+    """
+    class Category(models.TextChoices):
+        EXCEL = 'EXCEL', _('Excel & Formules')
+        SQL = 'SQL', _('SQL & Requêtes')
+        PYTHON = 'PYTHON', _('Python & Pandas')
+        POWERBI = 'POWERBI', _('Power BI & DAX')
+        CONCEPT = 'CONCEPT', _('Concepts Data & Métier')
+
+    class Difficulty(models.TextChoices):
+        EASY = 'EASY', _('Facile')
+        MEDIUM = 'MEDIUM', _('Moyen')
+        HARD = 'HARD', _('Avancé')
+
+    front = models.TextField(verbose_name=_('Question / Recto de la carte'))
+    back = models.TextField(verbose_name=_('Réponse / Verso de la carte'))
+    code_snippet = models.TextField(blank=True, default='', verbose_name=_('Syntaxe ou exemple de code'))
+    category = models.CharField(max_length=20, choices=Category.choices, default=Category.EXCEL)
+    difficulty = models.CharField(max_length=20, choices=Difficulty.choices, default=Difficulty.MEDIUM)
+    track = models.ForeignKey('Track', on_delete=models.SET_NULL, null=True, blank=True, related_name='flashcards')
+    lesson = models.ForeignKey('Lesson', on_delete=models.SET_NULL, null=True, blank=True, related_name='flashcards')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['category', 'id']
+        verbose_name = _('Flashcard de révision')
+        verbose_name_plural = _('Flashcards de révision')
+
+    def __str__(self) -> str:
+        return f"[{self.category}] {self.front[:50]}..."
+
+
+class UserFlashcardProgress(models.Model):
+    """
+    SM-2 Spaced Repetition Algorithm state per user and flashcard (F2.9, R16).
+    Tracks repetition count, easiness factor (EF), and schedule interval.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='flashcard_progresses')
+    card = models.ForeignKey(Flashcard, on_delete=models.CASCADE, related_name='user_progresses')
+    repetitions = models.PositiveIntegerField(default=0, help_text=_('Nombre de révisions réussies consécutives'))
+    easiness_factor = models.FloatField(default=2.5, help_text=_('Facteur d\'aisance SM-2 (minimum 1.3)'))
+    interval_days = models.PositiveIntegerField(default=1, help_text=_('Intervalle actuel en jours avant prochaine révision'))
+    next_review_at = models.DateTimeField(default=timezone.now, db_index=True, verbose_name=_('Date de prochaine révision'))
+    last_reviewed_at = models.DateTimeField(null=True, blank=True)
+    last_quality = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        null=True,
+        blank=True,
+        help_text=_('Dernière note de rappel (0 à 5 selon SM-2)')
+    )
+    total_reviews = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['next_review_at']
+        verbose_name = _('Progression SRS apprenant')
+        verbose_name_plural = _('Progressions SRS apprenants')
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'card'], name='unique_learner_flashcard_progress')
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} - Card #{self.card_id} (I={self.interval_days}d, EF={self.easiness_factor:.2f})"
+
+
+
 
 
