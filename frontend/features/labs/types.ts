@@ -87,3 +87,19 @@ export interface SqlLabState {
   selectedTable: string | null;
 }
 
+export interface PythonExecutionResult {
+  stdout: string;
+  stderr?: string;
+  outputTable?: { columns: string[]; rows: Record<string, unknown>[] };
+  executionTimeMs: number;
+  variables?: Record<string, unknown>;
+  error?: string;
+}
+
+export interface PythonLabState {
+  code: string;
+  history: string[];
+  lastResult: PythonExecutionResult | null;
+  activeExercise: LabExercise | null;
+}
+

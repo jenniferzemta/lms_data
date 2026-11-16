@@ -15,7 +15,8 @@ import {
   ExternalLink,
   LogIn,
   ShieldCheck,
-  Terminal
+  Terminal,
+  FileCode
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -44,11 +45,18 @@ export const DesktopSidebar: React.FC = () => {
       isActive: isCourses
     },
     {
-      key: 'labs',
+      key: 'labs-sql',
       label: 'Laboratoire SQL',
       href: '/labs/sql',
       icon: Terminal,
-      isActive: pathname.startsWith('/labs')
+      isActive: pathname.startsWith('/labs/sql')
+    },
+    {
+      key: 'labs-python',
+      label: 'Laboratoire Python',
+      href: '/labs/python',
+      icon: FileCode,
+      isActive: pathname.startsWith('/labs/python')
     },
     {
       key: 'my-courses',

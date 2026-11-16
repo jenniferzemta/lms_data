@@ -264,6 +264,10 @@
     "rowsReturned": "{count} lignes retournées",
     "noResults": "Aucun résultat pour le moment",
     "successTitle": "Atelier SQL Réussi avec Succès !",
-    "nextExercise": "Passer à l'atelier suivant"
+    "nextExercise": "Passer à l'atelier suivant",
+    "pythonTitle": "Laboratoire Python & Pandas",
+    "pythonSubtitle": "Analysez des jeux de données d'entreprises locales en FCFA avec la bibliothèque Pandas.",
+    "runPython": "Exécuter le script Python",
+    "pythonSuccessTitle": "Atelier Python Validé avec Succès !"
   }
 }

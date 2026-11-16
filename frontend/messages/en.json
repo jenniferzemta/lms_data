@@ -264,6 +264,10 @@
     "rowsReturned": "{count} rows returned",
     "noResults": "No results yet",
     "successTitle": "SQL Workshop Completed Successfully!",
-    "nextExercise": "Next Workshop"
+    "nextExercise": "Next Workshop",
+    "pythonTitle": "Python & Pandas Laboratory",
+    "pythonSubtitle": "Analyze local business datasets in FCFA using the Pandas data analysis library.",
+    "runPython": "Run Python Script",
+    "pythonSuccessTitle": "Python Workshop Validated Successfully!"
   }
 }
