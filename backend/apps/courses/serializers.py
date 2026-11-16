@@ -928,6 +928,12 @@ class LearnerPortfolioUpdateSerializer(serializers.ModelSerializer):
         )
 
 
+class MissionSubmissionGradeSerializer(serializers.Serializer):
+    grade = serializers.IntegerField(min_value=0, max_value=100)
+    feedback = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+
 
 
 

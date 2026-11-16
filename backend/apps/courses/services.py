@@ -994,6 +994,51 @@ def add_mission_to_portfolio(
     return project
 
 
+def grade_mission_submission(
+    instructor_user,
+    submission_id: int,
+    grade: int,
+    feedback: str = '',
+) -> MissionSubmission:
+    """
+    Evaluates and grades a learner's mission deliverable by an instructor (F2.6, R24).
+    Emits an xAPI 'evaluated' event statement.
+    """
+    if grade < 0 or grade > 100:
+        raise ValueError("La note doit être comprise entre 0 et 100.")
+
+    submission = MissionSubmission.objects.filter(id=submission_id).select_related('mission', 'user').first()
+    if not submission:
+        raise ValueError(f"Soumission #{submission_id} introuvable.")
+
+    submission.instructor_grade = grade
+    submission.instructor_feedback = feedback.strip()
+    submission.graded_by = instructor_user
+    submission.graded_at = timezone.now()
+    submission.save()
+
+    # Emit standard xAPI statement (R15)
+    record_learning_event(
+        user=submission.user,
+        verb='evaluated',
+        object_id=f"mission:{submission.mission.slug}:submission:{submission.id}",
+        object_type='assignment',
+        object_name=f"Correction formateur - {submission.mission.title}",
+        result_score_raw=float(grade),
+        result_score_max=100.0,
+        result_score_scaled=float(grade) / 100.0,
+        result_success=(grade >= 70),
+        extra_payload={
+            'instructor_id': instructor_user.id if instructor_user else None,
+            'mission_slug': submission.mission.slug,
+            'feedback_length': len(feedback),
+        }
+    )
+
+    return submission
+
+
+
 
 
 

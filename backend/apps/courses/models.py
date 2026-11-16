@@ -1291,6 +1291,26 @@ class MissionSubmission(models.Model):
     learner_notes = models.TextField(blank=True, default='', verbose_name=_('Notes et synthèse de l\'apprenant'))
     deliverable_link = models.URLField(blank=True, default='', verbose_name=_('Lien GitHub ou Drive du livrable'))
     is_completed = models.BooleanField(default=False)
+    instructor_grade = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        verbose_name=_('Note attribuée par le formateur')
+    )
+    instructor_feedback = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Commentaire et feedback pédagogique du formateur')
+    )
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='graded_mission_submissions',
+        verbose_name=_('Formateur')
+    )
+    graded_at = models.DateTimeField(null=True, blank=True, verbose_name=_('Date de correction'))
     submitted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

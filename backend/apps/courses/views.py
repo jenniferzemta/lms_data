@@ -41,6 +41,8 @@ from courses.selectors import (
     get_user_srs_metrics,
     get_chunked_upload_status,
     get_public_portfolio,
+    list_submissions_for_instructor,
+    get_learning_objectives_analytics,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -82,6 +84,7 @@ from courses.serializers import (
     PortfolioProjectSerializer,
     AddMissionToPortfolioSerializer,
     LearnerPortfolioUpdateSerializer,
+    MissionSubmissionGradeSerializer,
 )
 from courses.services import (
     review_flashcard_sm2,
@@ -105,6 +108,7 @@ from courses.services import (
     finalize_chunked_upload,
     get_or_create_portfolio,
     add_mission_to_portfolio,
+    grade_mission_submission,
 )
 
 
@@ -1213,6 +1217,70 @@ class AddMissionToPortfolioView(APIView):
             },
             status=status.HTTP_201_CREATED,
         )
+
+
+class InstructorSubmissionsListView(APIView):
+    """
+    GET /api/v1/courses/instructor/submissions/
+    Lists learner submissions for instructor grading (F2.6).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        status_filter = request.query_params.get('status', 'ALL')
+        submissions = list_submissions_for_instructor(status_filter=status_filter)
+        return Response(submissions, status=status.HTTP_200_OK)
+
+
+class InstructorSubmissionGradeView(APIView):
+    """
+    POST /api/v1/courses/instructor/submissions/<int:pk>/grade/
+    Submits instructor grading, criteria points and feedback (F2.6, R24).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, pk: int) -> Response:
+        serializer = MissionSubmissionGradeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        grade = serializer.validated_data['grade']
+        feedback = serializer.validated_data.get('feedback', '')
+
+        try:
+            submission = grade_mission_submission(
+                instructor_user=request.user,
+                submission_id=pk,
+                grade=grade,
+                feedback=feedback,
+            )
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {
+                'success': True,
+                'submission_id': submission.id,
+                'instructor_grade': submission.instructor_grade,
+                'instructor_feedback': submission.instructor_feedback,
+                'message': f"Note de {submission.instructor_grade}/100 et évaluation enregistrées avec succès.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
+class InstructorLearningObjectivesAnalyticsView(APIView):
+    """
+    GET /api/v1/courses/instructor/learning-objectives-analytics/
+    Analytics of learning objectives attainment by Bloom taxonomy levels and detection
+    of concepts requiring remediation (F2.12, criterion R18).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        course_slug = request.query_params.get('course_slug')
+        data = get_learning_objectives_analytics(course_slug=course_slug)
+        return Response(data, status=status.HTTP_200_OK)
+
 
 
 

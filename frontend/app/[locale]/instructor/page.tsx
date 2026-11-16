@@ -9,6 +9,14 @@ import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { useAuth } from '@/features/auth';
 import { coursesService, CourseSummary, QualityCheckData } from '@/features/courses';
 import {
+  InstructorSubmissionsList,
+  LearningObjectivesDashboard,
+  fetchInstructorSubmissions,
+  fetchLearningObjectivesAnalytics,
+  InstructorSubmissionItem,
+  LearningObjectivesAnalytics,
+} from '@/features/instructor';
+import {
   ShieldCheck,
   CheckCircle2,
   XCircle,
@@ -21,6 +29,9 @@ import {
   RotateCcw,
   Check,
   Lock,
+  FileText,
+  Brain,
+  Target,
 } from 'lucide-react';
 
 interface CourseCardState {
@@ -38,6 +49,35 @@ export default function InstructorPage() {
 
   const [courses, setCourses] = useState<CourseCardState[]>([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState<boolean>(true);
+  const [activeTab, setActiveTab] = useState<'courses' | 'submissions' | 'analytics'>('courses');
+  const [submissions, setSubmissions] = useState<InstructorSubmissionItem[]>([]);
+  const [analytics, setAnalytics] = useState<LearningObjectivesAnalytics | null>(null);
+  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState<boolean>(false);
+  const [isLoadingAnalytics, setIsLoadingAnalytics] = useState<boolean>(false);
+
+  const loadSubmissions = () => {
+    setIsLoadingSubmissions(true);
+    fetchInstructorSubmissions().then((data) => {
+      setSubmissions(data);
+      setIsLoadingSubmissions(false);
+    });
+  };
+
+  const loadAnalytics = () => {
+    setIsLoadingAnalytics(true);
+    fetchLearningObjectivesAnalytics().then((data) => {
+      setAnalytics(data);
+      setIsLoadingAnalytics(false);
+    });
+  };
+
+  useEffect(() => {
+    if (activeTab === 'submissions') {
+      loadSubmissions();
+    } else if (activeTab === 'analytics') {
+      loadAnalytics();
+    }
+  }, [activeTab]);
 
   // Load all courses
   useEffect(() => {
@@ -199,7 +239,50 @@ export default function InstructorPage() {
               </div>
             )}
 
-            {/* Courses Quality Checklist Cards List */}
+            {/* 3 Main Instructor Tabs */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-100 p-1.5 rounded-2xl max-w-2xl">
+              <button
+                type="button"
+                onClick={() => setActiveTab('courses')}
+                className={`py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+                  activeTab === 'courses'
+                    ? 'bg-white text-brand-primary shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-brand-primary" />
+                <span>Qualité des Cours (F1.12)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('submissions')}
+                className={`py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+                  activeTab === 'submissions'
+                    ? 'bg-white text-brand-primary shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <FileText className="w-4 h-4 text-brand-primary" />
+                <span>Devoirs & Livrables (F2.6)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('analytics')}
+                className={`py-2 px-3 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-all min-h-[44px] ${
+                  activeTab === 'analytics'
+                    ? 'bg-white text-brand-primary shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Brain className="w-4 h-4 text-brand-primary" />
+                <span>Objectifs & Remédiation (R18)</span>
+              </button>
+            </div>
+
+            {/* TAB 1: Courses Quality Checklist */}
+            {activeTab === 'courses' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-base sm:text-lg font-bold text-brand-primary">
@@ -387,6 +470,48 @@ export default function InstructorPage() {
                 </div>
               )}
             </div>
+            )}
+
+            {/* TAB 2: Submissions to Grade (F2.6) */}
+            {activeTab === 'submissions' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-bold text-brand-primary">
+                    Correction des Devoirs & Livrables Professionnels (F2.6)
+                  </h2>
+                </div>
+
+                {isLoadingSubmissions ? (
+                  <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
+                    Chargement des devoirs soumis...
+                  </div>
+                ) : (
+                  <InstructorSubmissionsList
+                    submissions={submissions}
+                    onSubmissionGraded={loadSubmissions}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* TAB 3: Learning Objectives & Bloom Analytics (F2.12, R18) */}
+            {activeTab === 'analytics' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-base sm:text-lg font-bold text-brand-primary">
+                    Suivi Formateur — Atteinte des Objectifs & Remédiation (R18)
+                  </h2>
+                </div>
+
+                {isLoadingAnalytics || !analytics ? (
+                  <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
+                    Calcul des métriques de rétention et niveaux de Bloom...
+                  </div>
+                ) : (
+                  <LearningObjectivesDashboard analytics={analytics} />
+                )}
+              </div>
+            )}
 
           </div>
         </main>
