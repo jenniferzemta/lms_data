@@ -6,6 +6,7 @@ import { missionsService } from '../services/missions.service';
 import { MissionDatasetPreview } from './MissionDatasetPreview';
 import { MissionRubricEvaluation } from './MissionRubricEvaluation';
 import { MissionSolutionReveal } from './MissionSolutionReveal';
+import { ChunkedFileUploader } from '@/features/uploads';
 import { Badge } from '@/ui/Badge';
 import { Link } from '@/i18n/routing';
 import {
@@ -266,7 +267,12 @@ export const MissionWorkspaceView: React.FC<MissionWorkspaceViewProps> = ({ miss
 
         {/* TAB 2: DELIVERABLES & AUTO-EVALUATION */}
         {activeTab === 'deliverables' && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <ChunkedFileUploader
+              title="Dépôt résilient de votre fichier de travail"
+              description="Déposez votre classeur Excel (.xlsx), rapport Power BI (.pbix) ou script SQL final pour évaluation et archivage."
+              accept=".xlsx,.xls,.pbix,.csv,.sql"
+            />
             <MissionRubricEvaluation
               rubric={mission.evaluation_rubric}
               existingSubmission={submission}

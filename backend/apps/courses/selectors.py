@@ -8,6 +8,7 @@ from courses.models import (
     UserBadgeEarned,
     Flashcard,
     UserFlashcardProgress,
+    ChunkedUpload,
     Certificate,
     Course,
     CourseEnrollment,
@@ -1089,6 +1090,37 @@ def get_user_srs_metrics(user) -> Dict[str, Any]:
         'total_reviewed': total_reviews,
         'retention_percentage': retention_pct,
     }
+
+
+def get_chunked_upload_status(upload_id, user=None) -> Optional[Dict[str, Any]]:
+    """
+    Returns resumable status of a chunked upload session (F2.5, R4).
+    """
+    qs = ChunkedUpload.objects.all()
+    if user and user.is_authenticated:
+        qs = qs.filter(user=user)
+    upload = qs.filter(id=upload_id).first()
+    if not upload:
+        return None
+
+    uploaded_chunks = upload.uploaded_chunks or []
+    progress_pct = int((len(uploaded_chunks) / upload.total_chunks) * 100) if upload.total_chunks > 0 else 0
+    return {
+        'id': str(upload.id),
+        'filename': upload.filename,
+        'file_size': upload.file_size,
+        'chunk_size': upload.chunk_size,
+        'total_chunks': upload.total_chunks,
+        'uploaded_chunks': uploaded_chunks,
+        'progress_percentage': progress_pct,
+        'status': upload.status,
+        'is_completed': upload.status == ChunkedUpload.Status.COMPLETED,
+        'checksum': upload.checksum,
+        'file_url': upload.file.url if upload.file else None,
+        'created_at': upload.created_at.isoformat() if upload.created_at else None,
+        'completed_at': upload.completed_at.isoformat() if upload.completed_at else None,
+    }
+
 
 
 

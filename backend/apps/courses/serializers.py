@@ -8,6 +8,7 @@ from courses.models import (
     UserBadgeEarned,
     Flashcard,
     UserFlashcardProgress,
+    ChunkedUpload,
     Certificate,
     Course,
     CourseFeedback,
@@ -852,6 +853,35 @@ class SrsStatsSerializer(serializers.Serializer):
     total_active_cards = serializers.IntegerField()
     total_reviewed = serializers.IntegerField()
     retention_percentage = serializers.IntegerField()
+
+
+class ChunkedUploadInitSerializer(serializers.Serializer):
+    filename = serializers.CharField(max_length=255)
+    file_size = serializers.IntegerField(min_value=1)
+    total_chunks = serializers.IntegerField(min_value=1)
+    chunk_size = serializers.IntegerField(min_value=1, default=1048576)
+
+
+class ChunkedUploadChunkSerializer(serializers.Serializer):
+    chunk_index = serializers.IntegerField(min_value=0)
+    chunk = serializers.FileField()
+
+
+class ChunkedUploadStatusSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    filename = serializers.CharField()
+    file_size = serializers.IntegerField()
+    chunk_size = serializers.IntegerField()
+    total_chunks = serializers.IntegerField()
+    uploaded_chunks = serializers.ListField(child=serializers.IntegerField())
+    progress_percentage = serializers.IntegerField()
+    status = serializers.CharField()
+    is_completed = serializers.BooleanField()
+    checksum = serializers.CharField(allow_blank=True)
+    file_url = serializers.CharField(allow_null=True)
+    created_at = serializers.CharField(allow_null=True)
+    completed_at = serializers.CharField(allow_null=True)
+
 
 
 

@@ -1,6 +1,10 @@
+import os
+import shutil
+import hashlib
 import secrets
 from datetime import timedelta
 from decimal import Decimal
+from django.conf import settings
 from django.db.models import F
 from django.utils import timezone
 from courses.models import (
@@ -24,6 +28,9 @@ from courses.models import (
     Quiz,
     QuizAttempt,
     QuizQuestion,
+    Flashcard,
+    UserFlashcardProgress,
+    ChunkedUpload,
 )
 
 
@@ -797,6 +804,118 @@ def review_flashcard_sm2(
     )
 
     return progress
+
+
+def init_chunked_upload(
+    user,
+    filename: str,
+    file_size: int,
+    total_chunks: int,
+    chunk_size: int = 1048576,
+) -> ChunkedUpload:
+    """
+    Initializes a new chunked upload session for an authenticated user (F2.5, R4).
+    Prepares temporary chunk storage directory.
+    """
+    upload = ChunkedUpload.objects.create(
+        user=user,
+        filename=filename,
+        file_size=file_size,
+        total_chunks=total_chunks,
+        chunk_size=chunk_size,
+        uploaded_chunks=[],
+        status=ChunkedUpload.Status.IN_PROGRESS,
+    )
+
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'chunks', str(upload.id))
+    os.makedirs(temp_dir, exist_ok=True)
+    return upload
+
+
+def save_chunk(upload: ChunkedUpload, chunk_index: int, chunk_file) -> ChunkedUpload:
+    """
+    Saves an uploaded chunk to the temporary directory and updates the received indices list.
+    """
+    if chunk_index < 0 or chunk_index >= upload.total_chunks:
+        raise ValueError(f"Index de morceau invalide: {chunk_index} (total attendu: {upload.total_chunks})")
+
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'chunks', str(upload.id))
+    os.makedirs(temp_dir, exist_ok=True)
+    chunk_path = os.path.join(temp_dir, f"chunk_{chunk_index:05d}")
+
+    # Write chunk data
+    with open(chunk_path, 'wb+') as dest:
+        for chunk in chunk_file.chunks():
+            dest.write(chunk)
+
+    # Track received chunks
+    current_chunks = set(upload.uploaded_chunks or [])
+    current_chunks.add(chunk_index)
+    upload.uploaded_chunks = sorted(list(current_chunks))
+    upload.save(update_fields=['uploaded_chunks'])
+
+    return upload
+
+
+def finalize_chunked_upload(upload: ChunkedUpload) -> ChunkedUpload:
+    """
+    Reassembles all temporary chunks into the final destination file,
+    computes SHA-256 checksum, cleans up chunk fragments, and marks upload completed.
+    """
+    if len(upload.uploaded_chunks) != upload.total_chunks:
+        raise ValueError(
+            f"Téléversement incomplet : {len(upload.uploaded_chunks)}/{upload.total_chunks} morceaux reçus."
+        )
+
+    temp_dir = os.path.join(settings.MEDIA_ROOT, 'chunks', str(upload.id))
+    sha256 = hashlib.sha256()
+
+    # Reassemble in memory / streaming buffer
+    final_dir = os.path.join(settings.MEDIA_ROOT, 'chunked_uploads')
+    os.makedirs(final_dir, exist_ok=True)
+    final_rel_path = f"chunked_uploads/{upload.id}_{upload.filename}"
+    final_full_path = os.path.join(settings.MEDIA_ROOT, final_rel_path)
+
+    with open(final_full_path, 'wb') as outfile:
+        for i in range(upload.total_chunks):
+            chunk_file_path = os.path.join(temp_dir, f"chunk_{i:05d}")
+            if not os.path.exists(chunk_file_path):
+                raise FileNotFoundError(f"Morceau manquant sur le disque : {chunk_file_path}")
+
+            with open(chunk_file_path, 'rb') as infile:
+                data = infile.read()
+                sha256.update(data)
+                outfile.write(data)
+
+    # Clean up temp chunks
+    try:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+    except Exception:
+        pass
+
+    upload.file.name = final_rel_path
+    upload.checksum = sha256.hexdigest()
+    upload.status = ChunkedUpload.Status.COMPLETED
+    upload.completed_at = timezone.now()
+    upload.save()
+
+    # Emit xAPI event
+    record_learning_event(
+        user=upload.user,
+        verb='uploaded',
+        object_id=str(upload.id),
+        object_type='file',
+        object_name=upload.filename,
+        result_success=True,
+        extra_payload={
+            'file_size': upload.file_size,
+            'total_chunks': upload.total_chunks,
+            'checksum': upload.checksum,
+        }
+    )
+
+    return upload
+
 
 
 

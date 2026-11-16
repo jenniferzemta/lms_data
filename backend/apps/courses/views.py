@@ -4,12 +4,13 @@ import re
 from django.conf import settings
 from django.http import FileResponse, Http404, HttpResponseRedirect, StreamingHttpResponse
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from courses.models import Course, Lesson
+from courses.models import Course, Lesson, ChunkedUpload
 from courses.selectors import (
     check_course_publication_quality,
     get_course_feedback_summary,
@@ -38,6 +39,7 @@ from courses.selectors import (
     get_all_badges_with_user_status,
     get_due_flashcards,
     get_user_srs_metrics,
+    get_chunked_upload_status,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -73,6 +75,9 @@ from courses.serializers import (
     FlashcardReviewSubmitSerializer,
     UserFlashcardProgressSerializer,
     SrsStatsSerializer,
+    ChunkedUploadInitSerializer,
+    ChunkedUploadChunkSerializer,
+    ChunkedUploadStatusSerializer,
 )
 from courses.services import (
     review_flashcard_sm2,
@@ -91,6 +96,9 @@ from courses.services import (
     evaluate_quiz_submission,
     mark_lesson_completed,
     record_attachment_download,
+    init_chunked_upload,
+    save_chunk,
+    finalize_chunked_upload,
 )
 
 
@@ -1043,6 +1051,92 @@ class SrsStatsView(APIView):
         metrics = get_user_srs_metrics(request.user)
         serializer = SrsStatsSerializer(metrics)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ChunkedUploadInitView(APIView):
+    """
+    POST /api/v1/courses/uploads/init/
+    Initializes a chunked file upload session (F2.5, R4).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        serializer = ChunkedUploadInitSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        upload = init_chunked_upload(
+            user=request.user,
+            filename=serializer.validated_data['filename'],
+            file_size=serializer.validated_data['file_size'],
+            total_chunks=serializer.validated_data['total_chunks'],
+            chunk_size=serializer.validated_data.get('chunk_size', 1048576),
+        )
+
+        return Response(
+            {
+                'upload_id': str(upload.id),
+                'filename': upload.filename,
+                'total_chunks': upload.total_chunks,
+                'chunk_size': upload.chunk_size,
+                'status': upload.status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class ChunkedUploadChunkView(APIView):
+    """
+    POST /api/v1/courses/uploads/<uuid:upload_id>/chunk/
+    Uploads a single chunk slice and auto-finalizes when all chunks are received (F2.5, R4).
+    """
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request: Request, upload_id) -> Response:
+        try:
+            upload = ChunkedUpload.objects.get(id=upload_id, user=request.user)
+        except ChunkedUpload.DoesNotExist:
+            return Response({'error': "Session de téléversement introuvable."}, status=status.HTTP_404_NOT_FOUND)
+
+        if upload.status == ChunkedUpload.Status.COMPLETED:
+            status_data = get_chunked_upload_status(upload.id, request.user)
+            return Response(status_data, status=status.HTTP_200_OK)
+
+        serializer = ChunkedUploadChunkSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        chunk_index = serializer.validated_data['chunk_index']
+        chunk_file = serializer.validated_data['chunk']
+
+        try:
+            save_chunk(upload, chunk_index, chunk_file)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if complete
+        if len(upload.uploaded_chunks) == upload.total_chunks:
+            try:
+                finalize_chunked_upload(upload)
+            except Exception as e:
+                return Response({'error': f"Échec de l'assemblage: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        status_data = get_chunked_upload_status(upload.id, request.user)
+        return Response(status_data, status=status.HTTP_200_OK)
+
+
+class ChunkedUploadStatusView(APIView):
+    """
+    GET /api/v1/courses/uploads/<uuid:upload_id>/status/
+    Returns current progress and received chunk indices for client-side resumption (F2.5, R4).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, upload_id) -> Response:
+        status_data = get_chunked_upload_status(upload_id, request.user)
+        if not status_data:
+            return Response({'error': "Session introuvable."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(status_data, status=status.HTTP_200_OK)
+
 
 
 

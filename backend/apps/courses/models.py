@@ -1431,6 +1431,44 @@ class UserFlashcardProgress(models.Model):
         return f"{self.user} - Card #{self.card_id} (I={self.interval_days}d, EF={self.easiness_factor:.2f})"
 
 
+class ChunkedUpload(models.Model):
+    """
+    Resumable chunked file upload for unreliable / 2G-3G African network connections (F2.5, R4).
+    Enables pause, retry, and background resumption of large .xlsx, .pbix, .sql, and datasets.
+    """
+    class Status(models.TextChoices):
+        IN_PROGRESS = 'IN_PROGRESS', _('En cours')
+        COMPLETED = 'COMPLETED', _('Terminé')
+        FAILED = 'FAILED', _('Échoué')
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='chunked_uploads',
+        verbose_name=_('Apprenant')
+    )
+    filename = models.CharField(max_length=255, verbose_name=_('Nom du fichier d\'origine'))
+    file_size = models.BigIntegerField(verbose_name=_('Taille totale en octets'))
+    chunk_size = models.PositiveIntegerField(default=1048576, verbose_name=_('Taille unitaire de chunk'))
+    total_chunks = models.PositiveIntegerField(verbose_name=_('Nombre total de morceaux'))
+    uploaded_chunks = models.JSONField(default=list, blank=True, verbose_name=_('Index des morceaux reçus'))
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.IN_PROGRESS, verbose_name=_('Statut'))
+    file = models.FileField(upload_to='chunked_uploads/%Y/%m/', null=True, blank=True, verbose_name=_('Fichier final assemblé'))
+    checksum = models.CharField(max_length=64, blank=True, default='', verbose_name=_('Checksum SHA-256'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Dépôt de fichier par morceaux')
+        verbose_name_plural = _('Dépôts de fichiers par morceaux')
+
+    def __str__(self) -> str:
+        return f"{self.filename} ({len(self.uploaded_chunks)}/{self.total_chunks} chunks) - {self.status}"
+
+
+
 
 
 
