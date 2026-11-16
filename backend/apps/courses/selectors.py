@@ -1497,6 +1497,111 @@ def get_user_placement_result(user: Any) -> Optional[Dict[str, Any]]:
     }
 
 
+def get_learner_recommendations(user: Any) -> Dict[str, Any]:
+    """
+    Intelligent recommendation and re-engagement system for learners (F3.8, F3.9, R23).
+    Analyzes placement test results, SRS flashcards due, current course progress,
+    and days of inactivity to output targeted pedagogical action cards and anti-dropoff reminders.
+    """
+    if not user or not user.is_authenticated:
+        return {
+            'recommendations': [],
+            'reminders': [],
+            'inactivity_days': 0,
+            'summary': "Connectez-vous pour voir vos recommandations personnalisées."
+        }
+
+    from django.utils import timezone
+    from courses.models import CourseEnrollment, LessonProgress, LearningEvent, PlacementAssessment, Course, Mission
+    from courses.selectors import get_due_flashcards
+
+    recommendations = []
+    reminders = []
+
+    # 1. Check Placement Test status
+    placement = PlacementAssessment.objects.filter(user=user).order_by('-completed_at').first()
+    if not placement:
+        recommendations.append({
+            'id': 'rec_placement_test',
+            'type': 'ASSESSMENT',
+            'priority': 'HIGH',
+            'title': 'Passez le Test de Positionnement Adaptatif',
+            'reason': 'Obtenez votre diagnostic de compétences immédiat et orientez votre parcours (N1, N2 ou N3).',
+            'action_label': 'Passer le test (5 min)',
+            'action_url': '/placement-test',
+            'icon': 'target',
+        })
+    elif placement.recommended_course:
+        enrollment = CourseEnrollment.objects.filter(user=user, course=placement.recommended_course).first()
+        if not enrollment:
+            recommendations.append({
+                'id': 'rec_target_course',
+                'type': 'COURSE',
+                'priority': 'HIGH',
+                'title': f'Démarrer : {placement.recommended_course.title}',
+                'reason': f'Parcours recommandé d\'après votre test ({placement.get_recommended_level_display()}).',
+                'action_label': 'Commencer le cours',
+                'action_url': f'/courses/{placement.recommended_course.slug}',
+                'icon': 'compass',
+            })
+
+    # 2. Check SRS flashcards due
+    try:
+        due_cards = get_due_flashcards(user)
+        if due_cards and len(due_cards) > 0:
+            reminders.append({
+                'id': 'rem_srs_due',
+                'type': 'SRS_DUE',
+                'title': f'{len(due_cards)} carte(s) à réviser aujourd\'hui',
+                'message': 'Renforcez votre rétention mnésique à long terme avec une micro-session de 3 minutes.',
+                'action_label': 'Lancer la session SRS',
+                'action_url': '/srs',
+                'urgency': 'HIGH',
+            })
+    except Exception:
+        pass
+
+    # 3. Check hands-on real-world mission
+    unattempted_mission = Mission.objects.exclude(submissions__user=user).first()
+    if unattempted_mission:
+        recommendations.append({
+            'id': f'rec_mission_{unattempted_mission.id}',
+            'type': 'MISSION',
+            'priority': 'MEDIUM',
+            'title': f'Mission Entreprise : {unattempted_mission.title}',
+            'reason': f'Cas réel {unattempted_mission.company_name} ({unattempted_mission.location}) en FCFA pour votre portfolio.',
+            'action_label': 'Relever la mission',
+            'action_url': f'/missions/{unattempted_mission.slug}',
+            'icon': 'briefcase',
+        })
+
+    # 4. Inactivity & Anti-dropoff calculation (F3.9)
+    latest_event = LearningEvent.objects.filter(user=user).order_by('-timestamp').first()
+    inactivity_days = 0
+    if latest_event and latest_event.timestamp:
+        delta = timezone.now() - latest_event.timestamp
+        inactivity_days = delta.days
+
+    if inactivity_days >= 3:
+        reminders.append({
+            'id': 'rem_inactivity',
+            'type': 'ANTI_DROPOFF',
+            'title': f'Nous avons hâte de vous revoir ! ({inactivity_days} jours sans pratique)',
+            'message': 'La régularité est la clé de la réussite en data analysis. Reprenez là où vous vous étiez arrêté.',
+            'action_label': 'Reprendre mon apprentissage',
+            'action_url': '/dashboard',
+            'urgency': 'MEDIUM',
+        })
+
+    return {
+        'recommendations': recommendations,
+        'reminders': reminders,
+        'inactivity_days': inactivity_days,
+        'summary': f"{len(recommendations)} recommandation(s) et {len(reminders)} rappel(s) actif(s)."
+    }
+
+
+
 
 
 

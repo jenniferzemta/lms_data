@@ -6,12 +6,23 @@ import { Outfit, Plus_Jakarta_Sans } from 'next/font/google';
 import { routing } from '@/i18n/routing';
 import { AuthProvider } from '@/features/auth';
 import { DataSaverProvider } from '@/lib/data-saver';
+import { OfflineBanner } from '@/components/OfflineBanner';
 import '../globals.css';
+
+export const metadata = {
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'DataMboa',
+  },
+};
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
+  themeColor: '#0d9488',
 };
 
 const outfit = Outfit({
@@ -52,6 +63,7 @@ export default async function LocaleLayout({
           <AuthProvider>
             <DataSaverProvider>
               {children}
+              <OfflineBanner />
             </DataSaverProvider>
           </AuthProvider>
         </NextIntlClientProvider>

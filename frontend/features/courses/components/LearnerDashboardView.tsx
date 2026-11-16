@@ -22,6 +22,7 @@ import {
   Loader2,
   Compass,
 } from 'lucide-react';
+import { RecommendationsFeed } from '@/features/recommendations';
 
 interface LearnerDashboardViewProps {
   locale: string;
@@ -238,6 +239,11 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
           </p>
         </div>
       </section>
+
+      {/* --------------------------------------------------------------------- */}
+      {/* 2.5 RECOMMANDATIONS & RAPPELS INTELLIGENTS (F3.8, F3.9)               */}
+      {/* --------------------------------------------------------------------- */}
+      <RecommendationsFeed />
 
       {/* --------------------------------------------------------------------- */}
       {/* 3. 1-CLICK RESUME CARD (Qu'est-ce que je fais)                         */}

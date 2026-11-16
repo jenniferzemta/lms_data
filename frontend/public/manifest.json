@@ -1,0 +1,27 @@
+{
+  "name": "DataMboa — Plateforme d'apprentissage en Analyse de Données",
+  "short_name": "DataMboa",
+  "description": "Formez-vous à l'analyse de données (Excel, SQL, Python, Power BI, GitHub) par la pratique sur cas réels africains, même avec une connexion lente.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "productivity", "utilities"],
+  "lang": "fr-CM",
+  "dir": "ltr"
+}

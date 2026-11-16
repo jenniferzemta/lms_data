@@ -1373,6 +1373,20 @@ class CodeAuditDownloadView(APIView):
         return response
 
 
+class LearnerRecommendationsView(APIView):
+    """
+    GET /api/v1/courses/recommendations/
+    Personalized recommendations and anti-dropoff reminders feed (F3.8, F3.9, R23).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        from courses.selectors import get_learner_recommendations
+        data = get_learner_recommendations(request.user)
+        return Response(data, status=status.HTTP_200_OK)
+
+
+
 
 
 
