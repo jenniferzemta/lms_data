@@ -1,5 +1,7 @@
 from django.urls import path
 from courses.views import (
+    CourseQualityCheckView,
+    CoursePublicationToggleView,
     CourseFeedbackSubmitView,
     UserCourseFeedbackView,
     CourseFeedbackSummaryView,
@@ -46,6 +48,8 @@ urlpatterns = [
     path('<slug:slug>/feedback/', CourseFeedbackSubmitView.as_view(), name='course-feedback-submit'),
     path('<slug:slug>/feedback/my/', UserCourseFeedbackView.as_view(), name='course-feedback-my'),
     path('<slug:slug>/feedback/summary/', CourseFeedbackSummaryView.as_view(), name='course-feedback-summary'),
+    path('<slug:slug>/quality-check/', CourseQualityCheckView.as_view(), name='course-quality-check'),
+    path('<slug:slug>/publish/', CoursePublicationToggleView.as_view(), name='course-publish'),
     path('<slug:slug>/progress/', CourseProgressView.as_view(), name='course-progress'),
     path('<slug:slug>/enroll/', CourseEnrollView.as_view(), name='course-enroll'),
     path('<slug:course_slug>/lessons/<slug:lesson_slug>/', LessonDetailView.as_view(), name='lesson-detail'),

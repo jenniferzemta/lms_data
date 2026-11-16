@@ -1398,3 +1398,404 @@ class CourseFeedbackTests(TestCase):
         self.assertEqual(len(data['recent_testimonials']), 2)
 
 
+class CourseQualityCheckTests(TestCase):
+    """
+    Test suite for Course Authoring & Quality Publication Checklist (F1.12, F1.17, R9, R14).
+    """
+
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.instructor = User.objects.create_user(
+            email='alain.fotso@datamboa.cm',
+            password='Password123!',
+            first_name='Alain',
+            last_name='Fotso',
+            role=User.Role.INSTRUCTOR,
+            is_staff=True,
+        )
+        self.learner = User.objects.create_user(
+            email='simple.learner@datamboa.cm',
+            password='Password123!',
+            first_name='Simple',
+            last_name='Learner',
+            role=User.Role.LEARNER,
+        )
+        self.track = Track.objects.create(
+            name='Excel Analytique',
+            slug='excel-qualite-track',
+            tool=Track.Tool.EXCEL,
+        )
+        # Complete course with all 5 pillars
+        self.complete_course = Course.objects.create(
+            track=self.track,
+            title='Excel — Maîtrise Complète',
+            slug='excel-maitrise-complete',
+            duration_hours=14,
+            instructor_name='Alain Fotso',
+            instructor_role='Lead Data Trainer',
+            instructor_bio='15 ans d expérience en Business Intelligence.',
+            target_audience='Analystes, comptables et gestionnaires africains.',
+            prerequisites='Notions de base sur ordinateur.',
+            pedagogical_modalities='Vidéos courtes, quiz formatifs, laboratoires interactifs.',
+            learning_outcomes=[
+                {'id': 1, 'text': 'Nettoyer des données de vente', 'bloom_level': 'APPLY'},
+                {'id': 2, 'text': 'Créer des Tableaux Croisés Dynamiques', 'bloom_level': 'ANALYZE'},
+                {'id': 3, 'text': 'Concevoir un tableau de bord de direction', 'bloom_level': 'CREATE'},
+            ],
+            is_published=False,
+        )
+        module = Module.objects.create(
+            course=self.complete_course,
+            title='Module 1 : Pratique',
+            order=1,
+        )
+        lesson = Lesson.objects.create(
+            module=module,
+            title='Leçon Pratique',
+            slug='lecon-pratique-qualite',
+            duration_minutes=20,
+            order=1,
+        )
+        quiz = Quiz.objects.create(
+            lesson=lesson,
+            title='Quiz de validation',
+            passing_score_percentage=70,
+        )
+        InteractiveExercise.objects.create(
+            lesson=lesson,
+            title='Exercice TCD',
+            exercise_type=InteractiveExercise.ExerciseType.FILL_BLANKS,
+            instruction='Complétez la formule',
+            prompt_template='=SOMME({{b1}})',
+            solution={'b1': 'A1:A10'},
+            explanation='Explication pédagogique',
+        )
+
+        # Incomplete course (missing outcomes, syllabus, and quiz)
+        self.incomplete_course = Course.objects.create(
+            track=self.track,
+            title='Cours Incomplet Brouillon',
+            slug='cours-incomplet-brouillon',
+            duration_hours=0,
+            is_published=False,
+        )
+
+    def test_quality_check_complete_course(self):
+        self.client.force_authenticate(user=self.instructor)
+        res = self.client.get(f'/api/v1/courses/{self.complete_course.slug}/quality-check/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['can_publish'])
+        self.assertEqual(res.data['score_percentage'], 100)
+        self.assertEqual(res.data['passed_count'], res.data['total_checks'])
+
+    def test_quality_check_incomplete_course(self):
+        self.client.force_authenticate(user=self.instructor)
+        res = self.client.get(f'/api/v1/courses/{self.incomplete_course.slug}/quality-check/')
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.data['can_publish'])
+        self.assertTrue(res.data['score_percentage'] < 50)
+
+    def test_publication_blocked_when_quality_checklist_incomplete(self):
+        self.client.force_authenticate(user=self.instructor)
+        # Attempt to publish incomplete course -> must be BLOCKED with 400
+        res = self.client.post(
+            f'/api/v1/courses/{self.incomplete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.data['success'])
+        self.assertIn('bloquée', res.data['message'])
+
+        self.incomplete_course.refresh_from_db()
+        self.assertFalse(self.incomplete_course.is_published)
+
+    def test_publication_allowed_when_quality_checklist_complete(self):
+        self.client.force_authenticate(user=self.instructor)
+        # Attempt to publish complete course -> must SUCCEED with 200
+        res = self.client.post(
+            f'/api/v1/courses/{self.complete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['success'])
+
+        self.complete_course.refresh_from_db()
+        self.assertTrue(self.complete_course.is_published)
+
+    def test_learner_cannot_publish_course(self):
+        self.client.force_authenticate(user=self.learner)
+        res = self.client.post(
+            f'/api/v1/courses/{self.complete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 403)
+
+
+
+
+class CourseFeedbackTests(TestCase):
+    """
+    Test suite for CourseFeedback and ADDIE Evaluation framework (F1.20, R17).
+    """
+
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.user1 = User.objects.create_user(
+            email='paul.talla@datamboa.cm',
+            password='Password123!',
+            first_name='Paul',
+            last_name='Talla',
+            role=User.Role.LEARNER,
+        )
+        self.user2 = User.objects.create_user(
+            email='brigitte.mbi@datamboa.cm',
+            password='Password123!',
+            first_name='Brigitte',
+            last_name='Mbi',
+            role=User.Role.LEARNER,
+        )
+        self.track = Track.objects.create(
+            name='Excel Analytique',
+            slug='excel-analytique-eval',
+            tool=Track.Tool.EXCEL,
+        )
+        self.course = Course.objects.create(
+            track=self.track,
+            title='Excel — Bases & Tableaux de bord',
+            slug='excel-bases-analyse',
+            duration_hours=14,
+            is_published=True,
+        )
+
+    def test_submit_course_feedback_service_and_xapi(self):
+        from courses.services import submit_course_feedback
+        feedback = submit_course_feedback(
+            user=self.user1,
+            course=self.course,
+            rating=5,
+            clarity_rating=5,
+            usefulness_rating=5,
+            difficulty_level=CourseFeedback.DifficultyLevel.BALANCED,
+            pace_rating=CourseFeedback.PaceRating.BALANCED,
+            recommend_score=10,
+            strengths='Cas réel avec factures en FCFA très pertinent.',
+            improvements='Ajouter encore plus d exercices sur RECHERCHEX.',
+            comment='Excellente formation pratique !',
+        )
+        self.assertEqual(feedback.rating, 5)
+        self.assertEqual(feedback.recommend_score, 10)
+
+        # Check emitted xAPI learning event
+        event = LearningEvent.objects.filter(
+            user=self.user1,
+            verb=LearningEvent.Verb.COMPLETED,
+            object_type=LearningEvent.ObjectType.COURSE,
+        ).first()
+        self.assertIsNotNone(event)
+        self.assertEqual(event.result_score_raw, 5.0)
+
+    def test_submit_course_feedback_api(self):
+        self.client.force_authenticate(user=self.user1)
+        payload = {
+            'rating': 4,
+            'clarity_rating': 5,
+            'usefulness_rating': 4,
+            'difficulty_level': 'BALANCED',
+            'pace_rating': 'BALANCED',
+            'recommend_score': 9,
+            'strengths': 'Vidéos courtes adaptées au téléphone',
+            'improvements': 'Plus de données sur le commerce de gros',
+            'comment': 'Formation recommandée !',
+            'is_public_testimonial': True,
+        }
+        res = self.client.post(f'/api/v1/courses/{self.course.slug}/feedback/', data=payload, format='json')
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.data['rating'], 4)
+        self.assertEqual(res.data['author_name'], 'Paul')
+
+        # Check GET /feedback/my/
+        res_my = self.client.get(f'/api/v1/courses/{self.course.slug}/feedback/my/')
+        self.assertEqual(res_my.status_code, 200)
+        self.assertTrue(res_my.data['has_feedback'])
+        self.assertEqual(res_my.data['feedback']['rating'], 4)
+
+    def test_course_feedback_summary_api(self):
+        from courses.services import submit_course_feedback
+        # Feedback 1
+        submit_course_feedback(
+            user=self.user1,
+            course=self.course,
+            rating=5,
+            clarity_rating=5,
+            usefulness_rating=5,
+            recommend_score=10,
+            strengths='Top cas pratiques',
+            comment='Très formateur !',
+        )
+        # Feedback 2
+        submit_course_feedback(
+            user=self.user2,
+            course=self.course,
+            rating=4,
+            clarity_rating=4,
+            usefulness_rating=5,
+            recommend_score=8,
+            strengths='Accessible hors ligne avec mode léger',
+            comment='Super utile pour le bureau',
+        )
+
+        res = self.client.get(f'/api/v1/courses/{self.course.slug}/feedback/summary/')
+        self.assertEqual(res.status_code, 200)
+        data = res.data
+
+        self.assertEqual(data['total_reviews'], 2)
+        self.assertEqual(data['average_rating'], 4.5)
+        self.assertEqual(data['recommendation_percentage'], 100)
+        self.assertEqual(data['ratings_breakdown'][5], 1)
+        self.assertEqual(data['ratings_breakdown'][4], 1)
+        self.assertEqual(len(data['recent_testimonials']), 2)
+
+
+class CourseQualityCheckTests(TestCase):
+    """
+    Test suite for Course Authoring & Quality Publication Checklist (F1.12, F1.17, R9, R14).
+    """
+
+    def setUp(self):
+        from accounts.models import User
+        self.client = APIClient()
+        self.instructor = User.objects.create_user(
+            email='alain.fotso@datamboa.cm',
+            password='Password123!',
+            first_name='Alain',
+            last_name='Fotso',
+            role=User.Role.INSTRUCTOR,
+            is_staff=True,
+        )
+        self.learner = User.objects.create_user(
+            email='simple.learner@datamboa.cm',
+            password='Password123!',
+            first_name='Simple',
+            last_name='Learner',
+            role=User.Role.LEARNER,
+        )
+        self.track = Track.objects.create(
+            name='Excel Analytique',
+            slug='excel-qualite-track',
+            tool=Track.Tool.EXCEL,
+        )
+        # Complete course with all 5 pillars
+        self.complete_course = Course.objects.create(
+            track=self.track,
+            title='Excel — Maîtrise Complète',
+            slug='excel-maitrise-complete',
+            duration_hours=14,
+            instructor_name='Alain Fotso',
+            instructor_role='Lead Data Trainer',
+            instructor_bio='15 ans d expérience en Business Intelligence.',
+            target_audience='Analystes, comptables et gestionnaires africains.',
+            prerequisites='Notions de base sur ordinateur.',
+            pedagogical_modalities='Vidéos courtes, quiz formatifs, laboratoires interactifs.',
+            learning_outcomes=[
+                {'id': 1, 'text': 'Nettoyer des données de vente', 'bloom_level': 'APPLY'},
+                {'id': 2, 'text': 'Créer des Tableaux Croisés Dynamiques', 'bloom_level': 'ANALYZE'},
+                {'id': 3, 'text': 'Concevoir un tableau de bord de direction', 'bloom_level': 'CREATE'},
+            ],
+            is_published=False,
+        )
+        module = Module.objects.create(
+            course=self.complete_course,
+            title='Module 1 : Pratique',
+            order=1,
+        )
+        lesson = Lesson.objects.create(
+            module=module,
+            title='Leçon Pratique',
+            slug='lecon-pratique-qualite',
+            duration_minutes=20,
+            order=1,
+        )
+        quiz = Quiz.objects.create(
+            lesson=lesson,
+            title='Quiz de validation',
+            passing_score_percentage=70,
+        )
+        InteractiveExercise.objects.create(
+            lesson=lesson,
+            title='Exercice TCD',
+            exercise_type=InteractiveExercise.ExerciseType.FILL_BLANKS,
+            instruction='Complétez la formule',
+            prompt_template='=SOMME({{b1}})',
+            solution={'b1': 'A1:A10'},
+            explanation='Explication pédagogique',
+        )
+
+        # Incomplete course (missing outcomes, syllabus, and quiz)
+        self.incomplete_course = Course.objects.create(
+            track=self.track,
+            title='Cours Incomplet Brouillon',
+            slug='cours-incomplet-brouillon',
+            duration_hours=0,
+            is_published=False,
+        )
+
+    def test_quality_check_complete_course(self):
+        self.client.force_authenticate(user=self.instructor)
+        res = self.client.get(f'/api/v1/courses/{self.complete_course.slug}/quality-check/')
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['can_publish'])
+        self.assertEqual(res.data['score_percentage'], 100)
+        self.assertEqual(res.data['passed_count'], res.data['total_checks'])
+
+    def test_quality_check_incomplete_course(self):
+        self.client.force_authenticate(user=self.instructor)
+        res = self.client.get(f'/api/v1/courses/{self.incomplete_course.slug}/quality-check/')
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.data['can_publish'])
+        self.assertTrue(res.data['score_percentage'] < 50)
+
+    def test_publication_blocked_when_quality_checklist_incomplete(self):
+        self.client.force_authenticate(user=self.instructor)
+        # Attempt to publish incomplete course -> must be BLOCKED with 400
+        res = self.client.post(
+            f'/api/v1/courses/{self.incomplete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.data['success'])
+        self.assertIn('bloquée', res.data['message'])
+
+        self.incomplete_course.refresh_from_db()
+        self.assertFalse(self.incomplete_course.is_published)
+
+    def test_publication_allowed_when_quality_checklist_complete(self):
+        self.client.force_authenticate(user=self.instructor)
+        # Attempt to publish complete course -> must SUCCEED with 200
+        res = self.client.post(
+            f'/api/v1/courses/{self.complete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(res.data['success'])
+
+        self.complete_course.refresh_from_db()
+        self.assertTrue(self.complete_course.is_published)
+
+    def test_learner_cannot_publish_course(self):
+        self.client.force_authenticate(user=self.learner)
+        res = self.client.post(
+            f'/api/v1/courses/{self.complete_course.slug}/publish/',
+            data={'publish': True},
+            format='json',
+        )
+        self.assertEqual(res.status_code, 403)
+
+
+

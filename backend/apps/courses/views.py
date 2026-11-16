@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from courses.models import Course, Lesson
 from courses.selectors import (
+    check_course_publication_quality,
     get_course_feedback_summary,
     get_user_course_feedback,
     get_learner_dashboard_summary,
@@ -57,6 +58,7 @@ from courses.serializers import (
     QuizSubmitSerializer,
 )
 from courses.services import (
+    toggle_course_publication,
     submit_course_feedback,
     record_learning_event,
     verify_interactive_exercise,
@@ -795,5 +797,67 @@ class CourseFeedbackSummaryView(APIView):
 
         summary = get_course_feedback_summary(course)
         return Response(summary, status=status.HTTP_200_OK)
+
+
+# =====================================================================
+# INSTRUCTOR COURSE AUTHORING & QUALITY CHECKLIST VIEWS (F1.12, F1.17, R9, R14)
+# =====================================================================
+
+class CourseQualityCheckView(APIView):
+    """
+    GET /api/v1/courses/<slug>/quality-check/
+    Checks the course against the 5 pedagogical pillars and publication checklist.
+    Returns completeness score and list of validated/missing items.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request, slug: str) -> Response:
+        course = get_course_by_slug(slug, published_only=False)
+        if not course:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        quality = check_course_publication_quality(course)
+        return Response(quality, status=status.HTTP_200_OK)
+
+
+class CoursePublicationToggleView(APIView):
+    """
+    POST /api/v1/courses/<slug>/publish/
+    Toggles publication status of a course.
+    Enforces quality checklist check (F1.17, R14): publication is blocked if any pillar is missing.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, slug: str) -> Response:
+        is_authorized = (
+            request.user.is_staff
+            or getattr(request.user, 'role', '') in ('ADMIN', 'INSTRUCTOR')
+        )
+        if not is_authorized:
+            return Response(
+                {'error': 'Seuls les formateurs et administrateurs peuvent publier ou modifier le statut d\'un cours.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        course = get_course_by_slug(slug, published_only=False)
+        if not course:
+            return Response({'error': 'Course not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        publish = request.data.get('publish', True)
+        success, message, quality = toggle_course_publication(course, bool(publish))
+
+        status_code = status.HTTP_200_OK if success else status.HTTP_400_BAD_REQUEST
+        return Response(
+            {
+                'success': success,
+                'message': message,
+                'is_published': course.is_published,
+                'quality': quality,
+            },
+            status=status_code,
+        )
+
 
 

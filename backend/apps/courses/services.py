@@ -577,3 +577,25 @@ def submit_course_feedback(
 
     return feedback
 
+
+def toggle_course_publication(course: Course, publish: bool) -> tuple[bool, str, dict]:
+    """
+    Attempts to publish or unpublish a course.
+    Blocks publication if the quality checklist is incomplete (F1.17, R14).
+    """
+    from courses.selectors import check_course_publication_quality
+    quality = check_course_publication_quality(course)
+
+    if publish:
+        if not quality['can_publish']:
+            missing = [c['title'] for c in quality['checklist'] if not c['is_valid']]
+            return False, f"Publication bloquée : {len(missing)} critère(s) de qualité incomplet(s).", quality
+        course.is_published = True
+        course.save(update_fields=['is_published'])
+        return True, "Cours validé et publié avec succès dans le catalogue.", quality
+    else:
+        course.is_published = False
+        course.save(update_fields=['is_published'])
+        return True, "Cours dépublié et mis en mode brouillon.", quality
+
+

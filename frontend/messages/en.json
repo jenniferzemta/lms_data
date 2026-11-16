@@ -231,5 +231,19 @@
     "successSubtitle": "Your evaluation has been recorded and directly contributes to continuous course improvement.",
     "close": "Close",
     "openButton": "Rate this course"
+  },
+  "Instructor": {
+    "title": "Instructor & Authoring Space",
+    "subtitle": "Manage your courses and verify the quality publication checklist (ADDIE framework & 5 pillars).",
+    "qualityChecklistTitle": "Quality Publication Checklist",
+    "canPublish": "Ready for publication",
+    "publicationBlocked": "Publication blocked (missing criteria)",
+    "publishAction": "Publish course",
+    "unpublishAction": "Set to draft",
+    "publishedBadge": "Live",
+    "draftBadge": "Draft",
+    "scoreLabel": "Pedagogical compliance",
+    "adminLink": "Open Django Admin",
+    "noCourses": "No courses assigned yet."
   }
 }

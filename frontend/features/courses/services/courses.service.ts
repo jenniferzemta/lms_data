@@ -17,6 +17,8 @@ import {
   CourseFeedback,
   CourseFeedbackPayload,
   CourseFeedbackSummary,
+  QualityCheckData,
+  TogglePublicationResponse,
 } from '../types';
 
 export const coursesService = {
@@ -354,5 +356,30 @@ export const coursesService = {
     } catch {
       return null;
     }
+  },
+
+  /**
+   * Checks course against the 5 pedagogical pillars & publication quality checklist (F1.12, F1.17, R9, R14)
+   */
+  async getCourseQualityCheck(courseSlug: string): Promise<QualityCheckData> {
+    return await apiClient<QualityCheckData>(
+      `/courses/${encodeURIComponent(courseSlug)}/quality-check/`
+    );
+  },
+
+  /**
+   * Toggles publication status of a course, enforcing the quality checklist check (F1.17, R14)
+   */
+  async toggleCoursePublication(
+    courseSlug: string,
+    publish: boolean
+  ): Promise<TogglePublicationResponse> {
+    return await apiClient<TogglePublicationResponse>(
+      `/courses/${encodeURIComponent(courseSlug)}/publish/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ publish }),
+      }
+    );
   },
 };

@@ -231,5 +231,19 @@
     "successSubtitle": "Ton retour a bien été enregistré et contribue directement à l'amélioration de la formation.",
     "close": "Fermer",
     "openButton": "Évaluer la formation"
+  },
+  "Instructor": {
+    "title": "Espace Formateur & Outil d'Auteur",
+    "subtitle": "Supervise tes cours et valide la checklist de publication qualité (méthode ADDIE & 5 piliers).",
+    "qualityChecklistTitle": "Checklist de publication qualité",
+    "canPublish": "Prêt pour publication",
+    "publicationBlocked": "Publication bloquée (critères manquants)",
+    "publishAction": "Publier le cours",
+    "unpublishAction": "Mettre en brouillon",
+    "publishedBadge": "En ligne",
+    "draftBadge": "Brouillon",
+    "scoreLabel": "Conformité pédagogique",
+    "adminLink": "Ouvrir l'administration Django",
+    "noCourses": "Aucun cours assigné pour le moment."
   }
 }

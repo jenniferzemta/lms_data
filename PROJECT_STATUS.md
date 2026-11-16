@@ -2,25 +2,25 @@
 
 > **Source de vérité du niveau d'avancement.** Toute IA lit ce fichier juste après `MASTER_PROMPT.md` (protocole §0.2) et le met à jour à la fin de chaque tâche (skill `finish-task`).
 > **Légende** : ⬜ à faire · 🟨 en cours · 🔎 code terminé, à valider · ✅ terminé (définition de « terminé » §15 respectée) · ⏸ reporté · **M** = indispensable · **S** = souhaitable.
-> **Mise à jour du 15 nov. 2026** : validation de l'exigence F1.20 (Évaluation de la formation & questionnaire de fin de cours ADDIE, critère R17) et de l'exigence F1.19 (Journal d'événements d'apprentissage xAPI/LRS, critère R15).
+> **Mise à jour du 16 nov. 2026** : validation finale de toutes les exigences V1 Socle avec F1.12 & F1.17 (Outil d'auteur formateur & Checklist qualité de publication bloquante, critères R9, R10, R14). V1 Socle à 19/19 (100% des exigences M terminées).
 
 ---
 
 ## 1. Bloc de reprise (à copier dans la section 16 du `MASTER_PROMPT.md` pour une IA sans accès au dépôt)
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-11-15]
-Phase globale     : V1 SOCLE
-Version suivante  : V1 Socle — phase SAM : Développement (F1.12/F1.17 Outil d'auteur & Checklist de publication qualité)
-Avancement (M)    : V1 18/19 validé (F1.1 ✅, F1.2 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.9 ✅, F1.10 ✅, F1.11 ✅, F1.13 ✅, F1.14 ✅, F1.15 ✅, F1.16 ✅, F1.18 ✅, F1.19 ✅, F1.20 ✅) · V2 0/11 · V3 0/7 · V4 0/4
+[BLOC DE REPRISE — mis à jour le 2026-11-16]
+Phase globale     : V1 SOCLE (100% TERMINEE)
+Version suivante  : V2 PRATIQUE — phase SAM : Analyse & Conception
+Avancement (M)    : V1 19/19 validé (100% M) (F1.1 ✅, F1.2 ✅, F1.3 ✅, F1.4 ✅, F1.5 ✅, F1.6 ✅, F1.7 ✅, F1.8 ✅, F1.9 ✅, F1.10 ✅, F1.11 ✅, F1.12 ✅, F1.13 ✅, F1.14 ✅, F1.15 ✅, F1.16 ✅, F1.17 ✅, F1.18 ✅, F1.19 ✅, F1.20 ✅) · V2 0/11 · V3 0/7 · V4 0/4
 Conformité péda.  : 26/26 critères R ✅ validés dans le code (R1 à R26 complets)
-Fait              : F1.20 terminé — Évaluation de la formation selon le cadre ADDIE (modèle CourseFeedback, migration 0010, notation globale 1-5 étoiles, clarté, utilité en contexte FCFA, difficulté perçue, rythme, NPS 1-10, points forts/axes d'amélioration, sélecteurs d'agrégation formateur, endpoints REST et composant tactile CourseFeedbackModal dans LessonReader). 73 tests Django passants, tsc 0 erreur.
-En cours          : V1 Socle — Dernière exigence V1 : F1.12/F1.17 (Espace formateur / Outil d'auteur & Checklist qualité bloquante).
-Prochaine tâche   : F1.12 / F1.17 (Éditeur de cours formateur et checklist qualité empêchant la publication sans objectifs SMART/Bloom et syllabus complet).
-Décisions         : Structure d'évaluation ADDIE combinant métriques quantitatives (note, clarté, utilité, NPS) et retour qualitatif pour le formateur ; émission conjointe d'un événement xAPI.
+Fait              : V1 Socle 100% opérationnel — F1.12 & F1.17 terminés (outil d'auteur formateur et checklist de contrôle qualité de publication bloquante sur les 5 piliers pédagogiques, sélecteur `check_course_publication_quality`, service `toggle_course_publication`, endpoints REST `/quality-check/` et `/publish/`, vue frontend Next.js `/instructor`, liens de rôle dans la sidebar et le panneau admin Django). 78 tests Django passants, tsc 0 erreur.
+En cours          : Clôture de la V1 et livraison opérationnelle.
+Prochaine tâche   : Passage à la V2 Pratique (laboratoires interactifs dans le navigateur, tables d'exercices Excel/SQL).
+Décisions         : Contrôle de publication strict côté Django : un cours ne peut être publié sans ses 5 piliers pédagogiques (Bloom, profil formateur, prérequis, durée, modalités) et ses évaluations formatives.
 Questions ouvertes: Agrégateur Mobile Money V4 ; tableur labo Excel V2 ; hébergement VPS+Docker.
-Dépôt             : Branche main synchronisée, 73 tests passants, tsc 0 erreur.
-Dernière commande : git commit -m "feat(evaluation): implement course feedback evaluation and ADDIE survey modal (F1.20, R17)"
+Dépôt             : Branche main synchronisée, 78 tests passants, tsc 0 erreur.
+Dernière commande : git commit -m "feat(authoring): implement instructor quality checklist and publication enforcement (F1.12, F1.17, R9, R14)"
 ```
 
 ---
@@ -68,6 +68,7 @@ Dernière commande : git commit -m "feat(evaluation): implement course feedback 
 
 | Date | Exigence / Tâche | Fait | Fichiers clés |
 |---|---|---|---|
+| 2026-11-16 | F1.12 & F1.17 (Outil formateur & Checklist qualité) | Implémentation du moteur de contrôle qualité de publication sur les 5 piliers pédagogiques (sélecteur `check_course_publication_quality`), blocage strict de la mise en ligne si un pilier est manquant (`toggle_course_publication`), endpoints REST `/quality-check/` et `/publish/`, 5 tests unitaires Django dédiés. Côté frontend : espace formateur `/instructor` avec calcul dynamique du score et des piliers, liens de navigation dans la sidebar, accès Django Admin. 78 tests Django passants, tsc 0 erreur. V1 Socle à 100% (19/19 exigences M). | `backend/apps/courses/`, `frontend/app/[locale]/instructor/`, `DesktopSidebar.tsx`, `courses.service.ts` |
 | 2026-11-15 | F1.20 (Évaluation de formation ADDIE) | Implémentation complète backend (modèle `CourseFeedback`, migration 0010, service `submit_course_feedback` avec émission xAPI, sélecteurs d'agrégation note/clarté/utilité/NPS/témoignages, endpoints REST `/feedback/` et `/feedback/summary/`, 3 tests unitaires) et frontend (composant tactile `CourseFeedbackModal.tsx`, intégration dans `LessonReader.tsx` sur complétion 100%, client API et traductions FR/EN). 73 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `CourseFeedbackModal.tsx`, `LessonReader.tsx`, `fr.json`, `en.json` |
 | 2026-11-15 | F1.19 (Journal xAPI/LRS) & Accueil dynamique | Implémentation complète backend (modèle `LearningEvent`, migration 0009, sélecteurs, sérialiseurs xAPI 1.0.3, endpoints `/learning-events/` et `/learning-events/xapi/`, tests unitaires dédiés) et refonte réactive de la page d'accueil (`page.tsx`) connectée à `useAuth` (vue visiteur sans stats fictives vs vue apprenant connecté). 70 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `frontend/app/[locale]/page.tsx`, `fr.json`, `en.json` |
 | 2026-11-14 | F1.14 (Mode léger / Data Saver) | Implémentation du système complet d'économie de forfait data : Provider `DataSaverProvider`, hook `useDataSaver`, détection réseau 3G/saveData, persistance `localStorage`, composant interactif tactile `DataSaverToggle`, intégration dans `LessonReader` (preload="none"), `AppHeader` et `ProfileView`. tsc 0 erreur. | `frontend/lib/data-saver/`, `LessonReader.tsx`, `AppHeader.tsx`, `ProfileView.tsx` |

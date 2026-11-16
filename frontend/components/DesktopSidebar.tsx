@@ -126,15 +126,25 @@ export const DesktopSidebar: React.FC = () => {
               <span className="px-3.5 text-[10px] uppercase font-bold text-amber-700 tracking-wider">
                 Espace {user.role === 'ADMIN' || user.is_staff ? 'Admin' : 'Formateur'}
               </span>
+              <Link
+                href="/instructor"
+                className={`flex items-center gap-2.5 px-3.5 py-2 mt-1 rounded-xl text-xs font-bold transition-all min-h-[44px] ${
+                  pathname.startsWith('/instructor')
+                    ? 'bg-amber-100 text-amber-950 border border-amber-300 shadow-xs'
+                    : 'bg-amber-50/80 text-amber-900 border border-amber-200/80 hover:bg-amber-100/90'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                <span className="truncate">Checklist Qualité Cours</span>
+              </Link>
               <a
                 href="http://localhost:8000/admin/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2.5 px-3.5 py-2 mt-1 rounded-xl text-xs font-bold transition-all min-h-[44px] bg-amber-50 text-amber-900 border border-amber-200/80 hover:bg-amber-100/90 shadow-2xs"
+                className="flex items-center gap-2.5 px-3.5 py-2 mt-1 rounded-xl text-xs font-bold transition-all min-h-[44px] bg-slate-50 text-slate-800 border border-slate-200 hover:bg-slate-100 shadow-2xs"
               >
-                <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+                <ExternalLink className="w-4 h-4 text-slate-600 shrink-0" />
                 <span className="truncate">Panneau Admin Django</span>
-                <ExternalLink className="w-3.5 h-3.5 ml-auto text-amber-700 shrink-0" />
               </a>
             </div>
           )}

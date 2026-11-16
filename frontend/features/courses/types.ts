@@ -70,6 +70,7 @@ export interface CourseSummary {
   modules_count: number;
   lessons_count: number;
   order: number;
+  is_published?: boolean;
 }
 
 export interface LearningOutcome {
@@ -391,4 +392,30 @@ export interface CourseFeedbackSummary {
     created_at: string;
   }>;
 }
+
+export interface QualityCheckItem {
+  key: string;
+  title: string;
+  is_valid: boolean;
+  detail: string;
+}
+
+export interface QualityCheckData {
+  course_slug: string;
+  course_title: string;
+  is_published: boolean;
+  can_publish: boolean;
+  score_percentage: number;
+  passed_count: number;
+  total_checks: number;
+  checklist: QualityCheckItem[];
+}
+
+export interface TogglePublicationResponse {
+  success: boolean;
+  message: string;
+  is_published: boolean;
+  quality: QualityCheckData;
+}
+
 
