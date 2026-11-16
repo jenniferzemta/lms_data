@@ -1209,3 +1209,102 @@ class CourseFeedback(models.Model):
         return f"{self.user} - {self.course.title} ({self.rating}/5)"
 
 
+class Mission(models.Model):
+    """
+    Real-world African Enterprise Scenario Case Study (F2.7, Critère R11).
+    Multi-disciplinary problem solving simulating junior data analyst consultant deliverables.
+    """
+    class Difficulty(models.TextChoices):
+        BEGINNER = 'BEGINNER', _('Débutant')
+        INTERMEDIATE = 'INTERMEDIATE', _('Intermédiaire')
+        ADVANCED = 'ADVANCED', _('Avancé')
+
+    title = models.CharField(max_length=200, verbose_name=_('Titre de la mission'))
+    slug = models.SlugField(max_length=200, unique=True)
+    company_name = models.CharField(max_length=150, verbose_name=_('Entreprise cliente'))
+    sector = models.CharField(max_length=100, verbose_name=_('Secteur d\'activité'))
+    location = models.CharField(max_length=100, default='Douala, Cameroun', verbose_name=_('Localisation'))
+    difficulty = models.CharField(max_length=20, choices=Difficulty.choices, default=Difficulty.INTERMEDIATE)
+    estimated_duration_minutes = models.PositiveIntegerField(default=90, verbose_name=_('Durée estimée (min)'))
+    currency = models.CharField(max_length=10, default='FCFA', verbose_name=_('Devise'))
+    
+    context_brief = models.TextField(verbose_name=_('Brief de mise en situation'))
+    business_problem = models.TextField(verbose_name=_('Problématique d\'entreprise'))
+    
+    # JSON list of targets/tasks
+    tasks = models.JSONField(
+        default=list,
+        help_text=_('Liste ordonnée des tâches d\'analyse à accomplir')
+    )
+    # JSON list of expected deliverables
+    deliverables = models.JSONField(
+        default=list,
+        help_text=_('Spécification des livrables professionnels attendus')
+    )
+    # Dataset information
+    dataset_description = models.TextField(blank=True, default='')
+    dataset_sample = models.JSONField(default=list, blank=True)
+    dataset_download_url = models.CharField(max_length=255, blank=True, default='')
+
+    # Auto-evaluation Rubric (R24)
+    evaluation_rubric = models.JSONField(
+        default=list,
+        help_text=_('Critères d\'auto-évaluation avec pondération (ex: [{"id": "r1", "label": "...", "points": 25}])')
+    )
+
+    # Solution & Debrief
+    model_solution_summary = models.TextField(
+        blank=True,
+        default='',
+        verbose_name=_('Corrigé type et analyse de référence'),
+        help_text=_('Révélé après auto-évaluation par l\'apprenant')
+    )
+
+    is_published = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['order', 'title']
+        verbose_name = _('Mission d\'entreprise')
+        verbose_name_plural = _('Missions d\'entreprise')
+
+    def __str__(self) -> str:
+        return f"{self.title} ({self.company_name})"
+
+
+class MissionSubmission(models.Model):
+    """
+    Learner's submission and guided self-evaluation on a mission (F2.7, R24).
+    """
+    mission = models.ForeignKey(Mission, on_delete=models.CASCADE, related_name='submissions')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='mission_submissions')
+    self_evaluation = models.JSONField(
+        default=dict,
+        help_text=_('Scores par critère du barème: {"r1": 25, "r2": 20, ...}')
+    )
+    final_score = models.PositiveIntegerField(
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        default=0
+    )
+    learner_notes = models.TextField(blank=True, default='', verbose_name=_('Notes et synthèse de l\'apprenant'))
+    deliverable_link = models.URLField(blank=True, default='', verbose_name=_('Lien GitHub ou Drive du livrable'))
+    is_completed = models.BooleanField(default=False)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+        verbose_name = _('Soumission de mission')
+        verbose_name_plural = _('Soumissions de missions')
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'mission'], name='unique_learner_mission_submission')
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} - {self.mission.title} ({self.final_score}/100)"
+
+
+

@@ -16,6 +16,8 @@ from courses.models import (
     LessonNote,
     LessonProgress,
     LessonQuestion,
+    Mission,
+    MissionSubmission,
     Quiz,
     QuizAttempt,
     QuizQuestion,
@@ -597,5 +599,58 @@ def toggle_course_publication(course: Course, publish: bool) -> tuple[bool, str,
         course.is_published = False
         course.save(update_fields=['is_published'])
         return True, "Cours dépublié et mis en mode brouillon.", quality
+
+
+def submit_mission_self_evaluation(
+    mission: Mission,
+    user,
+    self_evaluation: dict,
+    learner_notes: str = '',
+    deliverable_link: str = '',
+) -> MissionSubmission:
+    """
+    Records a learner's guided self-evaluation submission on an enterprise mission (F2.7, R24).
+    Calculates final rubric score and emits an xAPI learning event (R15).
+    """
+    # Calculate score based on rubric evaluation
+    raw_score = sum(int(val) for val in self_evaluation.values() if isinstance(val, (int, float, str)) and str(val).isdigit())
+    final_score = min(100, max(0, raw_score))
+    is_success = final_score >= 70
+
+    submission, _ = MissionSubmission.objects.update_or_create(
+        mission=mission,
+        user=user,
+        defaults={
+            'self_evaluation': self_evaluation,
+            'final_score': final_score,
+            'learner_notes': learner_notes.strip(),
+            'deliverable_link': deliverable_link.strip(),
+            'is_completed': True,
+            'submitted_at': timezone.now(),
+        },
+    )
+
+    # Emit standard xAPI learning event (F1.19, R15)
+    record_learning_event(
+        user=user,
+        verb=LearningEvent.Verb.COMPLETED,
+        object_id=f"mission:{mission.slug}",
+        object_type="mission",
+        object_name=mission.title,
+        result_score_raw=float(final_score),
+        result_score_max=100.0,
+        result_score_scaled=float(final_score) / 100.0,
+        result_success=is_success,
+        result_completion=True,
+        extra_payload={
+            'company_name': mission.company_name,
+            'sector': mission.sector,
+            'final_score': final_score,
+            'is_success': is_success,
+        },
+    )
+
+    return submission
+
 
 

@@ -14,6 +14,8 @@ from courses.models import (
     LessonNote,
     LessonQuestion,
     LessonTranslation,
+    Mission,
+    MissionSubmission,
     Module,
     Quiz,
     QuizAnswerOption,
@@ -643,5 +645,104 @@ class CourseFeedbackSubmitSerializer(serializers.Serializer):
     improvements = serializers.CharField(required=False, allow_blank=True, default='')
     comment = serializers.CharField(required=False, allow_blank=True, default='')
     is_public_testimonial = serializers.BooleanField(default=True, required=False)
+
+
+class MissionListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Mission
+        fields = (
+            'id',
+            'title',
+            'slug',
+            'company_name',
+            'sector',
+            'location',
+            'difficulty',
+            'estimated_duration_minutes',
+            'currency',
+            'business_problem',
+            'order',
+        )
+
+
+class MissionDetailSerializer(serializers.ModelSerializer):
+    user_submission = serializers.SerializerMethodField()
+    model_solution_summary = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Mission
+        fields = (
+            'id',
+            'title',
+            'slug',
+            'company_name',
+            'sector',
+            'location',
+            'difficulty',
+            'estimated_duration_minutes',
+            'currency',
+            'context_brief',
+            'business_problem',
+            'tasks',
+            'deliverables',
+            'dataset_description',
+            'dataset_sample',
+            'dataset_download_url',
+            'evaluation_rubric',
+            'model_solution_summary',
+            'user_submission',
+            'order',
+        )
+
+    def get_user_submission(self, obj) -> dict | None:
+        user = self.context.get('request').user if self.context.get('request') else None
+        if not user or not user.is_authenticated:
+            return None
+        sub = obj.submissions.filter(user=user).first()
+        if not sub:
+            return None
+        return {
+            'id': sub.id,
+            'self_evaluation': sub.self_evaluation,
+            'final_score': sub.final_score,
+            'learner_notes': sub.learner_notes,
+            'deliverable_link': sub.deliverable_link,
+            'is_completed': sub.is_completed,
+            'submitted_at': sub.submitted_at,
+        }
+
+    def get_model_solution_summary(self, obj) -> str:
+        # Solution revealed only if completed by current user (R24)
+        user = self.context.get('request').user if self.context.get('request') else None
+        if user and user.is_authenticated:
+            sub = obj.submissions.filter(user=user, is_completed=True).first()
+            if sub:
+                return obj.model_solution_summary
+        return ''
+
+
+class MissionSubmissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MissionSubmission
+        fields = (
+            'id',
+            'mission',
+            'self_evaluation',
+            'final_score',
+            'learner_notes',
+            'deliverable_link',
+            'is_completed',
+            'submitted_at',
+            'created_at',
+            'updated_at',
+        )
+        read_only_fields = ('id', 'final_score', 'is_completed', 'submitted_at', 'created_at', 'updated_at')
+
+
+class MissionSubmitActionSerializer(serializers.Serializer):
+    self_evaluation = serializers.DictField(child=serializers.IntegerField(min_value=0, max_value=100))
+    learner_notes = serializers.CharField(required=False, allow_blank=True, default='')
+    deliverable_link = serializers.CharField(required=False, allow_blank=True, default='')
+
 
 

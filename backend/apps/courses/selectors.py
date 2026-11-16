@@ -15,6 +15,8 @@ from courses.models import (
     LessonProgress,
     LessonQuestion,
     LessonTranslation,
+    Mission,
+    MissionSubmission,
     Module,
     Quiz,
     QuizAttempt,
@@ -841,8 +843,6 @@ def check_course_publication_quality(course: Course) -> Dict[str, Any]:
     }
 
 
-
-
 def get_user_course_feedback(user, course: Course) -> Optional[CourseFeedback]:
     """
     Returns the user's feedback for a course if existing (F1.20).
@@ -930,76 +930,37 @@ def get_course_feedback_summary(course: Course) -> Dict[str, Any]:
     }
 
 
+def list_published_missions(difficulty: Optional[str] = None):
+    """
+    Returns all published enterprise missions ordered by sequence.
+    """
+    qs = Mission.objects.filter(is_published=True)
+    if difficulty:
+        qs = qs.filter(difficulty=difficulty.upper())
+    return qs.order_by('order', 'id')
 
-    modules_count = course.modules.count()
-    lessons_count = Lesson.objects.filter(module__course=course).count()
-    has_structured_curriculum = modules_count >= 1 and lessons_count >= 1 and course.duration_hours > 0
-    has_modalities = bool(course.pedagogical_modalities)
 
-    has_quiz = Quiz.objects.filter(lesson__module__course=course).exists()
-    has_interactive_practice = (
-        InteractiveExercise.objects.filter(lesson__module__course=course).exists()
-        or LessonAttachment.objects.filter(lesson__module__course=course).exists()
-    )
+def get_mission_by_slug(slug: str) -> Optional[Mission]:
+    """
+    Fetches a published mission by its unique slug.
+    """
+    try:
+        return Mission.objects.get(slug=slug, is_published=True)
+    except Mission.DoesNotExist:
+        return None
 
-    checks = [
-        {
-            'key': 'outcomes',
-            'title': 'Objectifs d’apprentissage SMART et Bloom (Critères R2 & R3)',
-            'is_valid': has_bloom_outcomes,
-            'detail': f"{len(outcomes)} objectif(s) défini(s) (minimum 3 requis avec verbe d'action Bloom).",
-        },
-        {
-            'key': 'instructor',
-            'title': 'Profil formateur identifié avec rôle et bio (Critère R9 Pilier 2)',
-            'is_valid': has_instructor_profile,
-            'detail': f"Formateur : {course.instructor_name or 'Non renseigné'}.",
-        },
-        {
-            'key': 'audience',
-            'title': 'Public cible et prérequis définis (Critère R9 Pilier 3)',
-            'is_valid': has_audience_and_prereqs,
-            'detail': f"Public : {course.target_audience[:40] if course.target_audience else 'Non renseigné'}...",
-        },
-        {
-            'key': 'curriculum',
-            'title': 'Programme détaillé avec durées et grains pédagogiques (Critère R9 Pilier 4)',
-            'is_valid': has_structured_curriculum,
-            'detail': f"{modules_count} module(s), {lessons_count} leçon(s), durée : {course.duration_hours}h.",
-        },
-        {
-            'key': 'modalities',
-            'title': 'Modalités pédagogiques et critères de certification (Critère R9 Pilier 5)',
-            'is_valid': has_modalities,
-            'detail': f"Modalités : {course.pedagogical_modalities[:40] if course.pedagogical_modalities else 'Non renseignées'}...",
-        },
-        {
-            'key': 'formative_quiz',
-            'title': 'Évaluation formative / Quiz avec feedback explicatif (Critère R11)',
-            'is_valid': has_quiz,
-            'detail': 'Quiz présent pour valider la compréhension des concepts clés.' if has_quiz else 'Aucun quiz rattaché aux leçons.',
-        },
-        {
-            'key': 'hands_on_practice',
-            'title': 'Atelier pratique / Fichiers réels en FCFA ou laboratoires interactifs (Critère R10)',
-            'is_valid': has_interactive_practice,
-            'detail': 'Cas pratique avec fichiers ou laboratoire interactif présent.' if has_interactive_practice else 'Aucun exercice interactif ni fichier.',
-        },
-    ]
 
-    all_passed = all(c['is_valid'] for c in checks)
-    passed_count = sum(1 for c in checks if c['is_valid'])
+def get_learner_mission_submission(mission: Mission, user) -> Optional[MissionSubmission]:
+    """
+    Retrieves the learner's existing submission for a mission, if any.
+    """
+    if not user or not user.is_authenticated:
+        return None
+    try:
+        return MissionSubmission.objects.get(mission=mission, user=user)
+    except MissionSubmission.DoesNotExist:
+        return None
 
-    return {
-        'course_slug': course.slug,
-        'course_title': course.title,
-        'is_published': course.is_published,
-        'can_publish': all_passed,
-        'score_percentage': int((passed_count / len(checks)) * 100),
-        'passed_count': passed_count,
-        'total_checks': len(checks),
-        'checklist': checks,
-    }
 
 
 

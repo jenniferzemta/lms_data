@@ -31,6 +31,8 @@ from courses.selectors import (
     get_user_lesson_notes,
     list_lesson_questions,
     list_published_courses,
+    list_published_missions,
+    get_mission_by_slug,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -56,8 +58,13 @@ from courses.serializers import (
     QuizAttemptResponseSerializer,
     QuizPublicSerializer,
     QuizSubmitSerializer,
+    MissionListSerializer,
+    MissionDetailSerializer,
+    MissionSubmitActionSerializer,
+    MissionSubmissionSerializer,
 )
 from courses.services import (
+    submit_mission_self_evaluation,
     toggle_course_publication,
     submit_course_feedback,
     record_learning_event,
@@ -858,6 +865,75 @@ class CoursePublicationToggleView(APIView):
             },
             status=status_code,
         )
+
+
+# =====================================================================
+# ENTERPRISE SCENARIO MISSIONS VIEWS (F2.7, R11, R24)
+# =====================================================================
+
+class MissionListView(APIView):
+    """
+    GET /api/v1/courses/missions/
+    Lists all published real-world African enterprise missions (F2.7, R11).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        difficulty = request.query_params.get('difficulty')
+        missions = list_published_missions(difficulty=difficulty)
+        serializer = MissionListSerializer(missions, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MissionDetailView(APIView):
+    """
+    GET /api/v1/courses/missions/<slug>/
+    Retrieves complete mission context, deliverables, dataset preview and evaluation rubric.
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, slug: str) -> Response:
+        mission = get_mission_by_slug(slug)
+        if not mission:
+            return Response({'error': 'Mission introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = MissionDetailSerializer(mission, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class MissionSubmitView(APIView):
+    """
+    POST /api/v1/courses/missions/<slug>/submit/
+    Submits learner's self-evaluation rubric, notes, and deliverable link (F2.7, R24).
+    Unlocks model solution and emits xAPI learning event (R15).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request, slug: str) -> Response:
+        mission = get_mission_by_slug(slug)
+        if not mission:
+            return Response({'error': 'Mission introuvable.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = MissionSubmitActionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        submission = submit_mission_self_evaluation(
+            mission=mission,
+            user=request.user,
+            self_evaluation=serializer.validated_data['self_evaluation'],
+            learner_notes=serializer.validated_data.get('learner_notes', ''),
+            deliverable_link=serializer.validated_data.get('deliverable_link', ''),
+        )
+
+        return Response(
+            {
+                'success': True,
+                'message': 'Auto-évaluation enregistrée avec succès. Corrigé type débloqué !',
+                'submission': MissionSubmissionSerializer(submission).data,
+                'model_solution_summary': mission.model_solution_summary,
+            },
+            status=status.HTTP_200_OK,
+        )
+
 
 
 

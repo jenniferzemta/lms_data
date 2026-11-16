@@ -116,3 +116,4 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
     </div>
   );
 };
+

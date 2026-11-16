@@ -272,5 +272,12 @@
     "excelTitle": "Laboratoire Tableur Excel",
     "excelSubtitle": "Maîtrisez les formules SOMME, SI, SOMME.SI et RECHERCHEV sur les données d'une entreprise locale.",
     "excelSuccessTitle": "Feuille de calcul validée avec succès !"
+  },
+  "Missions": {
+    "title": "Missions & Études de Cas Réelles",
+    "subtitle": "Résolvez des défis analytiques concrets d'entreprises locales en FCFA, téléchargez les données réelles et auto-évaluez vos livrables avec nos corrigés de référence.",
+    "startMission": "Démarrer la mission",
+    "rubricTitle": "Grille d'auto-évaluation guidée",
+    "solutionTitle": "Diagnostic & Corrigé Type de Référence"
   }
 }

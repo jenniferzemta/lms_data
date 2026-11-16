@@ -193,3 +193,4 @@ export const SAMPLE_EXCEL_EXERCISES: LabExercise[] = [
     ]
   }
 ];
+

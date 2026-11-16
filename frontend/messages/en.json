@@ -272,5 +272,12 @@
     "excelTitle": "Excel Spreadsheet Laboratory",
     "excelSubtitle": "Master SUM, IF, SUMIF, and VLOOKUP formulas on authentic local business datasets.",
     "excelSuccessTitle": "Spreadsheet calculations validated successfully!"
+  },
+  "Missions": {
+    "title": "Real-World Enterprise Missions",
+    "subtitle": "Solve authentic business analytical challenges in FCFA, download datasets, and self-evaluate with reference solutions.",
+    "startMission": "Start Mission",
+    "rubricTitle": "Guided Self-Evaluation Rubric",
+    "solutionTitle": "Reference Diagnostic & Model Solution"
   }
 }
