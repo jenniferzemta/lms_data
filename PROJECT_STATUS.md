@@ -2,7 +2,7 @@
 
 > **Source de vérité du niveau d'avancement.** Toute IA lit ce fichier juste après `MASTER_PROMPT.md` (protocole §0.2) et le met à jour à la fin de chaque tâche (skill `finish-task`).
 > **Légende** : ⬜ à faire · 🟨 en cours · 🔎 code terminé, à valider · ✅ terminé (définition de « terminé » §15 respectée) · ⏸ reporté · **M** = indispensable · **S** = souhaitable.
-> **Mise à jour du 16 nov. 2026** : démarrage officiel de la **V2 Pratique** avec validation de **F2.4 (Socle `LabShell` & Pattern Adapter `LabEngine`)** et **F2.1 (Laboratoire SQL dans le navigateur)**. V1 Socle à 19/19 (100% M), V2 Pratique à 2/11 (18% M).
+> **Mise à jour du 16 nov. 2026** : avancée majeure sur la **V2 Pratique** avec validation de **F2.13 (Vidéos interactives : quiz incrustés avec pause obligatoire, chapitres, ressources jointes, critère R12)**, **F2.4 (Socle `LabShell` & Pattern Adapter `LabEngine`)** et **F2.1 (Laboratoire SQL dans le navigateur)**. V1 Socle à 19/19 (100% M), V2 Pratique à 3/11 (27% M).
 
 ---
 
@@ -12,15 +12,15 @@
 [BLOC DE REPRISE — mis à jour le 2026-11-16]
 Phase globale     : V2 PRATIQUE
 Version suivante  : V2 Pratique — phase SAM : Développement (F2.2 Labo Python & F2.3 Labo Excel)
-Avancement (M)    : V1 19/19 validé (100% M) · V2 2/11 validé (F2.1 ✅, F2.4 ✅) · V3 0/7 · V4 0/4
-Conformité péda.  : 26/26 critères R ✅ validés dans le code (critères R23 adaptatif ciblé, R11 cas réels FCFA, R12 vidéo interactive, R15 xAPI)
-Fait              : F2.4 & F2.1 terminés — Implémentation du socle commun des laboratoires (contrat d'interface LabEngine pattern Adapter, composant LabShell avec consigne métier, critères, 3 indices progressifs avec pénalité, sauvegarde auto localStorage, export/import .sql, touches rapides tactiles >= 44px, adaptatif ciblé onglets mobile / 2 colonnes desktop) et du Laboratoire SQL (moteur relationnel client, 4 tables microfinance Cameroun clients/comptes/credits/remboursements en FCFA, explorateur de schéma, table de résultats avec 1re colonne fixe, 4 ateliers progressifs Bloom, émission xAPI). tsc 0 erreur.
-En cours          : V2 Pratique — Suite des laboratoires (F2.2 Python & F2.3 Excel) et Vidéo Interactive (F2.13).
-Prochaine tâche   : F2.13 (Vidéos interactives avec quiz incrustés avec pause, critère R12) ou F2.2 (Labo Python Pyodide).
-Décisions         : Moteur SQL client in-memory pour démarrage instantané (< 50 ms) sans latence réseau, respectant le budget < 300 Ko sur connexion mobile camerounaise.
+Avancement (M)    : V1 19/19 validé (100% M) · V2 3/11 validé (F2.1 ✅, F2.4 ✅, F2.13 ✅) · V3 0/7 · V4 0/4
+Conformité péda.  : 26/26 critères R ✅ validés dans le code (critères R12 vidéo interactive validé en direct, R23 adaptatif ciblé, R11 cas réels FCFA, R15 xAPI)
+Fait              : F2.13 terminé — Implémentation du système complet de vidéo interactive dans LessonReader (quiz incrustés déclenchés aux timecodes précis avec pause obligatoire du lecteur, composant tactile InteractiveVideoOverlay, feedback pédagogique instantané et bouton de reprise, marqueurs temporels interactifs sur la timeline de progression, barre de chapitres avec saut direct au clic VideoChaptersList, émission automatique xAPI). 78 tests Django passants, tsc 0 erreur.
+En cours          : V2 Pratique — Suite des laboratoires (F2.2 Python & F2.3 Excel).
+Prochaine tâche   : F2.2 (Laboratoire Python Pyodide pour manipulation de tableaux Pandas) ou F2.3 (Laboratoire tableur Excel).
+Décisions         : Arrêt obligatoire de la vidéo lors d'un quiz incrusté (critère R12) pour valider l'attention avant de débloquer la suite du cours ; émission xAPI avec timecode.
 Questions ouvertes: Agrégateur Mobile Money V4 ; tableur labo Excel V2 ; hébergement VPS+Docker.
 Dépôt             : Branche main synchronisée, tests Django passants, tsc 0 erreur.
-Dernière commande : git commit -m "feat(labs): implement common LabShell contract and browser-based SQL laboratory (F2.1, F2.4, R23)"
+Dernière commande : git commit -m "feat(video): implement interactive video player with in-video quizzes and chapters (F2.13, R12)"
 ```
 
 ---
@@ -31,7 +31,7 @@ Dernière commande : git commit -m "feat(labs): implement common LabShell contra
 |---|---|
 | Phase globale | V2 — Pratique |
 | Version cible suivante | V2 — Pratique |
-| Phase SAM de la version cible | Développement (F2.2 Python / F2.13 Vidéo Interactive) |
+| Phase SAM de la version cible | Développement (F2.2 Python / F2.3 Excel) |
 | Dernière mise à jour | 2026-11-16 |
 | Dépôt | Synchronisé sur GitHub (`origin/main`) |
 | Conformité pédagogique | 26/26 critères R ✅ validés dans le code |
@@ -64,6 +64,7 @@ Dernière commande : git commit -m "feat(labs): implement common LabShell contra
 | Espace formateur & Checklist qualité bloquante (F1.12, F1.17, R14) | ✅ | Moteur de contrôle qualité 5 piliers, blocage publication, endpoint /quality-check/ et /publish/, vue /instructor |
 | Socle commun des laboratoires LabShell (F2.4, R23) | ✅ | Interface LabEngine, LabShell unifié avec consigne, critères, 3 indices progressifs, sauvegarde auto, adaptatif 360px |
 | Laboratoire SQL dans le navigateur (F2.1, R11, R23) | ✅ | Moteur SQL in-memory, base Microfinance Cameroun FCFA (4 tables), explorateur de schéma, table de résultats, 4 ateliers Bloom |
+| Vidéos interactives avec quiz incrustés (F2.13, R12) | ✅ | Pause forcée aux timecodes clés, quiz incrusté tactile, feedback pédagogique, chapitres cliquables et émission xAPI |
 | Intégration vidéos locales | ✅ | Endpoint Django streaming HTTP Range 206 depuis `D:\videoschariow` |
 | Progression et reprise (F1.8) | ✅ | CourseEnrollment + LessonProgress, endpoints REST, auto-reprise, validation sommaire |
 | Quiz interactifs & feedback (F1.7) | ✅ | Quiz, Bloom levels, score 70%, feedback pédagogique instantané R24, auto-complétion |
@@ -84,6 +85,7 @@ Dernière commande : git commit -m "feat(labs): implement common LabShell contra
 
 | Date | Exigence / Tâche | Fait | Fichiers clés |
 |---|---|---|---|
+| 2026-11-16 | F2.13 (Vidéos interactives avec quiz incrustés) | Implémentation complète du lecteur vidéo interactif (critère pédagogique R12) : détection des arrêts aux timecodes précis avec pause obligatoire du lecteur (`videoRef.pause`), composant de quiz incrusté `InteractiveVideoOverlay` sur téléphone et ordinateur, questions de contrôle contextualisées (syntaxe Excel, FCFA Kamer SARL, SQL), boutons de réponse tactiles >= 44px, feedback immédiat, bouton de reprise de lecture, marqueurs temporels interactifs sur la barre de progression (scrubber), explorateur de chapitres `VideoChaptersList` avec saut direct au clic, et émission d'événements d'apprentissage xAPI. tsc 0 erreur. | `LessonReader.tsx`, `InteractiveVideoOverlay.tsx`, `VideoChaptersList.tsx`, `videoCheckpoints.ts`, `types.ts`, `fr.json`, `en.json` |
 | 2026-11-16 | F2.4 & F2.1 (Socle LabShell & Labo SQL) | Conception et implémentation du socle commun des laboratoires interactifs (contrat d'interface `LabEngine` pattern Adapter, composant unifié `LabShell` avec consigne métier, critères attendus, 3 indices progressifs avec pénalité de score, sauvegarde automatique dans `localStorage`, export/import `.sql`, touches rapides tactiles >= 44px, adaptatif ciblé avec onglets mobiles et écran 2 colonnes sur desktop) et du premier laboratoire opérationnel : Laboratoire SQL dans le navigateur (moteur relationnel client in-memory pour démarrage immédiat < 50 ms sans charge serveur, base de données Microfinance Cameroun en FCFA avec 4 tables `clients`, `comptes`, `credits`, `remboursements`, explorateur de schéma, table de résultats avec 1re colonne fixe conforme règle 4.2, 4 ateliers progressifs Bloom, émission automatique xAPI). Page `/labs/sql` intégrée dans la sidebar, la bottom nav et le lecteur de cours `LessonReader`. tsc 0 erreur. | `frontend/features/labs/`, `frontend/app/[locale]/labs/sql/`, `DesktopSidebar.tsx`, `BottomNav.tsx`, `LessonReader.tsx` |
 | 2026-11-16 | F1.12 & F1.17 (Outil formateur & Checklist qualité) | Implémentation du moteur de contrôle qualité de publication sur les 5 piliers pédagogiques (sélecteur `check_course_publication_quality`), blocage strict de la mise en ligne si un pilier est manquant (`toggle_course_publication`), endpoints REST `/quality-check/` et `/publish/`, 5 tests unitaires Django dédiés. Côté frontend : espace formateur `/instructor` avec calcul dynamique du score et des piliers, liens de navigation dans la sidebar, accès Django Admin. 78 tests Django passants, tsc 0 erreur. V1 Socle à 100% (19/19 exigences M). | `backend/apps/courses/`, `frontend/app/[locale]/instructor/`, `DesktopSidebar.tsx`, `courses.service.ts` |
 | 2026-11-15 | F1.20 (Évaluation de formation ADDIE) | Implémentation complète backend (modèle `CourseFeedback`, migration 0010, service `submit_course_feedback` avec émission xAPI, sélecteurs d'agrégation note/clarté/utilité/NPS/témoignages, endpoints REST `/feedback/` et `/feedback/summary/`, 3 tests unitaires) et frontend (composant tactile `CourseFeedbackModal.tsx`, intégration dans `LessonReader.tsx` sur complétion 100%, client API et traductions FR/EN). 73 tests Django passants, tsc 0 erreur. | `backend/apps/courses/`, `CourseFeedbackModal.tsx`, `LessonReader.tsx`, `fr.json`, `en.json` |

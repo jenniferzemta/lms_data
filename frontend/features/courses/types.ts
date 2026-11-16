@@ -127,6 +127,24 @@ export interface LessonDetail {
   attachments: LessonAttachment[];
   previous_lesson: NavigationLesson | null;
   next_lesson: NavigationLesson | null;
+  interactive_checkpoints?: VideoCheckpointQuestion[];
+  video_chapters?: VideoChapter[];
+}
+
+export interface VideoCheckpointQuestion {
+  id: string;
+  timecodeSeconds: number;
+  title: string;
+  question: string;
+  options: { id: string; text: string; isCorrect: boolean }[];
+  explanation: string;
+}
+
+export interface VideoChapter {
+  id: string;
+  title: string;
+  timecodeSeconds: number;
+  durationFormatted?: string;
 }
 
 export interface CourseProgress {

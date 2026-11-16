@@ -12,6 +12,10 @@ import { LessonContentRenderer } from './LessonContentRenderer';
 import { LessonQuizInteractive } from './LessonQuizInteractive';
 import { LessonExerciseInteractive } from './LessonExerciseInteractive';
 import { CourseFeedbackModal } from './CourseFeedbackModal';
+import { InteractiveVideoOverlay } from './InteractiveVideoOverlay';
+import { VideoChaptersList } from './VideoChaptersList';
+import { getLessonVideoEnhancements } from '../data/videoCheckpoints';
+import { VideoCheckpointQuestion } from '../types';
 import { useDataSaver, DataSaverToggle } from '@/lib/data-saver';
 import {
   ChevronLeft,
@@ -103,6 +107,13 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
   const [exercises, setExercises] = useState<InteractiveExercise[]>([]);
   const [isLoadingExercises, setIsLoadingExercises] = useState(false);
 
+  // Interactive Video Checkpoints & Chapters (F2.13, R12)
+  const videoEnhancements = getLessonVideoEnhancements(lesson.slug);
+  const videoCheckpoints = lesson.interactive_checkpoints || videoEnhancements.checkpoints;
+  const videoChapters = lesson.video_chapters || videoEnhancements.chapters;
+  const [activeCheckpoint, setActiveCheckpoint] = useState<VideoCheckpointQuestion | null>(null);
+  const [completedCheckpoints, setCompletedCheckpoints] = useState<Set<string>>(new Set());
+
   // Fetch course progression, notes and community questions
   useEffect(() => {
     let isMounted = true;
@@ -178,7 +189,60 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
+      const time = videoRef.current.currentTime;
+      setCurrentTime(time);
+
+      // Check if video reached an uncompleted interactive checkpoint (F2.13, R12)
+      if (!activeCheckpoint && videoCheckpoints.length > 0) {
+        const hit = videoCheckpoints.find(
+          (cp) =>
+            Math.abs(time - cp.timecodeSeconds) < 1.0 &&
+            !completedCheckpoints.has(cp.id)
+        );
+        if (hit) {
+          videoRef.current.pause();
+          setIsPlaying(false);
+          setActiveCheckpoint(hit);
+        }
+      }
+    }
+  };
+
+  const handleCheckpointAnswered = async (isCorrect: boolean) => {
+    if (!activeCheckpoint) return;
+    try {
+      await coursesService.recordLearningEvent({
+        verb: isCorrect ? 'passed' : 'answered',
+        object_id: `video-checkpoint-${activeCheckpoint.id}`,
+        object_type: 'video_checkpoint',
+        object_name: `${lesson.title} - ${activeCheckpoint.title}`,
+        success: isCorrect,
+        score_scaled: isCorrect ? 1.0 : 0.0,
+        payload: {
+          timecode: activeCheckpoint.timecodeSeconds,
+          lesson_slug: lesson.slug,
+          course_slug: lesson.course_slug,
+        },
+      });
+    } catch {
+      // Continue offline
+    }
+  };
+
+  const handleResumeFromCheckpoint = () => {
+    if (!activeCheckpoint) return;
+    setCompletedCheckpoints((prev) => new Set([...prev, activeCheckpoint.id]));
+    setActiveCheckpoint(null);
+    if (videoRef.current) {
+      videoRef.current.currentTime += 0.8;
+      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
+
+  const handleSeekTo = (seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = seconds;
+      setCurrentTime(seconds);
     }
   };
 
@@ -591,32 +655,65 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
 
             {/* Center Big Play / Pause Button (Min 44px, Stitch 56px) */}
             <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
-              <button
-                type="button"
-                onClick={togglePlay}
-                aria-label={isPlaying ? 'Mettre en pause' : 'Lire la vidéo'}
-                className="w-14 h-14 rounded-full bg-[#13b8a6] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform pointer-events-auto hover:bg-[#006b5f]"
-              >
-                {isPlaying ? (
-                  <Pause className="w-7 h-7 fill-current" />
-                ) : (
-                  <Play className="w-7 h-7 fill-current ml-1" />
-                )}
-              </button>
+              {!activeCheckpoint && (
+                <button
+                  type="button"
+                  onClick={togglePlay}
+                  aria-label={isPlaying ? 'Mettre en pause' : 'Lire la vidéo'}
+                  className="w-14 h-14 rounded-full bg-[#13b8a6] text-white flex items-center justify-center shadow-lg active:scale-95 transition-transform pointer-events-auto hover:bg-[#006b5f]"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-7 h-7 fill-current" />
+                  ) : (
+                    <Play className="w-7 h-7 fill-current ml-1" />
+                  )}
+                </button>
+              )}
             </div>
+
+            {/* In-Video Interactive Quiz Overlay (F2.13, R12) */}
+            {activeCheckpoint && (
+              <InteractiveVideoOverlay
+                checkpoint={activeCheckpoint}
+                onAnswerSubmitted={handleCheckpointAnswered}
+                onResumeVideo={handleResumeFromCheckpoint}
+              />
+            )}
 
             {/* Bottom Controls Bar & Scrubber */}
             <div className="absolute bottom-0 left-0 right-0 z-10 p-2.5 sm:p-3 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col gap-1.5">
-              {/* Scrubber input */}
-              <input
-                type="range"
-                min={0}
-                max={duration || 100}
-                value={currentTime}
-                onChange={handleScrubberChange}
-                aria-label="Progression de la vidéo"
-                className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-[#13b8a6]"
-              />
+              {/* Scrubber input with interactive checkpoints markers */}
+              <div className="relative w-full flex items-center">
+                <input
+                  type="range"
+                  min={0}
+                  max={duration || 100}
+                  value={currentTime}
+                  onChange={handleScrubberChange}
+                  aria-label="Progression de la vidéo"
+                  className="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-[#13b8a6]"
+                />
+                {/* Visual Checkpoints markers along scrubber */}
+                {videoCheckpoints.map((cp) => {
+                  const percent = duration ? Math.min(99, Math.max(1, (cp.timecodeSeconds / duration) * 100)) : 0;
+                  const isDone = completedCheckpoints.has(cp.id);
+
+                  return (
+                    <button
+                      key={cp.id}
+                      type="button"
+                      onClick={() => handleSeekTo(cp.timecodeSeconds)}
+                      title={`Quiz incrusté : ${cp.title} (${formatTime(cp.timecodeSeconds)})`}
+                      style={{ left: `${percent}%` }}
+                      className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2.5 h-2.5 rounded-full transition-transform hover:scale-150 z-20 ${
+                        isDone
+                          ? 'bg-emerald-400 ring-2 ring-emerald-600'
+                          : 'bg-amber-400 ring-2 ring-amber-600 animate-pulse'
+                      }`}
+                    />
+                  );
+                })}
+              </div>
 
               <div className="flex items-center justify-between text-xs text-white pt-1">
                 <div className="flex items-center gap-2">
@@ -626,6 +723,11 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                   <span className="text-[10px] sm:text-xs font-semibold bg-[#006b5f]/80 text-[#70f8e4] px-2 py-0.5 rounded-full">
                     FCFA Cas Douala
                   </span>
+                  {videoCheckpoints.length > 0 && (
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] bg-slate-800/80 px-2 py-0.5 rounded-full text-amber-300">
+                      <span>{completedCheckpoints.size}/{videoCheckpoints.length} quiz vidéo validés</span>
+                    </span>
+                  )}
                 </div>
                 <button
                   type="button"
@@ -638,6 +740,17 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Video Chapters Accordion Bar (F2.13) */}
+          {videoChapters.length > 0 && (
+            <div className="mt-3">
+              <VideoChaptersList
+                chapters={videoChapters}
+                currentTime={currentTime}
+                onSeekTo={handleSeekTo}
+              />
+            </div>
+          )}
         </section>
 
         {/* ------------------------------------------------------------- */}

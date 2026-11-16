@@ -8,3 +8,6 @@ export * from './components/LessonAttachmentsList';
 export * from './components/LessonContentRenderer';
 export * from './components/LessonQuizInteractive';
 export * from './components/CourseFeedbackModal';
+export * from './components/InteractiveVideoOverlay';
+export * from './components/VideoChaptersList';
+export * from './data/videoCheckpoints';

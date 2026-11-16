@@ -121,7 +121,11 @@
     "typeOther": "Resource",
     "supportDocumentDesc": "Course handout and practical guide.",
     "filesCountSingular": "file",
-    "filesCountPlural": "files"
+    "filesCountPlural": "files",
+    "interactiveVideoTitle": "In-video live quiz",
+    "videoChaptersTitle": "Video lesson chapters",
+    "resumeVideo": "Resume video",
+    "videoPaused": "Video paused"
   },
   "Billing": {
     "title": "Activate subscription",

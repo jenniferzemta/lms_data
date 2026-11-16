@@ -121,7 +121,11 @@
     "typeOther": "Ressource",
     "supportDocumentDesc": "Support de cours et guide pratique.",
     "filesCountSingular": "fichier",
-    "filesCountPlural": "fichiers"
+    "filesCountPlural": "fichiers",
+    "interactiveVideoTitle": "Quiz incrusté en direct",
+    "videoChaptersTitle": "Chapitres de la leçon vidéo",
+    "resumeVideo": "Reprendre la vidéo",
+    "videoPaused": "Vidéo en pause"
   },
   "Billing": {
     "title": "Activer mon abonnement",
