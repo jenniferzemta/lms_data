@@ -9,6 +9,8 @@ from courses.models import (
     Flashcard,
     UserFlashcardProgress,
     ChunkedUpload,
+    LearnerPortfolio,
+    PortfolioProject,
     Certificate,
     Course,
     CourseEnrollment,
@@ -1120,6 +1122,76 @@ def get_chunked_upload_status(upload_id, user=None) -> Optional[Dict[str, Any]]:
         'created_at': upload.created_at.isoformat() if upload.created_at else None,
         'completed_at': upload.completed_at.isoformat() if upload.completed_at else None,
     }
+
+
+def get_public_portfolio(username_or_id: str) -> Optional[Dict[str, Any]]:
+    """
+    Retrieves public portfolio and certified projects by user email prefix, email or ID (F2.8).
+    """
+    # Try by id
+    portfolio = None
+    if str(username_or_id).isdigit():
+        portfolio = LearnerPortfolio.objects.filter(user_id=int(username_or_id), is_public=True).first()
+
+    # Try by email exact
+    if not portfolio:
+        portfolio = LearnerPortfolio.objects.filter(user__email__iexact=username_or_id, is_public=True).first()
+
+    # Try by email prefix (before @)
+    if not portfolio:
+        portfolio = LearnerPortfolio.objects.filter(user__email__istartswith=f"{username_or_id}@", is_public=True).first()
+
+    if not portfolio:
+        return None
+
+    user = portfolio.user
+    projects = portfolio.projects.all().order_by('-featured', '-created_at')
+
+    # Get earned badges and certificates for social proof
+    earned_badges_count = UserBadgeEarned.objects.filter(user=user).count()
+    certificates_count = Certificate.objects.filter(user=user).count()
+
+    projects_data = [
+        {
+            'id': p.id,
+            'title': p.title,
+            'slug': p.slug,
+            'problem_statement': p.problem_statement,
+            'tools_used': p.tools_used or [],
+            'solution_summary': p.solution_summary,
+            'impact_metrics': p.impact_metrics,
+            'dataset_name': p.dataset_name,
+            'file_url': p.file_url,
+            'featured': p.featured,
+            'mission_slug': p.mission.slug if p.mission else None,
+            'company_name': p.mission.company_name if p.mission else None,
+            'created_at': p.created_at.isoformat(),
+        }
+        for p in projects
+    ]
+
+    return {
+        'id': portfolio.id,
+        'user': {
+            'id': user.id,
+            'name': getattr(user, 'full_name', None) or f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip() or user.email.split('@')[0],
+            'email': user.email,
+        },
+        'headline': portfolio.headline,
+        'bio': portfolio.bio,
+        'city': portfolio.city,
+        'country': portfolio.country,
+        'github_url': portfolio.github_url,
+        'linkedin_url': portfolio.linkedin_url,
+        'stats': {
+            'projects_count': len(projects_data),
+            'certificates_count': certificates_count,
+            'badges_count': earned_badges_count,
+        },
+        'projects': projects_data,
+        'created_at': portfolio.created_at.isoformat(),
+    }
+
 
 
 

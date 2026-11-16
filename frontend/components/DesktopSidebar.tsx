@@ -19,7 +19,8 @@ import {
   FileCode,
   Table,
   Briefcase,
-  Brain
+  Brain,
+  FolderKanban
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -102,6 +103,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/srs',
       icon: Brain,
       isActive: pathname.startsWith('/srs')
+    },
+    {
+      key: 'portfolio',
+      label: 'Mon Portfolio Public',
+      href: '/portfolio/my',
+      icon: FolderKanban,
+      isActive: pathname.startsWith('/portfolio')
     },
     {
       key: 'pricing',

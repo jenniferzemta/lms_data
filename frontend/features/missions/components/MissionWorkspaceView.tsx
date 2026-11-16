@@ -7,6 +7,7 @@ import { MissionDatasetPreview } from './MissionDatasetPreview';
 import { MissionRubricEvaluation } from './MissionRubricEvaluation';
 import { MissionSolutionReveal } from './MissionSolutionReveal';
 import { ChunkedFileUploader } from '@/features/uploads';
+import { AddToPortfolioButton } from '@/features/portfolio';
 import { Badge } from '@/ui/Badge';
 import { Link } from '@/i18n/routing';
 import {
@@ -284,7 +285,11 @@ export const MissionWorkspaceView: React.FC<MissionWorkspaceViewProps> = ({ miss
 
         {/* TAB 3: CORRIGÉ TYPE */}
         {activeTab === 'solution' && (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <AddToPortfolioButton
+              missionSlug={mission.slug}
+              defaultImpact={`Cas ${mission.company_name} (${mission.location}) résolu`}
+            />
             <MissionSolutionReveal
               modelSolution={modelSolution}
               submission={submission}

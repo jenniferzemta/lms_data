@@ -1468,6 +1468,93 @@ class ChunkedUpload(models.Model):
         return f"{self.filename} ({len(self.uploaded_chunks)}/{self.total_chunks} chunks) - {self.status}"
 
 
+class LearnerPortfolio(models.Model):
+    """
+    Public showcase profile of a learner highlighting their certified data projects (F2.8).
+    Sharable with recruiters on LinkedIn, WhatsApp and CVs.
+    """
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='portfolio',
+        verbose_name=_('Apprenant')
+    )
+    headline = models.CharField(
+        max_length=200,
+        blank=True,
+        default='Data Analyst | Spécialiste Excel, SQL & Power BI',
+        verbose_name=_('Titre professionnel')
+    )
+    bio = models.TextField(blank=True, default='', verbose_name=_('Biographie et présentation'))
+    city = models.CharField(max_length=100, default='Douala', verbose_name=_('Ville'))
+    country = models.CharField(max_length=100, default='Cameroun', verbose_name=_('Pays'))
+    github_url = models.URLField(blank=True, default='', verbose_name=_('Lien GitHub'))
+    linkedin_url = models.URLField(blank=True, default='', verbose_name=_('Lien LinkedIn'))
+    is_public = models.BooleanField(default=True, verbose_name=_('Portfolio public'))
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = _('Portfolio apprenant')
+        verbose_name_plural = _('Portfolios apprenants')
+
+    def __str__(self) -> str:
+        return f"Portfolio de {self.user.email} - {self.headline}"
+
+
+class PortfolioProject(models.Model):
+    """
+    Certified African business data project featured on learner portfolio (F2.8, F2.9).
+    Can be added in 1 click from a completed real-world enterprise mission.
+    """
+    portfolio = models.ForeignKey(
+        LearnerPortfolio,
+        on_delete=models.CASCADE,
+        related_name='projects',
+        verbose_name=_('Portfolio')
+    )
+    title = models.CharField(max_length=200, verbose_name=_('Titre du projet'))
+    slug = models.SlugField(max_length=220)
+    problem_statement = models.TextField(verbose_name=_('Problématique métier résolue'))
+    tools_used = models.JSONField(default=list, verbose_name=_('Outils utilisés'))
+    solution_summary = models.TextField(verbose_name=_('Méthodologie et solution'))
+    impact_metrics = models.CharField(
+        max_length=255,
+        blank=True,
+        default='',
+        verbose_name=_('Métriques d\'impact métier (ex: FCFA, %...)')
+    )
+    dataset_name = models.CharField(max_length=150, blank=True, default='', verbose_name=_('Jeu de données analysé'))
+    file_url = models.URLField(blank=True, default='', verbose_name=_('Lien de consultation ou téléchargement du livrable'))
+    mission = models.ForeignKey(
+        'Mission',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='portfolio_projects',
+        verbose_name=_('Mission source')
+    )
+    badge = models.ForeignKey(
+        'BadgeDefinition',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='portfolio_projects',
+        verbose_name=_('Badge associé')
+    )
+    featured = models.BooleanField(default=False, verbose_name=_('Projet vedette'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-featured', '-created_at']
+        verbose_name = _('Projet de portfolio')
+        verbose_name_plural = _('Projets de portfolio')
+
+    def __str__(self) -> str:
+        return f"{self.title} ({self.portfolio.user.email})"
+
+
+
 
 
 

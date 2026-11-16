@@ -7,6 +7,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.db.models import F
 from django.utils import timezone
+from django.utils.text import slugify
 from courses.models import (
     InteractiveExercise,
     ExerciseAttempt,
@@ -31,6 +32,8 @@ from courses.models import (
     Flashcard,
     UserFlashcardProgress,
     ChunkedUpload,
+    LearnerPortfolio,
+    PortfolioProject,
 )
 
 
@@ -915,6 +918,81 @@ def finalize_chunked_upload(upload: ChunkedUpload) -> ChunkedUpload:
     )
 
     return upload
+
+
+def get_or_create_portfolio(user) -> LearnerPortfolio:
+    """
+    Retrieves or initializes a learner's public portfolio profile (F2.8).
+    """
+    portfolio, _ = LearnerPortfolio.objects.get_or_create(
+        user=user,
+        defaults={
+            'headline': 'Data Analyst | Spécialiste Excel, SQL & Power BI',
+            'city': 'Douala',
+            'country': 'Cameroun',
+            'is_public': True,
+        }
+    )
+    return portfolio
+
+
+def add_mission_to_portfolio(
+    user,
+    mission_slug: str,
+    impact_metrics: str = '',
+    featured: bool = True,
+) -> PortfolioProject:
+    """
+    1-Click Project Publishing to learner portfolio from a completed mission (F2.9, R11).
+    Extracts business context, tools, and deliverables, and features it on the public showcase.
+    """
+    portfolio = get_or_create_portfolio(user)
+    mission = Mission.objects.filter(slug=mission_slug).first()
+    if not mission:
+        raise ValueError(f"Mission introuvable avec le slug '{mission_slug}'.")
+
+    # Check if project already exists for this mission
+    existing_project = PortfolioProject.objects.filter(portfolio=portfolio, mission=mission).first()
+    if existing_project:
+        if impact_metrics:
+            existing_project.impact_metrics = impact_metrics
+        existing_project.featured = featured
+        existing_project.save()
+        return existing_project
+
+    project_slug = slugify(f"{mission.slug}-{user.id}")
+
+    project = PortfolioProject.objects.create(
+        portfolio=portfolio,
+        title=mission.title,
+        slug=project_slug,
+        problem_statement=mission.business_problem or mission.context_brief,
+        tools_used=['SQL', 'EXCEL'] if 'SQL' in mission.title else ['EXCEL', 'POWERBI'],
+        solution_summary=f"Étude de cas {mission.company_name} ({mission.location}). Analyse des données réelles et recommandations stratégiques.",
+        impact_metrics=impact_metrics or "Recommandations d'optimisation validées",
+        dataset_name=f"Dataset {mission.company_name} (FCFA)",
+        file_url=mission.dataset_download_url,
+        mission=mission,
+        featured=featured,
+    )
+
+    # Emit standard xAPI statement
+    record_learning_event(
+        user=user,
+        verb='shared',
+        object_id=f"portfolio:project:{project.id}",
+        object_type='portfolio_project',
+        object_name=project.title,
+        result_success=True,
+        extra_payload={
+            'mission_slug': mission.slug,
+            'company_name': mission.company_name,
+            'tools': project.tools_used,
+        }
+    )
+
+    return project
+
 
 
 

@@ -10,7 +10,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from courses.models import Course, Lesson, ChunkedUpload
+from courses.models import Course, Lesson, ChunkedUpload, LearnerPortfolio, PortfolioProject
 from courses.selectors import (
     check_course_publication_quality,
     get_course_feedback_summary,
@@ -40,6 +40,7 @@ from courses.selectors import (
     get_due_flashcards,
     get_user_srs_metrics,
     get_chunked_upload_status,
+    get_public_portfolio,
 )
 from courses.serializers import (
     CourseFeedbackSerializer,
@@ -78,6 +79,9 @@ from courses.serializers import (
     ChunkedUploadInitSerializer,
     ChunkedUploadChunkSerializer,
     ChunkedUploadStatusSerializer,
+    PortfolioProjectSerializer,
+    AddMissionToPortfolioSerializer,
+    LearnerPortfolioUpdateSerializer,
 )
 from courses.services import (
     review_flashcard_sm2,
@@ -99,6 +103,8 @@ from courses.services import (
     init_chunked_upload,
     save_chunk,
     finalize_chunked_upload,
+    get_or_create_portfolio,
+    add_mission_to_portfolio,
 )
 
 
@@ -1136,6 +1142,78 @@ class ChunkedUploadStatusView(APIView):
         if not status_data:
             return Response({'error': "Session introuvable."}, status=status.HTTP_404_NOT_FOUND)
         return Response(status_data, status=status.HTTP_200_OK)
+
+
+class PublicPortfolioDetailView(APIView):
+    """
+    GET /api/v1/courses/portfolio/<str:username>/
+    Publicly showcases a learner's validated projects, badges and certificates (F2.8).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request, username: str) -> Response:
+        data = get_public_portfolio(username)
+        if not data:
+            return Response({'error': "Portfolio introuvable ou privé."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class MyPortfolioView(APIView):
+    """
+    GET /api/v1/courses/portfolio/my/
+    PATCH /api/v1/courses/portfolio/my/
+    Manages the authenticated user's portfolio settings (F2.8).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        get_or_create_portfolio(request.user)
+        data = get_public_portfolio(str(request.user.id))
+        return Response(data, status=status.HTTP_200_OK)
+
+    def patch(self, request: Request) -> Response:
+        portfolio = get_or_create_portfolio(request.user)
+        serializer = LearnerPortfolioUpdateSerializer(portfolio, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        data = get_public_portfolio(str(request.user.id))
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class AddMissionToPortfolioView(APIView):
+    """
+    POST /api/v1/courses/portfolio/add-mission/
+    Publishes a completed mission to the learner's public portfolio in 1 click (F2.9).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        serializer = AddMissionToPortfolioSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        mission_slug = serializer.validated_data['mission_slug']
+        impact_metrics = serializer.validated_data.get('impact_metrics', '')
+        featured = serializer.validated_data.get('featured', True)
+
+        try:
+            project = add_mission_to_portfolio(
+                user=request.user,
+                mission_slug=mission_slug,
+                impact_metrics=impact_metrics,
+                featured=featured,
+            )
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(
+            {
+                'success': True,
+                'project': PortfolioProjectSerializer(project).data,
+                'message': "Projet certifié ajouté à votre portfolio professionnel avec succès !",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
 
 
 

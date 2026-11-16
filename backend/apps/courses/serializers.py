@@ -9,6 +9,8 @@ from courses.models import (
     Flashcard,
     UserFlashcardProgress,
     ChunkedUpload,
+    LearnerPortfolio,
+    PortfolioProject,
     Certificate,
     Course,
     CourseFeedback,
@@ -881,6 +883,50 @@ class ChunkedUploadStatusSerializer(serializers.Serializer):
     file_url = serializers.CharField(allow_null=True)
     created_at = serializers.CharField(allow_null=True)
     completed_at = serializers.CharField(allow_null=True)
+
+
+class PortfolioProjectSerializer(serializers.ModelSerializer):
+    mission_slug = serializers.CharField(source='mission.slug', read_only=True, allow_null=True)
+    company_name = serializers.CharField(source='mission.company_name', read_only=True, allow_null=True)
+
+    class Meta:
+        model = PortfolioProject
+        fields = (
+            'id',
+            'title',
+            'slug',
+            'problem_statement',
+            'tools_used',
+            'solution_summary',
+            'impact_metrics',
+            'dataset_name',
+            'file_url',
+            'featured',
+            'mission_slug',
+            'company_name',
+            'created_at',
+        )
+
+
+class AddMissionToPortfolioSerializer(serializers.Serializer):
+    mission_slug = serializers.CharField()
+    impact_metrics = serializers.CharField(required=False, allow_blank=True, default='')
+    featured = serializers.BooleanField(required=False, default=True)
+
+
+class LearnerPortfolioUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LearnerPortfolio
+        fields = (
+            'headline',
+            'bio',
+            'city',
+            'country',
+            'github_url',
+            'linkedin_url',
+            'is_public',
+        )
+
 
 
 
