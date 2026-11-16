@@ -1038,6 +1038,102 @@ def grade_mission_submission(
     return submission
 
 
+def submit_placement_test(user, answers: dict[str, str]):
+    """
+    Evaluates learner's answers on the diagnostic placement test (F3.7, R23).
+    Computes global and per-tool scores (Excel, SQL, Python, Power BI),
+    determines recommended starting level (N1, N2, N3), links recommended course,
+    persists PlacementAssessment, and emits an xAPI 'completed' statement.
+    """
+    from courses.selectors import PLACEMENT_QUESTIONS
+    from courses.models import PlacementAssessment, Course
+
+    tool_totals = {'excel': 0, 'sql': 0, 'python': 0, 'powerbi': 0}
+    tool_earned = {'excel': 0, 'sql': 0, 'python': 0, 'powerbi': 0}
+    total_weight = 0
+    total_earned = 0
+    answers_summary = {}
+
+    for q in PLACEMENT_QUESTIONS:
+        qid = q['id']
+        tool = q['tool']
+        weight = q['weight']
+        tool_totals[tool] += weight
+        total_weight += weight
+
+        user_choice = answers.get(qid)
+        correct_option = next((opt for opt in q['options'] if opt.get('correct')), None)
+        is_correct = bool(correct_option and user_choice == correct_option['id'])
+
+        if is_correct:
+            tool_earned[tool] += weight
+            total_earned += weight
+
+        answers_summary[qid] = {
+            'tool': tool,
+            'bloom': q['bloom'],
+            'level': q['level'],
+            'user_choice': user_choice,
+            'is_correct': is_correct,
+            'explanation': q['explanation'],
+        }
+
+    score_total = round((total_earned / total_weight) * 100, 2) if total_weight > 0 else 0.0
+    score_excel = round((tool_earned['excel'] / tool_totals['excel']) * 100, 2) if tool_totals['excel'] > 0 else 0.0
+    score_sql = round((tool_earned['sql'] / tool_totals['sql']) * 100, 2) if tool_totals['sql'] > 0 else 0.0
+    score_python = round((tool_earned['python'] / tool_totals['python']) * 100, 2) if tool_totals['python'] > 0 else 0.0
+    score_powerbi = round((tool_earned['powerbi'] / tool_totals['powerbi']) * 100, 2) if tool_totals['powerbi'] > 0 else 0.0
+
+    # Determine recommended level
+    if score_total >= 75.0:
+        recommended_level = PlacementAssessment.LEVEL_N3
+    elif score_total >= 45.0:
+        recommended_level = PlacementAssessment.LEVEL_N2
+    else:
+        recommended_level = PlacementAssessment.LEVEL_N1
+
+    # Match with existing course in database
+    recommended_course = None
+    level_query = 'Niveau 3' if recommended_level == PlacementAssessment.LEVEL_N3 else ('Niveau 2' if recommended_level == PlacementAssessment.LEVEL_N2 else 'Niveau 1')
+    recommended_course = Course.objects.filter(level__icontains=level_query).first() or Course.objects.first()
+
+    assessment = PlacementAssessment.objects.create(
+        user=user,
+        score_total=score_total,
+        score_excel=score_excel,
+        score_sql=score_sql,
+        score_python=score_python,
+        score_powerbi=score_powerbi,
+        recommended_level=recommended_level,
+        recommended_course=recommended_course,
+        answers_summary=answers_summary,
+    )
+
+    # Emit xAPI event statement (R15)
+    record_learning_event(
+        user=user,
+        verb='completed',
+        object_id='http://datamboa.cm/placement-test',
+        object_type='assessment',
+        object_name='Test de positionnement diagnostique initial',
+        result_score_raw=float(score_total),
+        result_score_max=100.0,
+        result_score_scaled=float(score_total) / 100.0,
+        result_success=True,
+        extra_payload={
+            'recommended_level': recommended_level,
+            'recommended_course_id': recommended_course.id if recommended_course else None,
+            'score_excel': score_excel,
+            'score_sql': score_sql,
+            'score_python': score_python,
+            'score_powerbi': score_powerbi,
+        }
+    )
+
+    return assessment
+
+
+
 
 
 

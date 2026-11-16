@@ -1317,6 +1317,187 @@ def get_learning_objectives_analytics(course_slug: Optional[str] = None) -> Dict
     }
 
 
+PLACEMENT_QUESTIONS: List[Dict[str, Any]] = [
+    {
+        'id': 'q_excel_1',
+        'tool': 'excel',
+        'bloom': 'UNDERSTAND',
+        'level': 'N1',
+        'weight': 10,
+        'question': 'Dans Excel, pour calculer la TVA camerounaise (19,25%) située en cellule $C$1 sur une liste de 200 lignes de vente, pourquoi utilise-t-on les symboles dollar ($) ?',
+        'options': [
+            {'id': 'a', 'text': 'Pour formater automatiquement le résultat en FCFA'},
+            {'id': 'b', 'text': 'Pour figer la référence absolue afin qu\'elle ne se décale pas lors du glisser-déposer vers le bas', 'correct': True},
+            {'id': 'c', 'text': 'Pour masquer la formule aux autres utilisateurs de l\'entreprise'},
+            {'id': 'd', 'text': 'Pour accélérer le calcul multi-thread dans Excel'},
+        ],
+        'explanation': 'La référence absolue $C$1 empêche la modification des coordonnées de la cellule de taxe lors de la recopie incrémentée.'
+    },
+    {
+        'id': 'q_excel_2',
+        'tool': 'excel',
+        'bloom': 'APPLY',
+        'level': 'N2',
+        'weight': 15,
+        'question': 'Quelle fonction Excel moderne est la plus robuste pour croiser une table de ventes avec une table clients de 50 000 lignes sans exiger que la clé soit dans la première colonne ?',
+        'options': [
+            {'id': 'a', 'text': 'RECHERCHEV'},
+            {'id': 'b', 'text': 'RECHERCHEX (ou le couple INDEX / EQUIV)', 'correct': True},
+            {'id': 'c', 'text': 'CONCATENER'},
+            {'id': 'd', 'text': 'SI.CONDITIONS'},
+        ],
+        'explanation': 'RECHERCHEX permet de rechercher à gauche comme à droite sans restriction de position de colonne et gère nativement les erreurs.'
+    },
+    {
+        'id': 'q_excel_3',
+        'tool': 'excel',
+        'bloom': 'ANALYZE',
+        'level': 'N3',
+        'weight': 15,
+        'question': 'Quelle est la différence fondamentale entre une transformation dans Power Query et une mesure DAX dans Power BI / Excel ?',
+        'options': [
+            {'id': 'a', 'text': 'Power Query s\'exécute lors du chargement des données (ETL), tandis qu\'une mesure DAX est recalculée dynamiquement selon le contexte de filtre visuel', 'correct': True},
+            {'id': 'b', 'text': 'Power Query sert uniquement aux fichiers texte, DAX aux bases SQL'},
+            {'id': 'c', 'text': 'Il n\'y a aucune différence, ce sont deux syntaxes pour les mêmes calculs'},
+            {'id': 'd', 'text': 'DAX modifie la structure des tables physiques alors que Power Query ne fait que de l\'affichage'},
+        ],
+        'explanation': 'Power Query nettoie et structure le modèle au chargement (ETL en langage M), alors que DAX évalue dynamiquement les agrégations selon les filtres du rapport.'
+    },
+    {
+        'id': 'q_sql_1',
+        'tool': 'sql',
+        'bloom': 'UNDERSTAND',
+        'level': 'N1',
+        'weight': 10,
+        'question': 'En SQL, quelle clause permet de filtrer les transactions pour ne conserver que les montants supérieurs à 500 000 FCFA ?',
+        'options': [
+            {'id': 'a', 'text': 'ORDER BY montant > 500000'},
+            {'id': 'b', 'text': 'WHERE montant > 500000', 'correct': True},
+            {'id': 'c', 'text': 'GROUP BY montant > 500000'},
+            {'id': 'd', 'text': 'LIMIT 500000'},
+        ],
+        'explanation': 'La clause WHERE filtre les lignes individuelles de la table avant toute agrégation.'
+    },
+    {
+        'id': 'q_sql_2',
+        'tool': 'sql',
+        'bloom': 'APPLY',
+        'level': 'N2',
+        'weight': 15,
+        'question': 'Pour obtenir le chiffre d\'affaires total par agence (Douala, Yaoundé, Bafoussam), quelle clause SQL est indispensable avec SUM(montant) ?',
+        'options': [
+            {'id': 'a', 'text': 'GROUP BY agence', 'correct': True},
+            {'id': 'b', 'text': 'JOIN agence'},
+            {'id': 'c', 'text': 'HAVING agence'},
+            {'id': 'd', 'text': 'PARTITION agence'},
+        ],
+        'explanation': 'GROUP BY regroupe les enregistrements partageant la même agence pour appliquer la fonction d\'agrégation SUM.'
+    },
+    {
+        'id': 'q_sql_3',
+        'tool': 'sql',
+        'bloom': 'ANALYZE',
+        'level': 'N3',
+        'weight': 15,
+        'question': 'Vous voulez lister tous les 1 000 clients de votre fichier, y compris ceux qui n\'ont effectué aucun achat ce mois-ci. Quel type de jointure devez-vous utiliser ?',
+        'options': [
+            {'id': 'a', 'text': 'INNER JOIN'},
+            {'id': 'b', 'text': 'LEFT OUTER JOIN (ou LEFT JOIN) depuis la table clients', 'correct': True},
+            {'id': 'c', 'text': 'CROSS JOIN'},
+            {'id': 'd', 'text': 'NATURAL JOIN'},
+        ],
+        'explanation': 'LEFT JOIN conserve l\'ensemble des lignes de la table de gauche (clients) et insère des NULL si aucune correspondance n\'existe dans la table de droite (ventes).'
+    },
+    {
+        'id': 'q_python_1',
+        'tool': 'python',
+        'bloom': 'UNDERSTAND',
+        'level': 'N1',
+        'weight': 10,
+        'question': 'En Python avec Pandas, quelle instruction charge un fichier de données tabulaires d\'export bancaire "operations.csv" ?',
+        'options': [
+            {'id': 'a', 'text': 'pd.load("operations.csv")'},
+            {'id': 'b', 'text': 'pd.read_csv("operations.csv")', 'correct': True},
+            {'id': 'c', 'text': 'pd.import_csv("operations.csv")'},
+            {'id': 'd', 'text': 'pd.DataFrame.open("operations.csv")'},
+        ],
+        'explanation': 'pd.read_csv() est la méthode standard de Pandas pour lire et convertir un fichier délimité en DataFrame.'
+    },
+    {
+        'id': 'q_powerbi_1',
+        'tool': 'powerbi',
+        'bloom': 'ANALYZE',
+        'level': 'N3',
+        'weight': 10,
+        'question': 'En DAX, que permet d\'accomplir la formule : Part_Marche = DIVIDE([CA_Total], CALCULATE([CA_Total], ALL(Ventes[Ville]))) ?',
+        'options': [
+            {'id': 'a', 'text': 'Elle filtre uniquement les ventes de la ville de Douala'},
+            {'id': 'b', 'text': 'Elle calcule la part de marché en retirant le filtre de ville au dénominateur pour obtenir le total global', 'correct': True},
+            {'id': 'c', 'text': 'Elle supprime la colonne Ville de la base de données'},
+            {'id': 'd', 'text': 'Elle génère un message d\'erreur de syntaxe'},
+        ],
+        'explanation': 'ALL(Ventes[Ville]) lève le contexte de filtre appliqué sur la dimension Ville, permettant de diviser le CA de la ville sélectionnée par le CA national global.'
+    }
+]
+
+
+def get_placement_test_questions() -> List[Dict[str, Any]]:
+    """
+    Returns public diagnostic questions for the placement test without revealing correct answer IDs.
+    """
+    sanitized = []
+    for q in PLACEMENT_QUESTIONS:
+        sanitized.append({
+            'id': q['id'],
+            'tool': q['tool'],
+            'bloom': q['bloom'],
+            'level': q['level'],
+            'weight': q['weight'],
+            'question': q['question'],
+            'options': [{'id': opt['id'], 'text': opt['text']} for opt in q['options']],
+        })
+    return sanitized
+
+
+def get_user_placement_result(user: Any) -> Optional[Dict[str, Any]]:
+    """
+    Retrieves the latest placement test result and recommendation for a user (F3.7).
+    """
+    if not user or not user.is_authenticated:
+        return None
+
+    from courses.models import PlacementAssessment
+    assessment = PlacementAssessment.objects.filter(user=user).order_by('-completed_at').first()
+    if not assessment:
+        return None
+
+    recommended_course_data = None
+    if assessment.recommended_course:
+        rc = assessment.recommended_course
+        recommended_course_data = {
+            'id': rc.id,
+            'title': rc.title,
+            'slug': rc.slug,
+            'level': rc.level,
+            'description': rc.description[:200] if rc.description else '',
+        }
+
+    return {
+        'id': assessment.id,
+        'score_total': float(assessment.score_total),
+        'score_excel': float(assessment.score_excel),
+        'score_sql': float(assessment.score_sql),
+        'score_python': float(assessment.score_python),
+        'score_powerbi': float(assessment.score_powerbi),
+        'recommended_level': assessment.recommended_level,
+        'recommended_level_display': assessment.get_recommended_level_display(),
+        'recommended_course': recommended_course_data,
+        'answers_summary': assessment.answers_summary,
+        'completed_at': assessment.completed_at.isoformat(),
+    }
+
+
+
 
 
 

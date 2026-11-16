@@ -1282,6 +1282,59 @@ class InstructorLearningObjectivesAnalyticsView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
+class PlacementTestQuestionsView(APIView):
+    """
+    GET /api/v1/courses/placement-test/questions/
+    Returns diagnostic questions for the initial placement assessment (F3.7).
+    """
+    permission_classes = [AllowAny]
+
+    def get(self, request: Request) -> Response:
+        from courses.selectors import get_placement_test_questions
+        questions = get_placement_test_questions()
+        return Response({'questions': questions}, status=status.HTTP_200_OK)
+
+
+class PlacementTestSubmitView(APIView):
+    """
+    POST /api/v1/courses/placement-test/submit/
+    Submits user's diagnostic test answers and returns level recommendation and roadmap (F3.7).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        from courses.services import submit_placement_test
+        from courses.selectors import get_user_placement_result
+
+        answers = request.data.get('answers') or {}
+        if not isinstance(answers, dict):
+            return Response({'error': "Les réponses doivent être fournies sous forme d'objet JSON."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            submit_placement_test(user=request.user, answers=answers)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        result_data = get_user_placement_result(request.user)
+        return Response(result_data, status=status.HTTP_200_OK)
+
+
+class PlacementTestResultView(APIView):
+    """
+    GET /api/v1/courses/placement-test/result/
+    Returns the user's latest placement test result and roadmap recommendation (F3.7).
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request: Request) -> Response:
+        from courses.selectors import get_user_placement_result
+        result_data = get_user_placement_result(request.user)
+        if not result_data:
+            return Response({'has_taken_test': False, 'result': None}, status=status.HTTP_200_OK)
+        return Response({'has_taken_test': True, 'result': result_data}, status=status.HTTP_200_OK)
+
+
+
 
 
 

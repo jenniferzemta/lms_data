@@ -22,7 +22,8 @@ import {
   Brain,
   FolderKanban,
   BarChart3,
-  GitBranch
+  GitBranch,
+  Target
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -49,6 +50,13 @@ export const DesktopSidebar: React.FC = () => {
       href: '/courses',
       icon: Compass,
       isActive: isCourses
+    },
+    {
+      key: 'placement-test',
+      label: 'Test de positionnement',
+      href: '/placement-test',
+      icon: Target,
+      isActive: pathname.startsWith('/placement-test')
     },
     {
       key: 'missions',

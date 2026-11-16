@@ -1574,6 +1574,89 @@ class PortfolioProject(models.Model):
         return f"{self.title} ({self.portfolio.user.email})"
 
 
+class PlacementAssessment(models.Model):
+    """
+    Diagnostic Placement Test for learners (V3 Intelligence, F3.7, Master Prompt §7.2).
+    Evaluates initial proficiencies across Excel, SQL, Python, and Power BI.
+    Produces a targeted level recommendation (Niveau 1, Niveau 2, Niveau 3)
+    and a personalized curriculum entry point.
+    """
+    LEVEL_N1 = 'N1'
+    LEVEL_N2 = 'N2'
+    LEVEL_N3 = 'N3'
+    RECOMMENDED_LEVEL_CHOICES = [
+        (LEVEL_N1, _('Niveau 1 : Les Fondamentaux')),
+        (LEVEL_N2, _('Niveau 2 : Pratique Avancée & Automatisation')),
+        (LEVEL_N3, _('Niveau 3 : Modélisation, DAX & Tableaux de Bord')),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='placement_assessments',
+        verbose_name=_('Apprenant')
+    )
+    score_total = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        verbose_name=_('Score global sur 100')
+    )
+    score_excel = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        verbose_name=_('Score Excel')
+    )
+    score_sql = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        verbose_name=_('Score SQL')
+    )
+    score_python = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        verbose_name=_('Score Python')
+    )
+    score_powerbi = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0.0,
+        verbose_name=_('Score Power BI')
+    )
+    recommended_level = models.CharField(
+        max_length=10,
+        choices=RECOMMENDED_LEVEL_CHOICES,
+        default=LEVEL_N1,
+        verbose_name=_('Niveau recommandé')
+    )
+    recommended_course = models.ForeignKey(
+        'Course',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='placement_recommendations',
+        verbose_name=_('Cours recommandé')
+    )
+    answers_summary = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_('Détail des réponses et profils Bloom')
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-completed_at']
+        verbose_name = _('Test de positionnement')
+        verbose_name_plural = _('Tests de positionnement')
+
+    def __str__(self) -> str:
+        return f"Diagnostic {self.user.email} - {self.recommended_level} ({self.score_total}/100)"
+
+
+
 
 
 
