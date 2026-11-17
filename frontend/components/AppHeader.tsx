@@ -1,51 +1,64 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { User, Search, Bell, LogOut } from 'lucide-react';
+import { User, Search, Bell, LogOut, Menu } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { DataSaverToggle } from '@/lib/data-saver';
+import { MobileNavDrawer } from './MobileNavDrawer';
 
 export const AppHeader: React.FC = () => {
   const tCommon = useTranslations('Common');
   const tNav = useTranslations('Navigation');
   const tCatalog = useTranslations('Catalog');
   const { user, logout } = useAuth();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-2xs transition-all lg:pl-64 xl:pl-72">
-      <div className="w-full h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-        {/* Left Slot: Mobile Logo (visible < lg) OR Desktop Search Bar (visible >= lg) */}
-        <div className="flex items-center gap-3">
-          {/* Mobile Logo Brand */}
-          <Link
-            href="/"
-            className="flex lg:hidden items-center gap-2.5 min-h-[44px] focus:outline-none"
-          >
-            <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white font-black text-xs shadow-xs">
-              DM
-            </div>
-            <span className="font-extrabold text-base text-brand-primary tracking-tight">
-              DataMboa
-            </span>
-          </Link>
+    <>
+      <header className="fixed top-0 left-0 right-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-2xs transition-all lg:pl-64 xl:pl-72">
+        <div className="w-full h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+          {/* Left Slot: Mobile Hamburger + Logo (visible < lg) OR Desktop Search Bar (visible >= lg) */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Mobile Hamburger Drawer Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsDrawerOpen(true)}
+              aria-label="Ouvrir le menu de navigation"
+              className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-brand-primary hover:bg-slate-100 transition-colors"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
 
-          {/* Desktop Global Search (Douala Student Portal Style) */}
-          <div className="hidden lg:flex items-center relative w-72 xl:w-96">
-            <Search className="w-4 h-4 text-brand-muted absolute left-3.5 pointer-events-none" />
-            <input
-              type="search"
-              placeholder={tCatalog('searchPlaceholder')}
-              aria-label="Recherche rapide"
-              className="w-full h-10 pl-10 pr-12 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs text-brand-text placeholder:text-brand-muted border border-brand-border/70 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 transition-all outline-none"
-            />
-            <kbd className="absolute right-3 hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-brand-muted bg-white border border-brand-border shadow-2xs">
-              Ctrl K
-            </kbd>
+            {/* Mobile Logo Brand */}
+            <Link
+              href="/"
+              className="flex lg:hidden items-center gap-2 min-h-[44px] focus:outline-none"
+            >
+              <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white font-black text-xs shadow-xs">
+                DM
+              </div>
+              <span className="font-extrabold text-base text-brand-primary tracking-tight">
+                DataMboa
+              </span>
+            </Link>
+
+            {/* Desktop Global Search (Douala Student Portal Style) */}
+            <div className="hidden lg:flex items-center relative w-72 xl:w-96">
+              <Search className="w-4 h-4 text-brand-muted absolute left-3.5 pointer-events-none" />
+              <input
+                type="search"
+                placeholder={tCatalog('searchPlaceholder')}
+                aria-label="Recherche rapide"
+                className="w-full h-10 pl-10 pr-12 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs text-brand-text placeholder:text-brand-muted border border-brand-border/70 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 transition-all outline-none"
+              />
+              <kbd className="absolute right-3 hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-brand-muted bg-white border border-brand-border shadow-2xs">
+                Ctrl K
+              </kbd>
+            </div>
           </div>
-        </div>
 
         {/* Right Slot: Network Status + Data Saver + Language + Notifications + User Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -111,5 +124,12 @@ export const AppHeader: React.FC = () => {
         </div>
       </div>
     </header>
+
+    {/* Mobile Slide-in Drawer */}
+    <MobileNavDrawer 
+      isOpen={isDrawerOpen} 
+      onClose={() => setIsDrawerOpen(false)} 
+    />
+  </>
   );
 };
