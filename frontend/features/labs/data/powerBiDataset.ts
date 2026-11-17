@@ -129,3 +129,4 @@ export const SAMPLE_POWERBI_EXERCISES = [
     maxPoints: 100,
   },
 ];
+

@@ -235,3 +235,4 @@ export const GitVisualizerGraph: React.FC<GitVisualizerGraphProps> = ({ labState
     </div>
   );
 };
+

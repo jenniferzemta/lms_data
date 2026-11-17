@@ -194,3 +194,4 @@ export const GitTerminalView: React.FC<GitTerminalViewProps> = ({
     </div>
   );
 };
+

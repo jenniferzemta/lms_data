@@ -1,4 +1,5 @@
 import { FlashcardItem, SrsMetrics, ReviewQuality, ReviewResponse } from '../types';
+import { getCsrfToken } from '@/lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -77,22 +78,17 @@ const FALLBACK_FLASHCARDS: FlashcardItem[] = [
 
 export async function fetchDueCards(category?: string): Promise<{ cards: FlashcardItem[]; metrics: SrsMetrics }> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const url = new URL(`${API_BASE_URL}/api/v1/courses/srs/due/`);
     if (category && category !== 'ALL') {
       url.searchParams.append('category', category);
     }
 
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const res = await fetch(url.toString(), {
       method: 'GET',
-      headers,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.ok) {
@@ -130,16 +126,17 @@ export async function fetchDueCards(category?: string): Promise<{ cards: Flashca
 
 export async function submitReview(cardId: number, quality: ReviewQuality): Promise<ReviewResponse> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const csrfToken = getCsrfToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
     }
 
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/srs/review/`, {
       method: 'POST',
+      credentials: 'include',
       headers,
       body: JSON.stringify({
         card_id: cardId,
@@ -177,17 +174,12 @@ export async function submitReview(cardId: number, quality: ReviewQuality): Prom
 
 export async function fetchSrsStats(): Promise<SrsMetrics> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/srs/stats/`, {
       method: 'GET',
-      headers,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.ok) {
@@ -205,3 +197,4 @@ export async function fetchSrsStats(): Promise<SrsMetrics> {
     streak_days: 4,
   };
 }
+

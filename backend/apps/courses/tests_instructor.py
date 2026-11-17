@@ -111,3 +111,4 @@ class InstructorGradingAndAnalyticsTests(TestCase):
         self.assertIn('UNDERSTAND', bloom_names)
         self.assertIn('APPLY', bloom_names)
         self.assertIn('ANALYZE', bloom_names)
+

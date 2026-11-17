@@ -267,3 +267,4 @@ export const PowerBiLabView: React.FC<PowerBiLabViewProps> = ({
     </div>
   );
 };
+

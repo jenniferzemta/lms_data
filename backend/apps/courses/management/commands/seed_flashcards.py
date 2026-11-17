@@ -106,3 +106,4 @@ class Command(BaseCommand):
                 created_count += 1
 
         self.stdout.write(self.style.SUCCESS(f"{len(cards_data)} flashcards seedées avec succès ({created_count} créées)."))
+

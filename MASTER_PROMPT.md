@@ -461,18 +461,18 @@ Trois questions : **où j'en suis** (niveau/avancement par outil), **qu'est-ce q
 > **Pour une IA sans accès au dépôt** (chat web, autre assistant) : ce bloc doit être remplacé à chaque session par celui du haut de `PROJECT_STATUS.md`, avant de coller le master prompt.
 
 ```text
-[BLOC DE REPRISE — mis à jour le 2026-11-03]
-Phase globale     : PRÉPARATION (avant V1). État initial SUPPOSÉ : à confirmer par Laure et par vérification du dépôt (§0.2, étape 2).
-Version suivante  : V1 Socle — phase SAM : Design
-Avancement (M)    : V1 0/19 · V2 0/11 · V3 0/7 · V4 0/4
-Conformité péda.  : critères R 0/26 (grille §21)
-Fait              : cahier des charges (16 oct. 2026) ; master prompt v3 (référentiel pédagogique Modules 1–3 intégré, 3 nov. 2026) ; kit Antigravity (AGENTS.md, règles, skills)
-En cours          : validation des priorités et des formules ; choix du nom et du domaine ; choix du cours vitrine pour la démonstration
-Prochaine tâche   : maquettes mobile (360 px) des écrans V1 (catalogue, présentation de cours, leçon, paiement WhatsApp), puis initialisation du monorepo ; en parallèle, analyse + synopsis du cours Excel niveau 1 (docs/pedagogy/courses/excel-1/)
-Décisions         : Next.js + Django REST + PostgreSQL + Celery/Redis ; FR/EN dès V1 ; paiement manuel WhatsApp en V1, Mobile Money intégré en V4 ; 4 formules (0 / 10 000 / 30 000 / 100 000 FCFA) ; exercices interactifs en composants React natifs (types H5P) ; événements d'apprentissage au format xAPI dès la V1
-Questions ouvertes: nom et domaine ; agrégateur de paiement ; tableur du labo Excel ; hébergement ; équipe de rédaction de contenus ; cours vitrine (Excel niveau 1 ou autre) ; portée SCORM/xAPI à présenter ; fusion avec le master prompt front déjà présent dans le README du dépôt (à rapprocher de ce document)
-Dépôt             : à vérifier au démarrage (un front peut déjà exister)
-Dernière commande : (aucune)
+[BLOC DE REPRISE — mis à jour le 2026-11-17]
+Phase globale     : V4 BUSINESS
+Version suivante  : V4 Business — phase SAM : Développement (F4.1 Paiement Mobile Money MTN/Orange Cameroun)
+Avancement (M)    : V1 19/19 validé (100% M) · V2 11/11 validé (100% M) · V3 7/7 validé (100% M) · V4 0/4
+Conformité péda.  : 26/26 critères R ✅ validés dans le code (R23 adaptatif ciblé, R11 cas réels FCFA, R12 vidéo interactive, R15 xAPI, R16 valorisation, R24 correction immédiate)
+Fait              : Intégration des 16 vidéos de formation réelles (Excel, SQL, Power BI, Git ~1 Mo chacune, optimisées faible bande passante 3G) depuis Downloads vers backend/media et frontend/public, commande Django link_course_videos liant vidéos et pièces jointes hors-ligne. Résolution de l'erreur de syntaxe de seed_all_courses_curriculum (12 cours, 16 leçons, 9 pièces jointes physiques, quiz). Implémentation du composant VisitorLandingView (page d'accueil explicative des 4 piliers DataMboa avec porte de connexion obligatoire avant de commencer à travailler). 106 tests Django passants, tsc 0 erreur.
+En cours          : V4 Business — Intégration du paiement Mobile Money MTN MoMo & Orange Money Cameroun en FCFA (F4.1, F4.2).
+Prochaine tâche   : F4.1 & F4.2 (Intégration du paiement Mobile Money automatisé avec webhook signé et activation instantanée des accès).
+Décisions         : V1, V2 et V3 certifiées 100% complètes. Vidéos servies statiquement et via streaming Django Media.
+Questions ouvertes: Choix de l'agrégateur de paiement Mobile Money V4 (CinetPay, Notch Pay, ou Flutterwave pour Cameroun FCFA).
+Dépôt             : Branche main synchronisée, tests Django passants (106/106), tsc 0 erreur.
+Dernière commande : git commit -m "feat(curriculum): integrate 16 training videos, fix seeder syntax and add visitor landing view with auth gate"
 ```
 
 ---

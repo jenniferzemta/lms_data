@@ -206,3 +206,4 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
     </div>
   );
 };
+

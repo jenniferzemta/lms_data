@@ -39,3 +39,4 @@ export interface ReviewResponse {
   progress: FlashcardProgress;
   message: string;
 }
+

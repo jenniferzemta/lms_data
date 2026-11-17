@@ -1,4 +1,5 @@
 import { LearnerPortfolioData, PortfolioProjectItem } from '../types';
+import { getCsrfToken } from '@/lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -75,17 +76,12 @@ export async function fetchPublicPortfolio(username: string): Promise<LearnerPor
 
 export async function fetchMyPortfolio(): Promise<LearnerPortfolioData> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/portfolio/my/`, {
       method: 'GET',
-      headers,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.ok) {
@@ -103,16 +99,17 @@ export async function addMissionToPortfolio(
   featured: boolean = true
 ): Promise<{ success: boolean; project?: PortfolioProjectItem; message: string }> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const csrfToken = getCsrfToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
     }
 
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/portfolio/add-mission/`, {
       method: 'POST',
+      credentials: 'include',
       headers,
       body: JSON.stringify({
         mission_slug: missionSlug,
@@ -138,16 +135,17 @@ export async function updateMyPortfolio(
   data: Partial<LearnerPortfolioData>
 ): Promise<LearnerPortfolioData> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const csrfToken = getCsrfToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) {
+      headers['X-CSRFToken'] = csrfToken;
     }
 
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/portfolio/my/`, {
       method: 'PATCH',
+      credentials: 'include',
       headers,
       body: JSON.stringify(data),
     });
@@ -160,3 +158,4 @@ export async function updateMyPortfolio(
   }
   return FALLBACK_PORTFOLIO;
 }
+

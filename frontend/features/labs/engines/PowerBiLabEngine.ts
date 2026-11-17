@@ -270,3 +270,4 @@ export class PowerBiLabEngine implements LabEngine<PowerBiLabState> {
     }, text);
   }
 }
+

@@ -22,7 +22,10 @@ class RecommendationsService {
   async getRecommendations(): Promise<RecommendationsData> {
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/courses/recommendations/`, {
-        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       if (res.ok) {
         return await res.json();
@@ -52,3 +55,4 @@ class RecommendationsService {
 }
 
 export const recommendationsService = new RecommendationsService();
+

@@ -18,3 +18,4 @@ export interface AuditReport {
   summary: string;
   formatted_report: string;
 }
+

@@ -178,3 +178,4 @@ class ChunkedUploadTests(TestCase):
             format='multipart'
         )
         self.assertEqual(chunk_res.status_code, status.HTTP_404_NOT_FOUND)
+

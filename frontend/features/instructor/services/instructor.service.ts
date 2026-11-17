@@ -1,4 +1,5 @@
 import { InstructorSubmissionItem, LearningObjectivesAnalytics } from '../types';
+import { getCsrfToken } from '@/lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -110,18 +111,17 @@ const FALLBACK_ANALYTICS: LearningObjectivesAnalytics = {
 
 export async function fetchInstructorSubmissions(statusFilter: string = 'ALL'): Promise<InstructorSubmissionItem[]> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const url = new URL(`${API_BASE_URL}/api/v1/courses/instructor/submissions/`);
     if (statusFilter !== 'ALL') {
       url.searchParams.append('status', statusFilter);
     }
 
-    const headers: Record<string, string> = {};
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
     const res = await fetch(url.toString(), {
       method: 'GET',
-      headers,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.ok) {
@@ -145,14 +145,15 @@ export async function submitInstructorGrade(
   feedback: string
 ): Promise<{ success: boolean; message: string; instructor_grade: number }> {
   try {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const csrfToken = getCsrfToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) headers['X-CSRFToken'] = csrfToken;
 
     const res = await fetch(`${API_BASE_URL}/api/v1/courses/instructor/submissions/${submissionId}/grade/`, {
       method: 'POST',
+      credentials: 'include',
       headers,
       body: JSON.stringify({ grade, feedback }),
     });
@@ -180,6 +181,10 @@ export async function fetchLearningObjectivesAnalytics(courseSlug?: string): Pro
 
     const res = await fetch(url.toString(), {
       method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
 
     if (res.ok) {
@@ -190,3 +195,4 @@ export async function fetchLearningObjectivesAnalytics(courseSlug?: string): Pro
   }
   return FALLBACK_ANALYTICS;
 }
+

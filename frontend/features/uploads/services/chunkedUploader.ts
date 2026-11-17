@@ -1,4 +1,5 @@
 import { ChunkedUploadInitResponse, ChunkedUploadStatus, UploadProgressInfo } from '../types';
+import { getCsrfToken } from '@/lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 export const DEFAULT_CHUNK_SIZE = 512 * 1024; // 512 KB per chunk for high reliability on 3G
@@ -38,16 +39,17 @@ export class ResumableChunkedUploader {
 
   public async start(): Promise<ChunkedUploadStatus> {
     const totalChunks = Math.ceil(this.file.size / this.chunkSize) || 1;
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const csrfToken = getCsrfToken();
     const authHeaders: Record<string, string> = {};
-    if (token) {
-      authHeaders['Authorization'] = `Bearer ${token}`;
+    if (csrfToken) {
+      authHeaders['X-CSRFToken'] = csrfToken;
     }
 
     // Step 1: Initialize or resume upload
     if (!this.uploadId) {
       const initRes = await fetch(`${API_BASE_URL}/api/v1/courses/uploads/init/`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
           ...authHeaders,
@@ -71,6 +73,7 @@ export class ResumableChunkedUploader {
     // Step 2: Query already uploaded chunks (for resumption after network drop)
     const statusRes = await fetch(`${API_BASE_URL}/api/v1/courses/uploads/${this.uploadId}/status/`, {
       method: 'GET',
+      credentials: 'include',
       headers: authHeaders,
     });
 
@@ -137,6 +140,7 @@ export class ResumableChunkedUploader {
 
           const chunkRes = await fetch(`${API_BASE_URL}/api/v1/courses/uploads/${this.uploadId}/chunk/`, {
             method: 'POST',
+            credentials: 'include',
             headers: authHeaders,
             body: formData,
           });
@@ -223,3 +227,4 @@ export class ResumableChunkedUploader {
     }
   }
 }
+

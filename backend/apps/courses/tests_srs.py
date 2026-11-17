@@ -117,3 +117,4 @@ class SrsApiTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('due_today_count', response.data)
         self.assertIn('retention_percentage', response.data)
+

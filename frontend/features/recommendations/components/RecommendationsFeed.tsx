@@ -150,3 +150,4 @@ export const RecommendationsFeed: React.FC = () => {
     </div>
   );
 };
+

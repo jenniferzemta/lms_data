@@ -1,4 +1,5 @@
 import { PlacementQuestion, PlacementResult } from '../types';
+import { getCsrfToken } from '@/lib/api-client';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -137,7 +138,10 @@ class PlacementService {
   async getQuestions(): Promise<PlacementQuestion[]> {
     try {
       const res = await fetch(`${API_BASE_URL}/api/v1/courses/placement-test/questions/`, {
-        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       if (res.ok) {
         const data = await res.json();
@@ -156,9 +160,18 @@ class PlacementService {
    */
   async submitAnswers(answers: Record<string, string>): Promise<PlacementResult> {
     try {
+      const csrfToken = getCsrfToken();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (csrfToken) {
+        headers['X-CSRFToken'] = csrfToken;
+      }
+
       const res = await fetch(`${API_BASE_URL}/api/v1/courses/placement-test/submit/`, {
         method: 'POST',
-        headers: this.getAuthHeaders(),
+        credentials: 'include',
+        headers,
         body: JSON.stringify({ answers }),
       });
       if (res.ok) {
@@ -228,3 +241,4 @@ class PlacementService {
 }
 
 export const placementService = new PlacementService();
+

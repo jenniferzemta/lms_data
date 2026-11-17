@@ -199,3 +199,4 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
     </div>
   );
 };
+

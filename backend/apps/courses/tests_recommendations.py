@@ -76,3 +76,4 @@ class RecommendationsEngineTests(TestCase):
         self.assertGreaterEqual(data['inactivity_days'], 3)
         rem_types = [rem['type'] for rem in data['reminders']]
         self.assertIn('ANTI_DROPOFF', rem_types)
+

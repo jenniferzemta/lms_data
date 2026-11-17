@@ -25,3 +25,4 @@ export interface RecommendationsData {
   inactivity_days: number;
   summary: string;
 }
+

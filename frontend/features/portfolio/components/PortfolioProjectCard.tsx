@@ -134,3 +134,4 @@ export const PortfolioProjectCard: React.FC<PortfolioProjectCardProps> = ({ proj
     </article>
   );
 };
+

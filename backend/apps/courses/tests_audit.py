@@ -78,3 +78,4 @@ class CodeAuditEngineTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response['Content-Type'], 'text/markdown; charset=utf-8')
         self.assertIn('RAPPORT D\'AUDIT', response.content.decode('utf-8'))
+

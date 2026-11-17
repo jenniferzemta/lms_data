@@ -46,3 +46,4 @@ export interface LearningObjectivesAnalytics {
   graded_missions_count: number;
   pending_submissions_count: number;
 }
+
