@@ -117,7 +117,7 @@ export const CatalogView: React.FC = () => {
           </span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-primary tracking-tight">
+        <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-primary tracking-tight">
           {tCatalog('exploreTitle')}
         </h1>
         <p className="text-xs sm:text-sm text-brand-muted mt-1 leading-relaxed">

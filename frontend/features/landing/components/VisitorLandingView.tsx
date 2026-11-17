@@ -98,7 +98,7 @@ export function VisitorLandingView() {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-brand-primary tracking-tight leading-[1.15]">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-brand-primary tracking-tight leading-snug">
             Formez-vous à l'analyse de données par la pratique sur des cas réels africains.
           </h1>
 
@@ -148,7 +148,7 @@ export function VisitorLandingView() {
           <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
             Pourquoi DataMboa est différent
           </span>
-          <h2 className="text-xl sm:text-2xl font-black text-brand-primary mt-0.5">
+          <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
             Ce que fait DataMboa exactement
           </h2>
           <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
@@ -242,7 +242,7 @@ export function VisitorLandingView() {
             <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
               Catalogue Cursus Métier
             </span>
-            <h2 className="text-xl sm:text-2xl font-black text-brand-primary mt-0.5">
+            <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
               5 Parcours Complets du Débutant à l'Expert
             </h2>
             <p className="text-xs sm:text-sm text-brand-muted mt-1">
@@ -276,7 +276,7 @@ export function VisitorLandingView() {
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-brand-primary">
+                  <h3 className="text-sm sm:text-base font-bold text-brand-primary">
                     {trk.name}
                   </h3>
                   <p className="text-xs text-brand-muted mt-1">
@@ -347,7 +347,7 @@ export function VisitorLandingView() {
             <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-brand-primary">
+            <h3 className="text-sm sm:text-base font-bold text-brand-primary">
               Optimisé pour les réseaux mobiles 3G et smartphones modestes
             </h3>
             <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-xl">

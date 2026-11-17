@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Mail, Lock, LogIn, AlertCircle } from 'lucide-react';
 import { Input } from '@/ui/Input';
@@ -15,6 +15,8 @@ export const LoginForm: React.FC = () => {
   const t = useTranslations('Auth');
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get('next');
   const locale = (params?.locale as string) || 'fr';
   const { login } = useAuth();
 
@@ -30,7 +32,14 @@ export const LoginForm: React.FC = () => {
 
     try {
       await login({ email, password });
-      router.push(`/${locale}`);
+      if (nextParam) {
+        const target = nextParam.startsWith(`/${locale}`)
+          ? nextParam
+          : `/${locale}${nextParam.startsWith('/') ? nextParam : `/${nextParam}`}`;
+        router.push(target);
+      } else {
+        router.push(`/${locale}`);
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         setErrorMessage(err.message);
@@ -52,6 +61,13 @@ export const LoginForm: React.FC = () => {
           {t('loginSubtitle')}
         </p>
       </div>
+
+      {nextParam && (
+        <div className="mb-4 p-3 rounded-xl bg-teal-50 border border-teal-200/80 text-teal-800 text-xs flex items-center gap-2">
+          <Lock className="w-4 h-4 text-brand-teal shrink-0" />
+          <span>Veuillez vous connecter pour accéder à votre espace de travail.</span>
+        </div>
+      )}
 
       {errorMessage && (
         <div

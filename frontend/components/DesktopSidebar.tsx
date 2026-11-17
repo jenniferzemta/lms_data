@@ -24,7 +24,11 @@ import {
   GitBranch,
   Target,
   FileCheck2,
-  Sparkles
+  Sparkles,
+  Users,
+  Building2,
+  GraduationCap,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
@@ -150,6 +154,39 @@ export const DesktopSidebar: React.FC = () => {
           href: '/portfolio/my',
           icon: FolderKanban,
           isActive: pathname.startsWith('/portfolio')
+        },
+      ]
+    },
+    {
+      title: 'Espaces Professionnels',
+      links: [
+        {
+          key: 'recruiter',
+          label: 'Espace Recruteur',
+          href: '/recruiter',
+          icon: Users,
+          isActive: pathname.startsWith('/recruiter')
+        },
+        {
+          key: 'enterprise',
+          label: 'Espace Entreprise B2B',
+          href: '/enterprise',
+          icon: Building2,
+          isActive: pathname.startsWith('/enterprise')
+        },
+        {
+          key: 'instructor',
+          label: 'Espace Formateur',
+          href: '/instructor',
+          icon: GraduationCap,
+          isActive: pathname.startsWith('/instructor')
+        },
+        {
+          key: 'admin-portal',
+          label: 'Portail Administration',
+          href: '/admin-portal',
+          icon: ShieldAlert,
+          isActive: pathname.startsWith('/admin-portal')
         },
       ]
     }

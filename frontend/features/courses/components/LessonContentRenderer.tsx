@@ -147,7 +147,7 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({ co
                 <FileSpreadsheet className="w-3.5 h-3.5 text-brand-teal" />
                 <span>Cas d&apos;entreprise concret</span>
               </span>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-brand-primary tracking-tight">
+              <h2 className="text-base sm:text-lg md:text-xl font-bold text-brand-primary tracking-tight">
                 {trimmed.replace(/^#\s+/, '')}
               </h2>
             </div>
@@ -158,7 +158,7 @@ export const LessonContentRenderer: React.FC<LessonContentRendererProps> = ({ co
         if (trimmed.startsWith('## ')) {
           return (
             <div key={idx} className="pt-4 pb-1">
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-brand-teal" />
                 <span>{trimmed.replace(/^##\s+/, '')}</span>
               </h3>

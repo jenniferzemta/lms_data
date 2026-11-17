@@ -573,7 +573,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
             </div>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-[#121c2a] mt-1 leading-snug">
+          <h1 className="text-base sm:text-lg font-bold text-[#121c2a] mt-1 leading-snug">
             {translation.title || lesson.title}
           </h1>
 

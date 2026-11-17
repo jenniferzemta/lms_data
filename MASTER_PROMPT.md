@@ -466,13 +466,13 @@ Phase globale     : V4 BUSINESS
 Version suivante  : V4 Business — phase SAM : Développement (F4.1 Paiement Mobile Money MTN/Orange Cameroun)
 Avancement (M)    : V1 19/19 validé (100% M) · V2 11/11 validé (100% M) · V3 7/7 validé (100% M) · V4 0/4
 Conformité péda.  : 26/26 critères R ✅ validés dans le code (R23 adaptatif ciblé, R11 cas réels FCFA, R12 vidéo interactive, R15 xAPI, R16 valorisation, R24 correction immédiate)
-Fait              : Refonte complète de la responsivité de la navigation : DesktopSidebar restructurée en 4 sections thématiques (Cursus, 5 Labos in-browser, Pratique & Outils, Carrière) avec scroll indépendant évitant tout débordement sur petits écrans ; création de MobileNavDrawer (tiroir tactile >= 44px sur mobile et tablette avec backdrop blur) ; intégration du bouton hamburger dans AppHeader et du déclencheur Menu dans BottomNav. Mise à jour de sécurité Next.js 16.4.6 résolvant l'insight Turbopack. 106 tests Django passants, tsc 0 erreur.
+Fait              : Création des espaces dédiés (Espace Recruteur /recruiter, Espace Entreprise B2B /enterprise, Portail Administration /admin-portal). Isolation complète de la page d'accueil pour les visiteurs non connectés (PublicHeader et PublicFooter sans sidebar ni bottom nav d'espace apprenant). Porte de connexion intelligente redirigeant vers /login?next=... avec conservation du parcours. Réduction et harmonisation de la taille des titres de cours sur mobile et desktop. Intégration des espaces métiers dans DesktopSidebar et MobileNavDrawer. 106 tests Django passants, Next.js build 46/46 routes OK, tsc 0 erreur.
 En cours          : V4 Business — Intégration du paiement Mobile Money MTN MoMo & Orange Money Cameroun en FCFA (F4.1, F4.2).
-Prochaine tâche   : F4.1 & F4.2 (Intégration du paiement Mobile Money automatisé avec webhook signé et activation instantanée des accès).
-Décisions         : Navigation responsive unifiée desktop (sidebar 4 groupes) et mobile (drawer tactile). Next.js sécurisé en 16.4.6.
-Questions ouvertes: Choix de l'agrégateur de paiement Mobile Money V4 (CinetPay, Notch Pay, ou Flutterwave pour Cameroun FCFA).
-Dépôt             : Branche main synchronisée, tests Django passants (106/106), tsc 0 erreur.
-Dernière commande : git commit -m "feat(ui): make navigation fully responsive with mobile drawer and upgrade next to 16.4.6"
+Prochaine tâche   : F4.1 & F4.2 (Intégration de la passerelle de paiement Mobile Money avec webhook signé et activation instantanée des accès).
+Décisions         : Séparation nette entre expérience visiteur (vitrine publique pleine largeur) et espace de travail apprenant (sidebar/drawer après connexion). Espaces métiers (recruteur, entreprise, formateur, admin) unifiés dans la navigation.
+Questions ouvertes: Choix de l'agrégateur de paiement Mobile Money V4 (Notch Pay ou CinetPay pour Cameroun FCFA).
+Dépôt             : Branche main synchronisée, tests Django passants (106/106), Next.js build réussi (46/46), tsc 0 erreur.
+Dernière commande : git commit -m "feat(spaces): add recruiter, enterprise and admin portals with clean public landing and course title typography"
 ```
 
 ---

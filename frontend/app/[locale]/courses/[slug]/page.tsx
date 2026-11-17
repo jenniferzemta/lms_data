@@ -151,12 +151,12 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-brand-primary leading-tight mb-3">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-primary leading-snug mb-2">
               {course.title}
             </h1>
 
             {course.subtitle && (
-              <p className="text-sm sm:text-base md:text-lg text-slate-600 font-medium mb-5 max-w-3xl leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 font-medium mb-4 max-w-3xl leading-relaxed">
                 {course.subtitle}
               </p>
             )}
@@ -358,7 +358,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
           <section className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl sm:text-2xl font-extrabold text-brand-primary">
+                <h2 className="text-base sm:text-lg font-bold text-brand-primary">
                   {tCourse('curriculumTitle')}
                 </h2>
                 <p className="text-xs sm:text-sm text-brand-muted mt-0.5">

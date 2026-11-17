@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
+import { PublicHeader, PublicFooter } from '@/components';
 import { useAuth } from '@/features/auth';
 import { 
   Flame, 
@@ -32,6 +33,23 @@ export default function HomePage() {
   const tHome = useTranslations('Home');
   const { user, isAuthenticated, isLoading } = useAuth();
 
+  if (!isAuthenticated && !isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen bg-brand-canvas text-brand-text">
+        {/* Pinned Public Visitor Header (Full width, no workspace sidebar) */}
+        <PublicHeader />
+
+        {/* Public Visitor Landing Viewport */}
+        <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+          <VisitorLandingView />
+        </main>
+
+        {/* Comprehensive Public Footer */}
+        <PublicFooter />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen bg-brand-canvas text-brand-text">
       {/* Desktop Persistent Left Sidebar (Visible only >= lg) */}
@@ -44,9 +62,15 @@ export default function HomePage() {
 
         {/* Content Viewport */}
         <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 lg:pb-12 min-h-[calc(100vh-4rem)]">
-          {!isAuthenticated ? (
-            /* Visitor Presentation Landing View (Explains exactly what DataMboa does + Connection Gate) */
-            <VisitorLandingView />
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-3">
+              <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center text-white font-bold animate-pulse shadow-xs">
+                DM
+              </div>
+              <span className="text-xs font-semibold text-brand-muted">
+                Chargement de votre espace de travail...
+              </span>
+            </div>
           ) : (
             /* Authenticated Learner Dashboard */
             <div className="flex flex-col gap-5 sm:gap-6">
@@ -65,7 +89,7 @@ export default function HomePage() {
                       </span>
                     </div>
 
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-brand-primary tracking-tight">
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-primary tracking-tight">
                       {tHome('learnerGreeting', { name: user?.first_name || user?.full_name || 'Apprenant' })}
                     </h1>
                     <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-xl">
@@ -198,7 +222,7 @@ export default function HomePage() {
                       </span>
                     </div>
 
-                    <h2 className="font-bold text-lg sm:text-xl text-brand-primary leading-snug">
+                    <h2 className="font-bold text-base sm:text-lg text-brand-primary leading-snug">
                       {tHome('currentCourseTitle')}
                     </h2>
 
