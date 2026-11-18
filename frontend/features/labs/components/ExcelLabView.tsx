@@ -242,11 +242,11 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                     Laboratoire Excel : Tableur Interactif
                   </h1>
                   <Badge variant="teal">
-                    {exercise.bloomLevel}
+                    Atelier pratique
                   </Badge>
                 </div>
                 <p className="text-xs text-slate-500 hidden sm:block">
-                  ETS MBALLA & FRÈRES — Quincaillerie & Matériaux de Construction (Douala, FCFA)
+                  ETS MBALLA & FRÈRES — Quincaillerie & Matériaux de Construction (Douala)
                 </p>
               </div>
             </div>

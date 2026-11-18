@@ -142,7 +142,7 @@ export const GitLabContainer: React.FC = () => {
                 V3 — Intelligence (F3.3)
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                Bloom : {exercise.bloomLevel}
+                Atelier pratique
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
                 100% Côté Client (Aucun serveur requis)

@@ -51,7 +51,7 @@ function getBloomBadge(bloomLevel: string): { label: string; colorClass: string 
     case 'CREATE':
       return { label: 'Créer', colorClass: 'bg-purple-50 text-purple-900 border-purple-300' };
     default:
-      return { label: 'Objectif SMART', colorClass: 'bg-teal-50 text-teal-800 border-teal-300' };
+      return { label: 'Compétence pratique', colorClass: 'bg-teal-50 text-teal-800 border-teal-300' };
   }
 }
 
@@ -237,10 +237,10 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-bold text-brand-primary">
-                    Ce que vous saurez accomplir (Objectifs SMART)
+                    Ce que vous saurez accomplir
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Compétences mesurables alignées sur la taxonomie de Bloom
+                    Compétences et savoir-faire validés par la pratique
                   </p>
                 </div>
               </div>
@@ -265,7 +265,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                         <span
                           className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${badge.colorClass}`}
                         >
-                          Bloom : {badge.label}
+                          {badge.label}
                         </span>
                       </div>
                     </div>
@@ -415,7 +415,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <Target className="w-5 h-5 text-indigo-600 mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Quiz Bloom (Seuil 70%)</div>
+                <div className="text-xs font-bold text-slate-900">Quiz de validation (Seuil 70%)</div>
                 <div className="text-[11px] text-slate-500">Validation formative avec feedback explicatif immédiat</div>
               </div>
 

@@ -151,7 +151,7 @@ export const LessonExerciseInteractive: React.FC<LessonExerciseInteractiveProps>
           <div>
             <h4 className="text-sm sm:text-base font-bold text-slate-900">{exercise.title}</h4>
             <span className="text-[10px] font-bold uppercase tracking-wider text-teal-800 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200/50">
-              Bloom : {exercise.bloom_level}
+              Exercice pratique
             </span>
           </div>
         </div>

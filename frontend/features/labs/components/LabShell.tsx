@@ -208,7 +208,7 @@ export const LabShell: React.FC<LabShellProps> = ({
                 Laboratoire SQL Intégré (SQLite Navigateur)
               </span>
               <Badge variant="teal">
-                Bloom : {exercise.bloomLevel}
+                Atelier pratique
               </Badge>
             </div>
             <h1 className="text-base sm:text-xl font-bold font-heading text-brand-primary leading-tight mt-0.5">

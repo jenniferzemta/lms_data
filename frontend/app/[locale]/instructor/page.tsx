@@ -505,7 +505,7 @@ export default function InstructorPage() {
 
                 {isLoadingAnalytics || !analytics ? (
                   <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
-                    Calcul des métriques de rétention et niveaux de Bloom...
+                    Calcul des métriques de rétention et acquisition des compétences...
                   </div>
                 ) : (
                   <LearningObjectivesDashboard analytics={analytics} />

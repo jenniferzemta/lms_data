@@ -122,7 +122,7 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
             {getToolLabel(currentQ.tool)}
           </span>
           <span className="px-2.5 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
-            Taxonomie de Bloom : {currentQ.bloom}
+            Évaluation pratique
           </span>
           <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold ml-auto">
             {currentQ.weight} points

@@ -105,7 +105,7 @@ export function VisitorLandingView() {
       name: 'Dr. Steve T.',
       role: 'Auditeur Financier · Bafoussam',
       company: 'Cabinet d\'Expertise',
-      comment: 'La validation par QR code et le barème pédagogique SMART font toute la différence auprès des recruteurs locaux. Une vraie formation professionnelle taillée pour notre économie.',
+      comment: 'La validation par QR code et les projets pratiques réels font toute la différence auprès des recruteurs locaux. Une vraie formation professionnelle taillée pour notre économie.',
       rating: 5,
     },
   ];

@@ -249,15 +249,10 @@ export const LessonQuizInteractive: React.FC<LessonQuizInteractiveProps> = ({
                   : 'bg-slate-50/60 border-slate-200 hover:border-slate-300'
               }`}
             >
-              {/* Question Header & Bloom Tag */}
+              {/* Question Header */}
               <div className="flex items-start justify-between gap-2 mb-3">
                 <span className="text-xs font-bold text-slate-400">
                   Question {idx + 1} / {quiz.questions.length}
-                </span>
-                <span
-                  className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${bloom.color}`}
-                >
-                  {bloom.label}
                 </span>
               </div>
 
