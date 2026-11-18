@@ -43,6 +43,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
   const tNav = useTranslations('Navigation');
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.is_admin_role || user?.is_staff;
 
   if (!isOpen) return null;
 
@@ -189,13 +190,17 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
           icon: GraduationCap,
           isActive: pathname.startsWith('/instructor')
         },
-        {
-          key: 'admin-portal',
-          label: 'Portail Administration',
-          href: '/admin-portal',
-          icon: ShieldAlert,
-          isActive: pathname.startsWith('/admin-portal')
-        },
+        ...(isAdmin
+          ? [
+              {
+                key: 'admin-portal',
+                label: 'Portail Administration',
+                href: '/admin-portal',
+                icon: ShieldAlert,
+                isActive: pathname.startsWith('/admin-portal')
+              }
+            ]
+          : [])
       ]
     }
   ];

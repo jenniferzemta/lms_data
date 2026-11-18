@@ -282,6 +282,7 @@
   },
   "PublicNav": {
     "courses": "Formations",
+    "placement": "Test de niveau",
     "recruiter": "Espace Recruteur",
     "enterprise": "Espace Entreprise",
     "instructor": "Espace Formateur",
@@ -292,6 +293,7 @@
     "closeMenu": "Fermer le menu",
     "createAccount": "Créer un compte apprenant",
     "regionalBadge": "E-learning Pratique",
+    "visitorBadge": "Profil : Visiteur",
     "whatsappHelp": "WhatsApp : 657 54 62 59"
   },
   "Landing": {
@@ -433,7 +435,14 @@
     "queueRule": "Règle stricte MASTER_PROMPT §10 : Valider l'activation uniquement après confirmation sur le relevé opérateur du compte Mobile Money.",
     "btnValidate": "Valider & Activer",
     "btnReject": "Rejeter",
-    "badgeValidated": "Paiement Validé & Accès Activé"
+    "badgeValidated": "Paiement Validé & Accès Activé",
+    "accessDeniedTitle": "Accès Restreint : Portail Administration",
+    "accessDeniedDesc": "Cette section est exclusivement réservée aux administrateurs de la plateforme DataMboa. Veuillez vous connecter avec un compte administrateur.",
+    "forbiddenTitle": "Accès Non Autorisé (Profil : Apprenant)",
+    "forbiddenDesc": "Votre compte utilisateur ne possède pas les privilèges requis pour accéder au portail d'administration de DataMboa. Cet espace est réservé au personnel administratif.",
+    "loginAsAdmin": "Se connecter comme Administrateur",
+    "backToHome": "Retour à la page d'accueil",
+    "backToWorkspace": "Retourner à mon Espace Apprenant"
   },
   "Placement": {
     "badge": "Diagnostic Pédagogique Validé",

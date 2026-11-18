@@ -6,6 +6,7 @@ import { Link } from '@/i18n/routing';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
+import { useAuth } from '@/features/auth';
 import { 
   ShieldAlert, 
   Users, 
@@ -21,13 +22,21 @@ import {
   AlertTriangle,
   ArrowRight,
   BookOpen,
-  Filter
+  Filter,
+  Lock,
+  ShieldX,
+  LogIn,
+  Home,
+  UserCheck
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
   const t = useTranslations('AdminPortal');
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'users'>('overview');
   const [validatedPayments, setValidatedPayments] = useState<string[]>([]);
+
+  const isAdmin = user?.role === 'ADMIN' || user?.is_admin_role || user?.is_staff;
 
   const mockPendingPayments = [
     {
@@ -58,6 +67,115 @@ export default function AdminPortalPage() {
     setValidatedPayments([...validatedPayments, id]);
   };
 
+  // 1. Loading State
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-brand-canvas text-brand-text items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-brand-primary flex items-center justify-center text-white font-bold animate-pulse shadow-xs">
+            DM
+          </div>
+          <span className="text-xs font-semibold text-brand-muted">
+            Vérification des accréditations administratives...
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // 2. Unauthenticated Visitor State (Access Denied)
+  if (!isAuthenticated) {
+    return (
+      <div className="flex min-h-screen bg-brand-canvas text-brand-text">
+        <DesktopSidebar />
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72">
+          <AppHeader />
+          <main className="flex-1 w-full max-w-3xl mx-auto px-4 pt-24 pb-16 flex items-center justify-center">
+            <div className="w-full bg-white rounded-3xl p-6 sm:p-10 border border-brand-border shadow-md text-center space-y-6">
+              <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto shadow-2xs">
+                <Lock className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold">
+                  Espace Réservé
+                </span>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  {t('accessDeniedTitle')}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  {t('accessDeniedDesc')}
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Link
+                  href="/login"
+                  className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                >
+                  <LogIn className="w-4 h-4 text-brand-teal" />
+                  <span>{t('loginAsAdmin')}</span>
+                </Link>
+                <Link
+                  href="/"
+                  className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl border border-brand-border text-slate-700 hover:bg-slate-50 text-xs font-semibold flex items-center justify-center gap-2 transition"
+                >
+                  <Home className="w-4 h-4 text-slate-500" />
+                  <span>{t('backToHome')}</span>
+                </Link>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Authenticated but Non-Admin (Learner 403 Forbidden)
+  if (!isAdmin) {
+    return (
+      <div className="flex min-h-screen bg-brand-canvas text-brand-text">
+        <DesktopSidebar />
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72">
+          <AppHeader />
+          <main className="flex-1 w-full max-w-3xl mx-auto px-4 pt-24 pb-16 flex items-center justify-center">
+            <div className="w-full bg-white rounded-3xl p-6 sm:p-10 border border-red-200 shadow-md text-center space-y-6">
+              <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-200 text-red-600 flex items-center justify-center mx-auto shadow-2xs">
+                <ShieldX className="w-8 h-8" />
+              </div>
+
+              <div className="space-y-2">
+                <span className="inline-block px-3 py-1 rounded-full bg-red-100 text-red-900 text-xs font-bold">
+                  Code 403 · Droits Insuffisants
+                </span>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  {t('forbiddenTitle')}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-600 max-w-md mx-auto leading-relaxed">
+                  {t('forbiddenDesc')}
+                </p>
+                <p className="text-xs text-slate-500">
+                  Connecté en tant que : <strong>{user?.email}</strong> ({user?.role === 'LEARNER' ? 'Apprenant' : user?.role})
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                <Link
+                  href="/"
+                  className="w-full sm:w-auto min-h-[44px] px-6 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                >
+                  <Home className="w-4 h-4 text-brand-teal" />
+                  <span>{t('backToWorkspace')}</span>
+                </Link>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // 4. Authorized Administrator View
   return (
     <div className="flex min-h-screen bg-brand-canvas text-brand-text">
       {/* Desktop Persistent Left Sidebar */}
@@ -80,6 +198,10 @@ export default function AdminPortalPage() {
                 </span>
                 <span className="text-xs font-semibold text-brand-muted bg-slate-100 px-2 py-0.5 rounded-full">
                   {t('subBadge')}
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                  <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>{user?.full_name || user?.email} (Admin)</span>
                 </span>
               </div>
 

@@ -89,8 +89,8 @@ export const PublicFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/admin-portal" className="hover:text-brand-primary transition">
-                  {tNav('admin')}
+                <Link href="/placement" className="hover:text-brand-primary transition">
+                  {tNav('placement')}
                 </Link>
               </li>
               <li>

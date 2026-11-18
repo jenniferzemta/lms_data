@@ -37,6 +37,7 @@ export const DesktopSidebar: React.FC = () => {
   const tCommon = useTranslations('Common');
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const isAdmin = user?.role === 'ADMIN' || user?.is_admin_role || user?.is_staff;
 
   const sections = [
     {
@@ -181,13 +182,17 @@ export const DesktopSidebar: React.FC = () => {
           icon: GraduationCap,
           isActive: pathname.startsWith('/instructor')
         },
-        {
-          key: 'admin-portal',
-          label: 'Portail Administration',
-          href: '/admin-portal',
-          icon: ShieldAlert,
-          isActive: pathname.startsWith('/admin-portal')
-        },
+        ...(isAdmin
+          ? [
+              {
+                key: 'admin-portal',
+                label: 'Portail Administration',
+                href: '/admin-portal',
+                icon: ShieldAlert,
+                isActive: pathname.startsWith('/admin-portal')
+              }
+            ]
+          : [])
       ]
     }
   ];

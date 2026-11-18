@@ -282,6 +282,7 @@
   },
   "PublicNav": {
     "courses": "Courses",
+    "placement": "Placement Test",
     "recruiter": "Recruiter Space",
     "enterprise": "Enterprise B2B",
     "instructor": "Instructor Space",
@@ -292,6 +293,7 @@
     "closeMenu": "Close menu",
     "createAccount": "Create learner account",
     "regionalBadge": "Hands-on E-learning",
+    "visitorBadge": "Profile: Visitor",
     "whatsappHelp": "WhatsApp: 657 54 62 59"
   },
   "Landing": {
@@ -433,7 +435,14 @@
     "queueRule": "Strict rule MASTER_PROMPT §10: Only validate after verifying receipt in your mobile money operator statement.",
     "btnValidate": "Validate & Activate",
     "btnReject": "Reject",
-    "badgeValidated": "Payment Validated & Access Activated"
+    "badgeValidated": "Payment Validated & Access Activated",
+    "accessDeniedTitle": "Restricted Access: Administration Portal",
+    "accessDeniedDesc": "This section is strictly reserved for DataMboa administrators. Please sign in with an administrator account.",
+    "forbiddenTitle": "Access Denied (Profile: Learner)",
+    "forbiddenDesc": "Your user account does not have sufficient privileges to access the DataMboa admin portal. This space is reserved for administrative staff.",
+    "loginAsAdmin": "Sign In as Administrator",
+    "backToHome": "Back to Home",
+    "backToWorkspace": "Back to Learner Workspace"
   },
   "Placement": {
     "badge": "Pedagogical Diagnostic Validated",
