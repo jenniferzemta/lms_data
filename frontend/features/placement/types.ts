@@ -19,6 +19,8 @@ export interface RecommendedCourse {
   slug: string;
   level: string;
   description: string;
+  track_name?: string;
+  duration_hours?: number;
 }
 
 export interface PlacementResult {
@@ -31,6 +33,7 @@ export interface PlacementResult {
   recommended_level: 'N1' | 'N2' | 'N3';
   recommended_level_display: string;
   recommended_course: RecommendedCourse | null;
+  target_courses?: RecommendedCourse[];
   answers_summary: Record<string, {
     tool: string;
     bloom: string;

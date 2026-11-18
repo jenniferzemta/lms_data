@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
@@ -24,6 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminPortalPage() {
+  const t = useTranslations('AdminPortal');
   const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'users'>('overview');
   const [validatedPayments, setValidatedPayments] = useState<string[]>([]);
 
@@ -74,18 +76,18 @@ export default function AdminPortalPage() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-50 border border-red-200 text-red-800 text-[11px] font-bold">
                   <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
-                  <span>Portail d&apos;Administration</span>
+                  <span>{t('badge')}</span>
                 </span>
                 <span className="text-xs font-semibold text-brand-muted bg-slate-100 px-2 py-0.5 rounded-full">
-                  DataMboa Core
+                  {t('subBadge')}
                 </span>
               </div>
 
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-brand-primary tracking-tight">
-                Tableau de Bord Administrateur
+                {t('title')}
               </h1>
               <p className="text-xs sm:text-sm text-brand-muted mt-0.5">
-                Supervision des inscriptions, validation des paiements manuels et accès au back-office Django.
+                {t('subtitle')}
               </p>
             </div>
 
@@ -97,7 +99,7 @@ export default function AdminPortalPage() {
                 rel="noopener noreferrer"
                 className="min-h-[44px] px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-2 shadow-xs transition active:scale-95"
               >
-                <span>Accéder à Django Admin</span>
+                <span>{t('btnDjangoAdmin')}</span>
                 <ExternalLink className="w-3.5 h-3.5 text-brand-teal" />
               </a>
             </div>
@@ -107,40 +109,40 @@ export default function AdminPortalPage() {
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-white rounded-2xl p-4 border border-brand-border shadow-2xs space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Apprenants Inscrits</span>
+                <span className="text-xs font-semibold text-slate-500">{t('statLearners')}</span>
                 <Users className="w-4 h-4 text-brand-teal" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums">148</div>
-              <div className="text-[11px] text-emerald-600 font-semibold">+18 cette semaine</div>
+              <div className="text-[11px] text-emerald-600 font-semibold">{t('statLearnersSub')}</div>
             </div>
 
             <div className="bg-white rounded-2xl p-4 border border-brand-border shadow-2xs space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Recettes Globales</span>
+                <span className="text-xs font-semibold text-slate-500">{t('statRevenue')}</span>
                 <Coins className="w-4 h-4 text-amber-600" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums">1 850 000 FCFA</div>
-              <div className="text-[11px] text-slate-500 font-medium">85% MTN MoMo / 15% Orange</div>
+              <div className="text-[11px] text-slate-500 font-medium">{t('statRevenueSub')}</div>
             </div>
 
             <div className="bg-white rounded-2xl p-4 border border-brand-border shadow-2xs space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Paiements en Attente</span>
+                <span className="text-xs font-semibold text-slate-500">{t('statPending')}</span>
                 <Clock className="w-4 h-4 text-indigo-600" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums">
                 {mockPendingPayments.length - validatedPayments.length}
               </div>
-              <div className="text-[11px] text-indigo-700 font-semibold">File WhatsApp V1</div>
+              <div className="text-[11px] text-indigo-700 font-semibold">{t('statPendingSub')}</div>
             </div>
 
             <div className="bg-white rounded-2xl p-4 border border-brand-border shadow-2xs space-y-1">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-500">Taux de Complétion</span>
+                <span className="text-xs font-semibold text-slate-500">{t('statCompletion')}</span>
                 <BookOpen className="w-4 h-4 text-emerald-600" />
               </div>
               <div className="text-xl sm:text-2xl font-bold text-slate-900 tabular-nums">76.4%</div>
-              <div className="text-[11px] text-emerald-600 font-semibold">Sur Niveau 1 Excel</div>
+              <div className="text-[11px] text-emerald-600 font-semibold">{t('statCompletionSub')}</div>
             </div>
           </section>
 
@@ -155,7 +157,7 @@ export default function AdminPortalPage() {
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
-              Vue Générale & Raccourcis
+              {t('tabOverview')}
             </button>
             <button
               type="button"
@@ -166,7 +168,7 @@ export default function AdminPortalPage() {
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
-              <span>File de Paiement WhatsApp (F1.10)</span>
+              <span>{t('tabPayments')}</span>
               <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-900 text-[10px]">
                 {mockPendingPayments.length - validatedPayments.length}
               </span>
@@ -178,9 +180,9 @@ export default function AdminPortalPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Back-office Quick Actions */}
               <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-3">
-                <h3 className="font-bold text-sm text-slate-900">Modules d&apos;Administration Django</h3>
+                <h3 className="font-bold text-sm text-slate-900">{t('djangoModulesTitle')}</h3>
                 <p className="text-xs text-brand-muted">
-                  Accès direct aux modèles et tables de base de données du backend Django REST.
+                  {t('djangoModulesSubtitle')}
                 </p>
 
                 <div className="space-y-2 pt-1">
@@ -190,7 +192,7 @@ export default function AdminPortalPage() {
                     rel="noopener noreferrer"
                     className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between text-xs font-bold text-slate-800 transition"
                   >
-                    <span>Gérer le Catalogue de Cours & Modules</span>
+                    <span>{t('linkCourses')}</span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                   </a>
 
@@ -200,7 +202,7 @@ export default function AdminPortalPage() {
                     rel="noopener noreferrer"
                     className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between text-xs font-bold text-slate-800 transition"
                   >
-                    <span>Gérer les Comptes Utilisateurs & Rôles</span>
+                    <span>{t('linkUsers')}</span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                   </a>
 
@@ -210,7 +212,7 @@ export default function AdminPortalPage() {
                     rel="noopener noreferrer"
                     className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between text-xs font-bold text-slate-800 transition"
                   >
-                    <span>Gérer les Formules d&apos;Abonnement & Prix FCFA</span>
+                    <span>{t('linkPlans')}</span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                   </a>
 
@@ -220,7 +222,7 @@ export default function AdminPortalPage() {
                     rel="noopener noreferrer"
                     className="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 flex items-center justify-between text-xs font-bold text-slate-800 transition"
                   >
-                    <span>Consulter les Certificats & Codes Uniques Émis</span>
+                    <span>{t('linkCerts')}</span>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
                   </a>
                 </div>
@@ -228,22 +230,22 @@ export default function AdminPortalPage() {
 
               {/* System Health & Status */}
               <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs space-y-3">
-                <h3 className="font-bold text-sm text-slate-900">État du Système & Conformité</h3>
+                <h3 className="font-bold text-sm text-slate-900">{t('systemStatusTitle')}</h3>
                 <div className="space-y-2.5 pt-1 text-xs">
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-                    <span className="font-semibold">Serveur Backend Django</span>
+                    <span className="font-semibold">{t('serverDjango')}</span>
                     <span className="font-bold">Opérationnel · Port 8000</span>
                   </div>
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900">
-                    <span className="font-semibold">Serveur Frontend Next.js</span>
+                    <span className="font-semibold">{t('serverNext')}</span>
                     <span className="font-bold">16.4.6 Sécurisé · Turbopack</span>
                   </div>
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-teal-50 border border-teal-200 text-teal-900">
-                    <span className="font-semibold">Tests Automatisés</span>
+                    <span className="font-semibold">{t('testsAutomated')}</span>
                     <span className="font-bold">106 / 106 tests OK</span>
                   </div>
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-800">
-                    <span className="font-semibold">Mode Économie de Données (R4)</span>
+                    <span className="font-semibold">{t('dataSaverStatus')}</span>
                     <span className="font-bold text-brand-teal">Actif & Configuré</span>
                   </div>
                 </div>
@@ -257,10 +259,10 @@ export default function AdminPortalPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                   <h3 className="font-bold text-sm text-slate-900">
-                    File de Validation des Paiements Manuels (F1.10)
+                    {t('queueTitle')}
                   </h3>
                   <p className="text-xs text-brand-muted mt-0.5">
-                    Règle stricte MASTER_PROMPT §10 : Valider l&apos;activation uniquement après confirmation sur le relevé opérateur du compte Mobile Money.
+                    {t('queueRule')}
                   </p>
                 </div>
               </div>

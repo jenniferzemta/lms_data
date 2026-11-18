@@ -1466,10 +1466,16 @@ def get_user_placement_result(user: Any) -> Optional[Dict[str, Any]]:
     if not user or not user.is_authenticated:
         return None
 
-    from courses.models import PlacementAssessment
+    from courses.models import PlacementAssessment, Course
     assessment = PlacementAssessment.objects.filter(user=user).order_by('-completed_at').first()
     if not assessment:
         return None
+
+    target_level = Course.Level.BEGINNER
+    if assessment.recommended_level == PlacementAssessment.LEVEL_N3:
+        target_level = Course.Level.ADVANCED
+    elif assessment.recommended_level == PlacementAssessment.LEVEL_N2:
+        target_level = Course.Level.INTERMEDIATE
 
     recommended_course_data = None
     if assessment.recommended_course:
@@ -1482,6 +1488,19 @@ def get_user_placement_result(user: Any) -> Optional[Dict[str, Any]]:
             'description': rc.description[:200] if rc.description else '',
         }
 
+    target_courses = []
+    target_courses_qs = Course.objects.filter(level=target_level).select_related('track')[:6]
+    for tc in target_courses_qs:
+        target_courses.append({
+            'id': tc.id,
+            'title': tc.title,
+            'slug': tc.slug,
+            'level': tc.level,
+            'track_name': tc.track.name if tc.track else '',
+            'description': tc.description[:180] if tc.description else '',
+            'duration_hours': tc.duration_hours,
+        })
+
     return {
         'id': assessment.id,
         'score_total': float(assessment.score_total),
@@ -1492,6 +1511,7 @@ def get_user_placement_result(user: Any) -> Optional[Dict[str, Any]]:
         'recommended_level': assessment.recommended_level,
         'recommended_level_display': assessment.get_recommended_level_display(),
         'recommended_course': recommended_course_data,
+        'target_courses': target_courses,
         'answers_summary': assessment.answers_summary,
         'completed_at': assessment.completed_at.isoformat(),
     }

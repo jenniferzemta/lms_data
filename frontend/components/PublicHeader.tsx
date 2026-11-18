@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { 
@@ -17,14 +18,15 @@ import {
 } from 'lucide-react';
 
 export const PublicHeader: React.FC = () => {
+  const t = useTranslations('PublicNav');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { label: 'Formations', href: '/courses', icon: BookOpen },
-    { label: 'Espace Recruteur', href: '/recruiter', icon: Users },
-    { label: 'Espace Entreprise', href: '/enterprise', icon: Building2 },
-    { label: 'Espace Formateur', href: '/instructor', icon: GraduationCap },
-    { label: 'Administration', href: '/admin-portal', icon: ShieldAlert },
+    { label: t('courses'), href: '/courses', icon: BookOpen },
+    { label: t('recruiter'), href: '/recruiter', icon: Users },
+    { label: t('enterprise'), href: '/enterprise', icon: Building2 },
+    { label: t('instructor'), href: '/instructor', icon: GraduationCap },
+    { label: t('admin'), href: '/admin-portal', icon: ShieldAlert },
   ];
 
   return (
@@ -46,7 +48,7 @@ export const PublicHeader: React.FC = () => {
                   DataMboa
                 </span>
                 <span className="text-[10px] text-brand-muted font-medium">
-                  Cameroun · FCFA
+                  {t('regionalBadge')}
                 </span>
               </div>
             </Link>
@@ -80,14 +82,14 @@ export const PublicHeader: React.FC = () => {
                 className="min-h-[44px] px-4 py-2 rounded-xl border border-brand-border text-xs font-bold text-brand-primary hover:bg-slate-50 transition-all flex items-center gap-1.5 active:scale-95 shadow-2xs"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Connexion</span>
+                <span>{t('login')}</span>
               </Link>
               <Link
                 href="/register"
                 className="min-h-[44px] px-4 py-2 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 shadow-xs"
               >
                 <Sparkles className="w-3.5 h-3.5 text-brand-teal" />
-                <span>S&apos;inscrire</span>
+                <span>{t('register')}</span>
               </Link>
             </div>
 
@@ -95,7 +97,7 @@ export const PublicHeader: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label={isMobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+              aria-label={isMobileMenuOpen ? t('closeMenu') : t('openMenu')}
               className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-brand-primary hover:bg-slate-100 transition-colors"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -116,7 +118,7 @@ export const PublicHeader: React.FC = () => {
           >
             <div className="space-y-1">
               <div className="text-[11px] font-bold uppercase tracking-wider text-brand-muted px-3 py-1">
-                Espaces & Navigation
+                DataMboa
               </div>
               {navLinks.map((item) => {
                 const Icon = item.icon;
@@ -147,7 +149,7 @@ export const PublicHeader: React.FC = () => {
                 className="min-h-[44px] w-full rounded-xl border border-brand-border text-xs font-bold text-brand-primary flex items-center justify-center gap-2 py-2.5"
               >
                 <LogIn className="w-4 h-4" />
-                <span>Se connecter</span>
+                <span>{t('login')}</span>
               </Link>
               <Link
                 href="/register"
@@ -155,7 +157,7 @@ export const PublicHeader: React.FC = () => {
                 className="min-h-[44px] w-full rounded-xl bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-2 py-2.5 shadow-xs"
               >
                 <Sparkles className="w-4 h-4 text-brand-teal" />
-                <span>Créer un compte apprenant</span>
+                <span>{t('createAccount')}</span>
               </Link>
             </div>
           </div>

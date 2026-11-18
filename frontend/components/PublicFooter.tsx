@@ -1,10 +1,14 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Table, Database, BarChart3, Code2, GitBranch, ShieldCheck } from 'lucide-react';
 
 export const PublicFooter: React.FC = () => {
+  const tNav = useTranslations('PublicNav');
+  const tLanding = useTranslations('Landing');
+
   return (
     <footer className="bg-white border-t border-brand-border py-12 text-xs text-brand-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -21,18 +25,18 @@ export const PublicFooter: React.FC = () => {
               </span>
             </div>
             <p className="text-slate-600 leading-relaxed pr-4 text-xs">
-              Première plateforme d&apos;apprentissage de l&apos;analyse de données conçue pour l&apos;Afrique centrale. Pratique immédiate sur Excel, SQL, Power BI, Python et Git avec des données réelles chiffrées en FCFA.
+              {tLanding('heroSubtitle')}
             </p>
             <div className="flex items-center gap-2 text-[11px] text-brand-teal font-semibold">
               <ShieldCheck className="w-4 h-4" />
-              <span>Conforme pédagogiquement · Certificats infalsifiables</span>
+              <span>{tLanding('pillar4Tag')}</span>
             </div>
           </div>
 
           {/* Outils & Laboratoires */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Outils & Formations
+              {tNav('courses')}
             </div>
             <ul className="space-y-1.5">
               <li>
@@ -66,27 +70,27 @@ export const PublicFooter: React.FC = () => {
           {/* Espaces Professionnels */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Espaces Métiers
+              Espaces & Portails
             </div>
             <ul className="space-y-1.5">
               <li>
                 <Link href="/recruiter" className="hover:text-brand-primary transition">
-                  Espace Recruteurs & Talents
+                  {tNav('recruiter')}
                 </Link>
               </li>
               <li>
                 <Link href="/enterprise" className="hover:text-brand-primary transition">
-                  Espace Entreprises (B2B)
+                  {tNav('enterprise')}
                 </Link>
               </li>
               <li>
                 <Link href="/instructor" className="hover:text-brand-primary transition">
-                  Espace Formateurs & Auteurs
+                  {tNav('instructor')}
                 </Link>
               </li>
               <li>
                 <Link href="/admin-portal" className="hover:text-brand-primary transition">
-                  Portail Administration
+                  {tNav('admin')}
                 </Link>
               </li>
               <li>
@@ -103,7 +107,7 @@ export const PublicFooter: React.FC = () => {
               Territoire & Légal
             </div>
             <p className="text-slate-600 leading-relaxed text-[11px]">
-              Douala · Yaoundé · Bafoussam · Garoua
+              {tLanding('badgeLocations')}
             </p>
             <p className="text-slate-600 text-[11px]">
               Devise officielle : <strong>FCFA (XAF)</strong>
@@ -122,12 +126,12 @@ export const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
           <div>
-            © {new Date().getFullYear()} DataMboa. Tous droits réservés. L&apos;analyse de données par la pratique, chez nous.
+            © {new Date().getFullYear()} DataMboa. {tNav('regionalBadge')}.
           </div>
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Plateforme active · 100% hébergée
+              Plateforme active · 100% in-browser
             </span>
           </div>
         </div>

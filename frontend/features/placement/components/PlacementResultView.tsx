@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { 
   Award, 
   CheckCircle2, 
@@ -24,6 +25,8 @@ interface PlacementResultViewProps {
 }
 
 export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result, onRetake }) => {
+  const t = useTranslations('Placement');
+
   const getLevelColor = (level: string) => {
     switch (level) {
       case 'N3':
@@ -38,11 +41,11 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
   const getLevelBadge = (level: string) => {
     switch (level) {
       case 'N3':
-        return 'Niveau 3 — Expert & Modélisation DAX';
+        return t('levelN3');
       case 'N2':
-        return 'Niveau 2 — Pratique Avancée & Automatisation';
+        return t('levelN2');
       default:
-        return 'Niveau 1 — Les Fondamentaux de la Donnée';
+        return t('levelN1');
     }
   };
 
@@ -57,13 +60,13 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           <div className="flex flex-col text-white">
             <span className="text-xs font-bold uppercase tracking-wider text-white/80 flex items-center gap-1.5 mb-1">
               <Sparkles className="w-3.5 h-3.5" />
-              Diagnostic Pédagogique Validé
+              {t('badge')}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight">
               {getLevelBadge(result.recommended_level)}
             </h1>
             <p className="text-xs sm:text-sm text-white/90 mt-1 max-w-xl leading-relaxed">
-              Félicitations ! Votre score global de <strong>{result.score_total}%</strong> vous oriente directement vers le palier d'apprentissage optimal pour maximiser votre montée en compétences sans temps mort.
+              {t('congrats', { score: Math.round(result.score_total) })}
             </p>
           </div>
         </div>
@@ -71,7 +74,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
         {/* Global Score Circle */}
         <div className="self-end md:self-center shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col items-center justify-center text-white min-w-[120px]">
           <span className="text-3xl font-black">{Math.round(result.score_total)}%</span>
-          <span className="text-[11px] font-bold text-white/80 uppercase">Score Global</span>
+          <span className="text-[11px] font-bold text-white/80 uppercase">{t('globalScore')}</span>
         </div>
       </div>
 
@@ -82,7 +85,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Table className="w-4 h-4 text-emerald-600" />
-              Tableur Excel
+              {t('toolExcel')}
             </span>
             <span className="text-xs font-black text-slate-900">{Math.round(result.score_excel)}%</span>
           </div>
@@ -99,7 +102,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <Terminal className="w-4 h-4 text-sky-600" />
-              Bases SQL
+              {t('toolSql')}
             </span>
             <span className="text-xs font-black text-slate-900">{Math.round(result.score_sql)}%</span>
           </div>
@@ -116,7 +119,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <FileCode className="w-4 h-4 text-amber-600" />
-              Python & Pandas
+              {t('toolPython')}
             </span>
             <span className="text-xs font-black text-slate-900">{Math.round(result.score_python)}%</span>
           </div>
@@ -133,7 +136,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
               <BarChart3 className="w-4 h-4 text-purple-600" />
-              Power BI & DAX
+              {t('toolPowerbi')}
             </span>
             <span className="text-xs font-black text-slate-900">{Math.round(result.score_powerbi)}%</span>
           </div>
@@ -146,7 +149,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
         </div>
       </div>
 
-      {/* Recommended Course Card (Direct 1-Click Action) */}
+      {/* Recommended Main Course Card */}
       {result.recommended_course && (
         <div className="bg-white rounded-3xl border border-brand-primary/40 p-6 sm:p-8 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
@@ -156,7 +159,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
             <div className="flex flex-col">
               <span className="text-xs font-bold text-brand-primary uppercase tracking-wider mb-1 flex items-center gap-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Votre Cours Cible Recommandé
+                {t('mainCourseBadge')}
               </span>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">
                 {result.recommended_course.title}
@@ -172,9 +175,64 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
               href={`/courses/${result.recommended_course.slug}`}
               className="px-6 py-3.5 rounded-2xl bg-brand-primary text-white font-bold text-sm shadow-md hover:bg-brand-primary/95 active:scale-95 transition-all flex items-center gap-2 min-h-[48px]"
             >
-              Rejoindre le cours
+              {t('joinCourse')}
               <ArrowRight className="w-4 h-4" />
             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Target Courses Grid (All tools for this level) */}
+      {result.target_courses && result.target_courses.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
+                {t('targetCoursesBadge')}
+              </span>
+              <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
+                {t('targetCoursesTitle', { level: result.recommended_level })}
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {result.target_courses.map((course) => (
+              <div
+                key={course.id}
+                className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between hover:border-brand-teal/50 transition-all space-y-3"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[11px] font-bold text-brand-teal bg-teal-50 px-2.5 py-0.5 rounded-full border border-teal-200/50">
+                      {course.track_name || 'Analyse de données'}
+                    </span>
+                    {course.duration_hours && (
+                      <span className="text-[11px] font-semibold text-slate-500">
+                        {course.duration_hours}h
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="font-bold text-sm text-slate-900 leading-snug">
+                    {course.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                    {course.description}
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-slate-100">
+                  <Link
+                    href={`/courses/${course.slug}`}
+                    className="w-full min-h-[40px] px-3.5 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95"
+                  >
+                    <span>{t('startCourse')}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -183,7 +241,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
       <div className="bg-slate-50 rounded-2xl border border-slate-200 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
         <span className="flex items-center gap-1.5">
           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-          Test enregistré et synchronisé dans votre journal xAPI.
+          {t('xapiSync')}
         </span>
 
         <Button
@@ -193,7 +251,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
           className="flex items-center gap-1.5 text-xs font-semibold self-start sm:self-auto"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          Repasser le test de positionnement
+          {t('retakeTest')}
         </Button>
       </div>
     </div>

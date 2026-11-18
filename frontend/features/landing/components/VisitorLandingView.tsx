@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { 
   Table, 
@@ -17,13 +18,19 @@ import {
   CheckCircle2, 
   GraduationCap, 
   Laptop, 
-  Coins,
   PlayCircle,
   Users,
-  Compass
+  Compass,
+  Star,
+  Building2,
+  Check
 } from 'lucide-react';
+import { DataMboaStudioMockup } from './DataMboaStudioMockup';
 
 export function VisitorLandingView() {
+  const t = useTranslations('Landing');
+  const tNav = useTranslations('PublicNav');
+
   const tracks = [
     {
       id: 'excel',
@@ -77,82 +84,153 @@ export function VisitorLandingView() {
     },
   ];
 
+  const testimonials = [
+    {
+      name: 'Mireille K.',
+      role: 'Contrôleur de Gestion Junior · Douala',
+      company: 'PME Agro-alimentaire',
+      comment: 'Avant DataMboa, je passais 4 heures par semaine à copier-coller des données de vente sur Excel. Grâce au cours Power Query et aux cas réels en FCFA, tout est désormais automatisé en 1 clic.',
+      rating: 5,
+    },
+    {
+      name: 'Arsène F.',
+      role: 'Analyste Crédit & Risques · Yaoundé',
+      company: 'Établissement de Microfinance',
+      comment: 'Le laboratoire SQL directement dans le navigateur m\'a permis de m\'entraîner le soir sur mon téléphone sans installer de logiciel lourd. J\'ai obtenu ma promotion grâce aux requêtes apprises.',
+      rating: 5,
+    },
+    {
+      name: 'Dr. Steve T.',
+      role: 'Auditeur Financier · Bafoussam',
+      company: 'Cabinet d\'Expertise',
+      comment: 'La validation par QR code et le barème pédagogique SMART font toute la différence auprès des recruteurs locaux. Une vraie formation professionnelle taillée pour notre économie.',
+      rating: 5,
+    },
+  ];
+
   return (
-    <div className="flex flex-col gap-6 sm:gap-8 pb-12">
+    <div className="flex flex-col gap-10 sm:gap-14 pb-12">
       
-      {/* 1. HERO PRINCIPAL AVEC PROMESSE CLAIRE */}
-      <section className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-border shadow-xs relative overflow-hidden">
+      {/* 1. HERO PRINCIPAL 2 COLONNES SUR DESKTOP (PC IMPACTANT) */}
+      <section className="bg-white rounded-3xl p-6 sm:p-10 lg:p-12 border border-brand-border shadow-xs relative overflow-hidden">
         {/* Subtle decorative background gradient */}
-        <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-teal-50/60 blur-3xl pointer-events-none" />
-        <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-amber-50/40 blur-3xl pointer-events-none" />
+        <div className="absolute -right-24 -top-24 w-96 h-96 rounded-full bg-teal-50/70 blur-3xl pointer-events-none" />
+        <div className="absolute -left-24 -bottom-24 w-96 h-96 rounded-full bg-amber-50/50 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-3xl">
-          {/* Tag de géolocalisation et devise */}
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/60 text-teal-900 text-xs font-bold tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-              <span>Plateforme E-learning Data Africaine</span>
-            </span>
-            <span className="text-xs font-semibold text-brand-muted px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">
-              Douala · Yaoundé · Bafoussam · FCFA (XAF)
-            </span>
-          </div>
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+          
+          {/* Left Column (7 cols): Pitch & Call-to-action */}
+          <div className="lg:col-span-7 space-y-5">
+            {/* Tag de géolocalisation et devise */}
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200/60 text-teal-900 text-xs font-bold tracking-wide">
+                <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
+                <span>{t('badgeAfro')}</span>
+              </span>
+              <span className="text-xs font-semibold text-brand-muted px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200">
+                {t('badgeLocations')}
+              </span>
+            </div>
 
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-brand-primary tracking-tight leading-snug">
-            Formez-vous à l'analyse de données par la pratique sur des cas réels africains.
-          </h1>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-brand-primary tracking-tight leading-snug">
+              {t('heroTitle')}
+            </h1>
 
-          <p className="mt-4 text-sm sm:text-base lg:text-lg text-brand-muted leading-relaxed">
-            DataMboa est la plateforme conçue pour les réalités du Cameroun et d'Afrique centrale. Maîtrisez <strong>Excel, SQL, Power BI, Python et Git</strong> directement dans votre navigateur, sans configuration complexe, avec des jeux de données d'entreprises locales chiffrés en FCFA.
-          </p>
+            <p className="text-xs sm:text-sm md:text-base text-brand-muted leading-relaxed">
+              {t('heroSubtitle')}
+            </p>
 
-          {/* Action Call Obligatoire (Gate) */}
-          <div className="mt-6 sm:mt-8 p-4 sm:p-5 rounded-2xl bg-brand-primary-light border border-brand-primary/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center shrink-0">
-                <Lock className="w-5 h-5 text-brand-teal" />
+            {/* Social Proof Badges Row */}
+            <div className="flex flex-wrap items-center gap-4 py-1 text-xs text-slate-600">
+              <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                <Users className="w-4 h-4 text-brand-teal" />
+                <span>{t('learnersCount')}</span>
               </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-bold text-brand-primary">
-                  Connexion requise pour démarrer
-                </h3>
-                <p className="text-[11px] sm:text-xs text-brand-muted">
-                  Connectez-vous pour accéder à vos cours, quiz et laboratoires interactifs.
-                </p>
+              <div className="flex items-center gap-1 font-bold text-amber-700">
+                <div className="flex items-center text-amber-500">
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                  <Star className="w-3.5 h-3.5 fill-current" />
+                </div>
+                <span>{t('ratingScore')}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2.5 shrink-0">
-              <Link
-                href="/login"
-                className="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
-              >
-                <span>Se connecter</span>
-                <ArrowRight className="w-4 h-4 text-brand-teal" />
-              </Link>
-              <Link
-                href="/register"
-                className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-brand-border text-brand-primary font-semibold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs"
-              >
-                <Sparkles className="w-4 h-4 text-brand-teal" />
-                <span>Créer un compte</span>
-              </Link>
+            {/* Action Call Obligatoire (Gate de connexion) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-brand-primary-light border border-brand-primary/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-brand-primary text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Lock className="w-5 h-5 text-brand-teal" />
+                </div>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-brand-primary">
+                    {t('loginGateTitle')}
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-brand-muted">
+                    {t('loginGateSubtitle')}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 shrink-0">
+                <Link
+                  href="/login"
+                  className="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                >
+                  <span>{t('loginButton')}</span>
+                  <ArrowRight className="w-4 h-4 text-brand-teal" />
+                </Link>
+                <Link
+                  href="/register"
+                  className="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-brand-border text-brand-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition active:scale-95 shadow-2xs"
+                >
+                  <Sparkles className="w-4 h-4 text-brand-teal" />
+                  <span>{t('registerButton')}</span>
+                </Link>
+              </div>
             </div>
           </div>
+
+          {/* Right Column (5 cols): Live In-Browser Studio Mockup (Visible on Desktop) */}
+          <div className="lg:col-span-5">
+            <DataMboaStudioMockup />
+          </div>
+
         </div>
       </section>
 
-      {/* 2. CE QUE FAIT EXACTEMENT DATAMBOA (4 PILIERS DE DIFFÉRENCIATION) */}
+      {/* 2. RECONNAISSANCE & CAS CONCRETS AFRICAINS (PARTENAIRES PME) */}
+      <section className="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
+        <div className="flex items-center gap-2 font-bold text-slate-800">
+          <Building2 className="w-4 h-4 text-brand-teal shrink-0" />
+          <span>Cas d&apos;entreprise réels intégrés au cursus :</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 font-semibold text-slate-700">
+          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
+            Kamer SARL (Quincaillerie Douala)
+          </span>
+          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
+            Microfinance Bafoussam (Crédits FCFA)
+          </span>
+          <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
+            Logistique Centrale Yaoundé
+          </span>
+        </div>
+      </section>
+
+      {/* 3. CE QUE FAIT EXACTEMENT DATAMBOA (4 PILIERS DE DIFFÉRENCIATION) */}
       <section className="space-y-4">
         <div className="text-center sm:text-left">
           <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
-            Pourquoi DataMboa est différent
+            {t('whyBadge')}
           </span>
           <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
-            Ce que fait DataMboa exactement
+            {t('whyTitle')}
           </h2>
           <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl">
-            La plupart des formations data utilisent des cours magistraux passifs avec des données de la Silicon Valley en dollars. Voici notre méthode 100% concrète :
+            {t('whySubtitle')}
           </p>
         </div>
 
@@ -161,18 +239,18 @@ export function VisitorLandingView() {
           <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between">
             <div>
               <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200/60 text-brand-teal flex items-center justify-center mb-3">
-                <Coins className="w-5 h-5" />
+                <Table className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-brand-primary leading-snug">
-                100% Cas d'Entreprises Réelles en FCFA
+                {t('pillar1Title')}
               </h3>
               <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                Pas de données abstraites. Vous analysez des ventes de supermarchés à Akwa, le portefeuille d'une microfinance à Bafoussam ou la logistique d'une brasserie.
+                {t('pillar1Desc')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-teal-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-brand-teal" />
-              <span>Montants XAF & réalités PME</span>
+              <span>{t('pillar1Tag')}</span>
             </div>
           </div>
 
@@ -183,15 +261,15 @@ export function VisitorLandingView() {
                 <Laptop className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-brand-primary leading-snug">
-                Laboratoires Intégrés au Navigateur
+                {t('pillar2Title')}
               </h3>
               <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                Pratiquez immédiatement sans avoir à installer de logiciel lourd. Écrivez et exécutez vos requêtes SQL, scripts Pandas et calculs DAX directement en ligne.
+                {t('pillar2Desc')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-blue-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-              <span>Zéro installation requise</span>
+              <span>{t('pillar2Tag')}</span>
             </div>
           </div>
 
@@ -199,18 +277,18 @@ export function VisitorLandingView() {
           <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between">
             <div>
               <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-700 flex items-center justify-center mb-3">
-                <GraduationCap className="w-5 h-5" />
+                <Zap className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-brand-primary leading-snug">
-                Pédagogie Active & Correction Immédiate
+                {t('pillar3Title')}
               </h3>
               <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                Fini les vidéos passives sans pratique. Chaque notion est validée par un atelier pratique, un quiz avec feedback Bloom instantané et des missions professionnelles.
+                {t('pillar3Desc')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-amber-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-              <span>Feedback pédagogique immédiat</span>
+              <span>{t('pillar3Tag')}</span>
             </div>
           </div>
 
@@ -221,39 +299,39 @@ export function VisitorLandingView() {
                 <Award className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-brand-primary leading-snug">
-                Certificats Infalsifiables & Portfolio GitHub
+                {t('pillar4Title')}
               </h3>
               <p className="text-xs text-brand-muted mt-1.5 leading-relaxed">
-                Chaque cursus achevé délivre un certificat officiel vérifiable par QR code et vous guide pour créer votre portfolio de projets concrets pour séduire les employeurs.
+                {t('pillar4Desc')}
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-800">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Code unique vérifiable en ligne</span>
+              <span>{t('pillar4Tag')}</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 3. LES 5 CURSUS PROFESSIONNELS DISPONIBLES */}
+      {/* 4. LES 5 CURSUS PROFESSIONNELS DISPONIBLES */}
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
             <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
-              Catalogue Cursus Métier
+              {t('catalogBadge')}
             </span>
             <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
-              5 Parcours Complets du Débutant à l'Expert
+              {t('catalogTitle')}
             </h2>
             <p className="text-xs sm:text-sm text-brand-muted mt-1">
-              Chaque parcours est découpé en 3 niveaux progressifs (N1, N2, N3) avec vidéos légères (~1 Mo) et fichiers téléchargeables.
+              {t('catalogSubtitle')}
             </p>
           </div>
           <Link
             href="/login"
             className="text-xs sm:text-sm font-bold text-brand-teal hover:underline flex items-center gap-1 self-start sm:self-auto min-h-[44px]"
           >
-            <span>Se connecter pour explorer</span>
+            <span>{t('exploreLogin')}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -264,7 +342,7 @@ export function VisitorLandingView() {
             return (
               <div
                 key={trk.id}
-                className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between hover:border-brand-teal/40 transition-all text-left"
+                className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between hover:border-brand-teal/40 transition-all text-left space-y-4"
               >
                 <div>
                   <div className="flex items-center justify-between mb-3">
@@ -293,16 +371,16 @@ export function VisitorLandingView() {
                   </ul>
                 </div>
 
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                   <span className="text-[11px] font-medium text-brand-muted flex items-center gap-1">
                     <PlayCircle className="w-3.5 h-3.5 text-brand-teal" />
-                    <span>Vidéos & Labos inclus</span>
+                    <span>{t('labIncluded')}</span>
                   </span>
                   <Link
                     href={trk.href}
                     className="min-h-[40px] px-3.5 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-900 text-xs font-bold flex items-center gap-1 transition"
                   >
-                    <span>Démarrer</span>
+                    <span>{t('startTrack')}</span>
                     <ArrowRight className="w-3 h-3" />
                   </Link>
                 </div>
@@ -317,22 +395,22 @@ export function VisitorLandingView() {
                 <Compass className="w-5 h-5" />
               </div>
               <span className="text-[10px] uppercase font-bold tracking-wider text-brand-teal">
-                Diagnostic Adaptatif
+                {t('diagnosticCardBadge')}
               </span>
-              <h3 className="text-base font-bold text-white mt-1">
-                Quel est votre niveau actuel ?
+              <h3 className="text-sm sm:text-base font-bold text-white mt-1">
+                {t('diagnosticCardTitle')}
               </h3>
               <p className="text-xs text-slate-300 mt-1.5 leading-relaxed">
-                Passez notre test rapide de 5 minutes pour évaluer vos compétences en Excel, SQL, Python et Power BI et obtenir votre plan de formation personnalisé.
+                {t('diagnosticCardDesc')}
               </p>
             </div>
 
             <div className="mt-5 pt-3 border-t border-white/10">
               <Link
                 href="/login?next=/placement-test"
-                className="w-full min-h-[44px] px-4 py-2 rounded-xl bg-brand-teal hover:bg-brand-teal-dark text-white text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95"
+                className="w-full min-h-[44px] px-4 py-2 rounded-xl bg-brand-teal hover:bg-brand-teal-dark text-white text-xs font-bold flex items-center justify-center gap-1.5 transition active:scale-95 shadow-xs"
               >
-                <span>Faire le test de positionnement</span>
+                <span>{t('diagnosticCardButton')}</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -340,7 +418,45 @@ export function VisitorLandingView() {
         </div>
       </section>
 
-      {/* 4. BANNIÈRE FINALE : CONÇU POUR LES CONNEXIONS AFRICAINES */}
+      {/* 5. TÉMOIGNAGES RÉELS D'APPRENANTS AU CAMEROUN */}
+      <section className="space-y-4">
+        <div>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
+            Retours d&apos;Expérience
+          </span>
+          <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
+            Ce que disent nos apprenants et diplômés
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {testimonials.map((testi, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-2xl p-5 border border-brand-border shadow-2xs flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center gap-1 text-amber-500">
+                  {[...Array(testi.rating)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                  ))}
+                </div>
+                <p className="text-xs text-slate-700 italic leading-relaxed">
+                  &ldquo;{testi.comment}&rdquo;
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100">
+                <div className="font-bold text-xs text-slate-900">{testi.name}</div>
+                <div className="text-[11px] text-brand-teal font-semibold">{testi.role}</div>
+                <div className="text-[10px] text-slate-500">{testi.company}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. BANNIÈRE FINALE : CONÇU POUR LES CONNEXIONS AFRICAINES */}
       <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
@@ -348,10 +464,10 @@ export function VisitorLandingView() {
           </div>
           <div>
             <h3 className="text-sm sm:text-base font-bold text-brand-primary">
-              Optimisé pour les réseaux mobiles 3G et smartphones modestes
+              {t('mobileBannerTitle')}
             </h3>
             <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-xl">
-              Pages inférieures à 300 Ko, vidéos compressées à ~1 Mo, mode économiseur de données activable en 1 clic et support PWA pour continuer à réviser même en cas de coupure réseau.
+              {t('mobileBannerDesc')}
             </p>
           </div>
         </div>
@@ -361,7 +477,7 @@ export function VisitorLandingView() {
             href="/login"
             className="flex-1 sm:flex-none min-h-[48px] px-6 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-sm font-semibold flex items-center justify-center gap-2 transition active:scale-95 shadow-xs"
           >
-            <span>Se connecter</span>
+            <span>{t('loginButton')}</span>
             <ArrowRight className="w-4 h-4 text-brand-teal" />
           </Link>
         </div>

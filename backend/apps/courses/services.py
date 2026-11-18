@@ -1084,18 +1084,19 @@ def submit_placement_test(user, answers: dict[str, str]):
     score_python = round((tool_earned['python'] / tool_totals['python']) * 100, 2) if tool_totals['python'] > 0 else 0.0
     score_powerbi = round((tool_earned['powerbi'] / tool_totals['powerbi']) * 100, 2) if tool_totals['powerbi'] > 0 else 0.0
 
-    # Determine recommended level
+    # Determine recommended level and target course level
     if score_total >= 75.0:
         recommended_level = PlacementAssessment.LEVEL_N3
+        target_level = Course.Level.ADVANCED
     elif score_total >= 45.0:
         recommended_level = PlacementAssessment.LEVEL_N2
+        target_level = Course.Level.INTERMEDIATE
     else:
         recommended_level = PlacementAssessment.LEVEL_N1
+        target_level = Course.Level.BEGINNER
 
-    # Match with existing course in database
-    recommended_course = None
-    level_query = 'Niveau 3' if recommended_level == PlacementAssessment.LEVEL_N3 else ('Niveau 2' if recommended_level == PlacementAssessment.LEVEL_N2 else 'Niveau 1')
-    recommended_course = Course.objects.filter(level__icontains=level_query).first() or Course.objects.first()
+    # Match with existing course in database corresponding to target_level
+    recommended_course = Course.objects.filter(level=target_level).first() or Course.objects.first()
 
     assessment = PlacementAssessment.objects.create(
         user=user,
