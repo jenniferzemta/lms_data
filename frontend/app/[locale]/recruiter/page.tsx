@@ -21,7 +21,8 @@ import {
   Database,
   BarChart3,
   Code2,
-  GitBranch
+  GitBranch,
+  MessageSquare
 } from 'lucide-react';
 
 export default function RecruiterPage() {
@@ -271,7 +272,7 @@ export default function RecruiterPage() {
                     <input
                       type="text"
                       required
-                      placeholder="Ex: Cameroun Logistique SA"
+                      placeholder="Ex: Entreprise / Cabinet RH"
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-slate-50 border border-brand-border text-xs focus:bg-white focus:outline-none focus:border-brand-primary"
                     />
                   </div>
@@ -283,7 +284,7 @@ export default function RecruiterPage() {
                     <input
                       type="email"
                       required
-                      placeholder="rh@entreprise.cm"
+                      placeholder="rh@entreprise.com"
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-slate-50 border border-brand-border text-xs focus:bg-white focus:outline-none focus:border-brand-primary"
                     />
                   </div>
@@ -303,18 +304,30 @@ export default function RecruiterPage() {
                   <textarea
                     rows={3}
                     required
-                    placeholder="Ex: Data Analyst Excel & Power BI FCFA..."
+                    placeholder="Ex: Data Analyst junior sur Excel et Power BI, disponible immédiatement..."
                     className="w-full p-3 rounded-xl bg-slate-50 border border-brand-border text-xs focus:bg-white focus:outline-none focus:border-brand-primary"
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="min-h-[44px] px-6 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
-                >
-                  <Mail className="w-4 h-4 text-brand-teal" />
-                  <span>{t('submitNeed')}</span>
-                </button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+                  <button
+                    type="submit"
+                    className="min-h-[44px] px-6 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                  >
+                    <Mail className="w-4 h-4 text-brand-teal" />
+                    <span>{t('submitNeed')}</span>
+                  </button>
+
+                  <a
+                    href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20je%20suis%20recruteur%20et%20recherche%20des%20profils%20analystes"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-h-[44px] px-4 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-900 text-xs font-bold flex items-center justify-center gap-2 transition"
+                  >
+                    <MessageSquare className="w-4 h-4 text-brand-teal" />
+                    <span>WhatsApp Recrutement (657 54 62 59)</span>
+                  </a>
+                </div>
               </form>
             )}
           </div>

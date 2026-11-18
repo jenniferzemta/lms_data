@@ -14,7 +14,8 @@ import {
   Building2, 
   GraduationCap, 
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  MessageSquare
 } from 'lucide-react';
 
 export const PublicHeader: React.FC = () => {
@@ -139,6 +140,19 @@ export const PublicHeader: React.FC = () => {
                   </Link>
                 );
               })}
+            </div>
+
+            {/* Direct WhatsApp Support */}
+            <div className="pt-2">
+              <a
+                href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20j'ai%20une%20question%20concernant%20les%20formations"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="min-h-[44px] w-full rounded-xl bg-teal-50 border border-teal-200/80 text-teal-900 text-xs font-bold flex items-center justify-center gap-2 py-2.5 hover:bg-teal-100 transition-colors"
+              >
+                <MessageSquare className="w-4 h-4 text-brand-teal" />
+                <span>WhatsApp : 657 54 62 59</span>
+              </a>
             </div>
 
             {/* Mobile Auth Buttons */}

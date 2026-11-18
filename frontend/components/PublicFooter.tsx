@@ -3,7 +3,7 @@
 import React from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { Table, Database, BarChart3, Code2, GitBranch, ShieldCheck } from 'lucide-react';
+import { Table, Database, BarChart3, Code2, GitBranch, ShieldCheck, MessageSquare } from 'lucide-react';
 
 export const PublicFooter: React.FC = () => {
   const tNav = useTranslations('PublicNav');
@@ -41,7 +41,7 @@ export const PublicFooter: React.FC = () => {
             <ul className="space-y-1.5">
               <li>
                 <Link href="/courses/excel-bases-analyse" className="hover:text-brand-primary transition">
-                  Excel Professionnel (FCFA)
+                  Excel Professionnel
                 </Link>
               </li>
               <li>
@@ -101,18 +101,24 @@ export const PublicFooter: React.FC = () => {
             </ul>
           </div>
 
-          {/* Mentions & Territoire */}
+          {/* Contact & Assistance WhatsApp */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Territoire & Légal
+              Assistance & Contact
             </div>
             <p className="text-slate-600 leading-relaxed text-[11px]">
-              {tLanding('badgeLocations')}
+              Une question avant de vous lancer ? Échangez directement avec un conseiller.
             </p>
-            <p className="text-slate-600 text-[11px]">
-              Devise officielle : <strong>FCFA (XAF)</strong>
-            </p>
-            <ul className="space-y-1.5 pt-1 text-[11px]">
+            <a
+              href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20j'ai%20une%20question%20concernant%20les%20formations"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 border border-teal-200 text-teal-900 font-bold text-xs hover:bg-teal-100 transition-colors"
+            >
+              <MessageSquare className="w-4 h-4 text-brand-teal" />
+              <span>WhatsApp : 657 54 62 59</span>
+            </a>
+            <ul className="space-y-1.5 pt-2 text-[11px]">
               <li>
                 <span className="hover:text-brand-primary cursor-pointer">Conditions Générales (CGU)</span>
               </li>
@@ -126,7 +132,7 @@ export const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
           <div>
-            © {new Date().getFullYear()} DataMboa. {tNav('regionalBadge')}.
+            © {new Date().getFullYear()} DataMboa. Plateforme d&apos;apprentissage pratique.
           </div>
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-1.5">

@@ -192,9 +192,9 @@ export const PowerBiLabView: React.FC<PowerBiLabViewProps> = ({
             <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-200">
               <span className="flex items-center gap-1.5">
                 <BarChart3 className="w-4 h-4 text-amber-600" />
-                Ventes par Ville (Cameroun)
+                Répartition des Ventes par Ville
               </span>
-              <span className="text-slate-400">En FCFA</span>
+              <span className="text-slate-400">Montants consolidés</span>
             </div>
 
             <div className="space-y-2.5 pt-1">

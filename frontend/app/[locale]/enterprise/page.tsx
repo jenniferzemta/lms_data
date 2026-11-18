@@ -17,7 +17,8 @@ import {
   Clock, 
   Mail, 
   ArrowRight,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
 
 export default function EnterprisePage() {
@@ -35,10 +36,10 @@ export default function EnterprisePage() {
       features: [
         'Automatisation Power Query sans coder',
         'Formules matricielles & RECHERCHEX',
-        'Modélisation de bilans et trésorerie en FCFA',
+        'Modélisation de bilans et tableaux de trésorerie',
         'Tableaux de bord dynamiques prêts pour la direction',
       ],
-      priceEst: 'À partir de 250 000 FCFA / cohorte (jusqu\'à 10 collaborateurs)',
+      priceEst: 'À partir de 250 000 / cohorte (jusqu\'à 10 collaborateurs)',
     },
     {
       title: 'Pack Décisionnel Power BI',
@@ -51,9 +52,9 @@ export default function EnterprisePage() {
         'Modélisation en étoile (Faits & Dimensions)',
         'Mesures DAX avancées (CALCULATE, DIVIDE)',
         'Sécurité par rôle (RLS) pour directeurs régionaux',
-        'Publication de rapports interactifs en ligne',
+        'Publication et partage de rapports interactifs',
       ],
-      priceEst: 'À partir de 450 000 FCFA / cohorte (jusqu\'à 10 collaborateurs)',
+      priceEst: 'À partir de 450 000 / cohorte (jusqu\'à 10 collaborateurs)',
     },
     {
       title: 'Pack Data Analytics (SQL & Python)',
@@ -68,7 +69,7 @@ export default function EnterprisePage() {
         'Gestion de versions de scripts sous Git & GitHub',
         'Export automatisé de rapports vers Excel',
       ],
-      priceEst: 'À partir de 600 000 FCFA / cohorte (jusqu\'à 10 collaborateurs)',
+      priceEst: 'À partir de 600 000 / cohorte (jusqu\'à 10 collaborateurs)',
     },
   ];
 
@@ -250,7 +251,7 @@ export default function EnterprisePage() {
                     <input
                       type="text"
                       required
-                      placeholder="Ex: Banque Atlantique Cameroun"
+                      placeholder="Ex: Entreprise / Groupe"
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-slate-50 border border-brand-border text-xs focus:bg-white focus:outline-none focus:border-brand-primary"
                     />
                   </div>
@@ -259,7 +260,7 @@ export default function EnterprisePage() {
                     <input
                       type="text"
                       required
-                      placeholder="Ex: Douala, Cameroun"
+                      placeholder="Ex: Ville / Siège"
                       className="w-full min-h-[44px] px-3.5 rounded-xl bg-slate-50 border border-brand-border text-xs focus:bg-white focus:outline-none focus:border-brand-primary"
                     />
                   </div>
@@ -318,13 +319,25 @@ export default function EnterprisePage() {
                   />
                 </div>
 
-                <button
-                  type="submit"
-                  className="min-h-[44px] px-6 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
-                >
-                  <Sparkles className="w-4 h-4 text-brand-teal" />
-                  <span>{t('submitQuote')}</span>
-                </button>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-1">
+                  <button
+                    type="submit"
+                    className="min-h-[44px] px-6 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-95"
+                  >
+                    <Sparkles className="w-4 h-4 text-brand-teal" />
+                    <span>{t('submitQuote')}</span>
+                  </button>
+
+                  <a
+                    href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20je%20souhaite%20un%20devis%20de%20formation%20entreprise"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-h-[44px] px-4 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-900 text-xs font-bold flex items-center justify-center gap-2 transition"
+                  >
+                    <MessageSquare className="w-4 h-4 text-brand-teal" />
+                    <span>Ou écrivez-nous sur WhatsApp (657 54 62 59)</span>
+                  </a>
+                </div>
               </form>
             )}
           </div>

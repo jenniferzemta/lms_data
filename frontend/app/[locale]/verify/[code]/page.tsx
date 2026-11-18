@@ -193,7 +193,7 @@ export default function CertificateVerificationPage() {
           <div className="text-center space-y-3 pb-6 border-b border-[#7c5800]/20">
             <div className="flex items-center justify-center gap-2 text-xs font-semibold tracking-widest uppercase text-[#7c5800]">
               <Sparkles className="w-4 h-4 text-[#7c5800]" />
-              <span>République du Cameroun · Direction Académique DataMboa</span>
+              <span>Direction Académique DataMboa · Division Certifications</span>
               <Sparkles className="w-4 h-4 text-[#7c5800]" />
             </div>
 
@@ -272,7 +272,7 @@ export default function CertificateVerificationPage() {
                 <span className="text-[8px] font-bold text-amber-900 tracking-tighter">
                   SCEAU OFFICIEL
                 </span>
-                <span className="text-[7px] text-amber-800">Douala · Cameroun</span>
+                <span className="text-[7px] text-amber-800">Certifié Conforme</span>
               </div>
             </div>
 

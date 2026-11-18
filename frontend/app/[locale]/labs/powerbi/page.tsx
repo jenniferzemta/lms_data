@@ -6,7 +6,7 @@ import { PowerBiLabContainer } from '@/features/labs';
 
 export const metadata = {
   title: 'Laboratoire Power BI & DAX | LMS Data Analysis',
-  description: 'Simulateur interactif Power BI et moteur DAX dans le navigateur sur données réelles d’entreprises camerounaises.',
+  description: 'Simulateur interactif Power BI et moteur DAX dans le navigateur sur données réelles d’entreprises.',
 };
 
 export default function PowerBiLabPage() {

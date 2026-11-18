@@ -308,7 +308,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                     <Check className="w-3 h-3 text-emerald-600" />
                     Formateur Accrédité
                   </span>
-                  <span className="text-[11px] text-slate-500">Douala · Cameroun</span>
+                  <span className="text-[11px] text-slate-500">Formateur Senior</span>
                 </div>
 
                 <p className="text-xs sm:text-sm font-semibold text-[#006b5f]">
@@ -409,8 +409,8 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <BookOpen className="w-5 h-5 text-[#006b5f] mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Cas réels en FCFA</div>
-                <div className="text-[11px] text-slate-500">Datasets locaux Kamer SARL et PME camerounaises</div>
+                <div className="text-xs font-bold text-slate-900">Cas réels d&apos;entreprises</div>
+                <div className="text-[11px] text-slate-500">Datasets et cas pratiques authentiques</div>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">

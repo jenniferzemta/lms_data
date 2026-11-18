@@ -165,7 +165,7 @@ export const PlacementResultView: React.FC<PlacementResultViewProps> = ({ result
                 {result.recommended_course.title}
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl">
-                {result.recommended_course.description || 'Apprenez par la pratique sur des cas réels d\'entreprises camerounaises avec nos laboratoires intégrés.'}
+                {result.recommended_course.description || 'Apprenez par la pratique sur des cas réels d\'entreprises avec nos laboratoires intégrés.'}
               </p>
             </div>
           </div>

@@ -61,8 +61,8 @@ export const MissionCard: React.FC<MissionCardProps> = ({ mission }) => {
           <Clock className="w-3.5 h-3.5 text-slate-400" />
           <span>~{mission.estimated_duration_minutes} min</span>
         </div>
-        <div className="flex items-center gap-1.5 font-mono font-bold text-brand-primary">
-          <span>{mission.currency}</span>
+        <div className="flex items-center gap-1.5 font-medium text-brand-teal">
+          <span>{mission.sector}</span>
         </div>
       </div>
 

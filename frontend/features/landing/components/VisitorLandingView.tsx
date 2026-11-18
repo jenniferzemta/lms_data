@@ -23,7 +23,9 @@ import {
   Compass,
   Star,
   Building2,
-  Check
+  Check,
+  MessageSquare,
+  ExternalLink
 } from 'lucide-react';
 import { DataMboaStudioMockup } from './DataMboaStudioMockup';
 
@@ -40,7 +42,7 @@ export function VisitorLandingView() {
       color: 'teal',
       badge: '3 Niveaux · 18 Modules',
       href: '/login?next=/courses/excel-bases-analyse',
-      highlights: ['Formules matricielles & RECHERCHEX', 'Automatisation Power Query', 'Modélisation financière en FCFA'],
+      highlights: ['Formules matricielles & RECHERCHEX', 'Automatisation Power Query', 'Modélisation financière'],
     },
     {
       id: 'sql',
@@ -89,7 +91,7 @@ export function VisitorLandingView() {
       name: 'Mireille K.',
       role: 'Contrôleur de Gestion Junior · Douala',
       company: 'PME Agro-alimentaire',
-      comment: 'Avant DataMboa, je passais 4 heures par semaine à copier-coller des données de vente sur Excel. Grâce au cours Power Query et aux cas réels en FCFA, tout est désormais automatisé en 1 clic.',
+      comment: 'Avant DataMboa, je passais 4 heures par semaine à copier-coller des données de vente sur Excel. Grâce au cours Power Query et aux cas réels, tout est désormais automatisé en 1 clic.',
       rating: 5,
     },
     {
@@ -212,7 +214,7 @@ export function VisitorLandingView() {
             Kamer SARL (Quincaillerie Douala)
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
-            Microfinance Bafoussam (Crédits FCFA)
+            Microfinance Bafoussam (Portefeuille Crédits)
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
             Logistique Centrale Yaoundé
@@ -418,14 +420,14 @@ export function VisitorLandingView() {
         </div>
       </section>
 
-      {/* 5. TÉMOIGNAGES RÉELS D'APPRENANTS AU CAMEROUN */}
-      <section className="space-y-4">
+      {/* 5. TÉMOIGNAGES & RETOURS VISITEURS */}
+      <section className="space-y-6">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal">
-            Retours d&apos;Expérience
+            {t('feedbackBadge')}
           </span>
           <h2 className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
-            Ce que disent nos apprenants et diplômés
+            {t('feedbackTitle')}
           </h2>
         </div>
 
@@ -454,9 +456,43 @@ export function VisitorLandingView() {
             </div>
           ))}
         </div>
+
+        {/* Bloc Retours Visiteurs & Échange WhatsApp Direct */}
+        <div className="bg-gradient-to-br from-teal-50/90 via-emerald-50/50 to-white rounded-3xl p-6 sm:p-8 border border-teal-200/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-brand-teal text-white flex items-center justify-center shrink-0 shadow-xs">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-100/70 text-teal-900 text-[10px] font-bold">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+                <span>Conseiller d&apos;orientation · 657 54 62 59</span>
+              </div>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">
+                {t('visitorFeedbackTitle')}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
+                {t('visitorFeedbackDesc')}
+              </p>
+            </div>
+          </div>
+
+          <div className="shrink-0 w-full md:w-auto">
+            <a
+              href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20j'ai%20une%20question%20concernant%20les%20formations"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full md:w-auto min-h-[48px] px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2.5 active:scale-95"
+            >
+              <MessageSquare className="w-4 h-4" />
+              <span>{t('visitorFeedbackAction')}</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-200" />
+            </a>
+          </div>
+        </div>
       </section>
 
-      {/* 6. BANNIÈRE FINALE : CONÇU POUR LES CONNEXIONS AFRICAINES */}
+      {/* 6. BANNIÈRE FINALE : CONÇU POUR TOUTES LES CONNEXIONS */}
       <section className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border shadow-xs flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
@@ -482,6 +518,22 @@ export function VisitorLandingView() {
           </Link>
         </div>
       </section>
+
+      {/* 7. BOUTON FLOTTANT D'ASSISTANCE WHATSAPP POUR LES VISITEURS */}
+      <aside aria-label="Assistance WhatsApp Visiteurs" className="fixed bottom-5 right-5 z-40">
+        <a
+          href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20j'ai%20une%20question%20concernant%20les%20formations"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Poser une question sur WhatsApp au 657 54 62 59"
+          className="group flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-xl transition-all active:scale-95 border-2 border-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+        >
+          <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+          <span className="font-bold text-xs sm:text-sm whitespace-nowrap">
+            WhatsApp 657 54 62 59
+          </span>
+        </a>
+      </aside>
 
     </div>
   );

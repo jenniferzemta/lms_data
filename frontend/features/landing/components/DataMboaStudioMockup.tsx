@@ -107,8 +107,8 @@ export const DataMboaStudioMockup: React.FC = () => {
                     <th className="p-2 border-r border-slate-200 w-8 text-center text-slate-400">#</th>
                     <th className="p-2 border-r border-slate-200">Article</th>
                     <th className="p-2 border-r border-slate-200 text-right">Qté</th>
-                    <th className="p-2 border-r border-slate-200 text-right">PU (FCFA)</th>
-                    <th className="p-2 text-right">Total (FCFA)</th>
+                    <th className="p-2 border-r border-slate-200 text-right">Prix Unitaire</th>
+                    <th className="p-2 text-right">Total</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -140,7 +140,7 @@ export const DataMboaStudioMockup: React.FC = () => {
                       Chiffre d&apos;Affaires Consolidé Kamer SARL :
                     </td>
                     <td className="p-2.5 text-right font-black text-brand-teal text-xs">
-                      4 435 000 FCFA
+                      4 435 000
                     </td>
                   </tr>
                 </tfoot>
@@ -163,7 +163,7 @@ export const DataMboaStudioMockup: React.FC = () => {
 
             <div className="p-2.5 bg-emerald-50 text-emerald-900 rounded-xl border border-emerald-200 flex items-center justify-between text-xs font-sans">
               <span className="font-semibold">Requête compilée en 12 ms</span>
-              <span className="font-bold">4 agences · 84 500 000 FCFA</span>
+              <span className="font-bold">4 agences · 84 500 000 d&apos;encours</span>
             </div>
           </div>
         )}

@@ -22,7 +22,7 @@ export const SqlSchemaExplorer: React.FC<SqlSchemaExplorerProps> = ({ onInsertTe
         <div className="flex items-center gap-2">
           <Layers className="w-4 h-4 text-brand-teal" />
           <h3 className="text-xs font-bold uppercase tracking-wider text-brand-primary">
-            Base Microfinance Cameroun
+            Base de Données Microfinance
           </h3>
         </div>
         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">

@@ -85,7 +85,7 @@ export default function HomePage() {
                         <span>{tHome('syncLightMode')}</span>
                       </span>
                       <span className="text-[11px] text-brand-muted font-medium">
-                        Douala, Cameroun · FCFA
+                        Espace de Travail
                       </span>
                     </div>
 

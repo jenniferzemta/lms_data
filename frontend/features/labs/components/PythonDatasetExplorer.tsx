@@ -10,7 +10,7 @@ interface PythonDatasetExplorerProps {
 
 const DATASET_COLUMNS = [
   { name: 'transaction_id', type: 'object', desc: 'Identifiant unique (ex: TXN-101)' },
-  { name: 'client', type: 'object', desc: 'Raison sociale entreprise camerounaise' },
+  { name: 'client', type: 'object', desc: 'Raison sociale entreprise partenaire' },
   { name: 'ville', type: 'object', desc: 'Douala, Yaoundé, Bafoussam, Garoua' },
   { name: 'produit', type: 'object', desc: 'Désignation article' },
   { name: 'categorie', type: 'object', desc: 'Informatique, BTP, Agro-alimentaire...' },

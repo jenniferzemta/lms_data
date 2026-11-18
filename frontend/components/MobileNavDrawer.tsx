@@ -118,7 +118,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
       links: [
         {
           key: 'missions',
-          label: 'Missions d\'Entreprise FCFA',
+          label: 'Missions d\'Entreprise',
           href: '/missions',
           icon: Briefcase,
           isActive: pathname.startsWith('/missions')
@@ -291,13 +291,13 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
         {/* Footer Area: WhatsApp + Profile */}
         <div className="p-3.5 border-t border-brand-border/70 shrink-0 bg-slate-50/70 space-y-2.5">
           <a
-            href="https://wa.me/237690000000"
+            href="https://wa.me/237657546259"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full min-h-[40px] px-3 py-1.5 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-900 font-semibold flex items-center justify-center gap-1.5 transition text-xs"
+            className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-900 font-semibold flex items-center justify-center gap-2 transition text-xs active:scale-98"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
-            <span>Assistance WhatsApp (24/7)</span>
+            <MessageSquare className="w-4 h-4 text-brand-teal" />
+            <span>Assistance WhatsApp (657 54 62 59)</span>
           </a>
 
           {user ? (

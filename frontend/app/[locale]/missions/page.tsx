@@ -28,7 +28,7 @@ export default async function MissionsCatalogPage() {
               Missions & Études de Cas Réelles
             </h1>
             <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-              Résolvez des défis analytiques concrets d&apos;entreprises locales en FCFA (microfinance, FMCG, Mobile Money), téléchargez les données réelles et auto-évaluez vos livrables avec nos corrigés de référence.
+              Résolvez des défis analytiques concrets d&apos;entreprises locales (microfinance, grande distribution, Mobile Money), téléchargez les données réelles et auto-évaluez vos livrables avec nos corrigés de référence.
             </p>
           </div>
 

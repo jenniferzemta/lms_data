@@ -110,7 +110,7 @@ export const DesktopSidebar: React.FC = () => {
       links: [
         {
           key: 'missions',
-          label: 'Missions d\'Entreprise FCFA',
+          label: 'Missions d\'Entreprise',
           href: '/missions',
           icon: Briefcase,
           isActive: pathname.startsWith('/missions')
@@ -212,14 +212,14 @@ export const DesktopSidebar: React.FC = () => {
         </Link>
       </div>
 
-      {/* 2. Badge Régional FCFA */}
-      <div className="px-6 py-2.5 bg-brand-canvas border-b border-brand-border/40 flex items-center justify-between shrink-0">
+      {/* 2. Statut Espace de Travail */}
+      <div className="px-6 py-2 bg-brand-canvas border-b border-brand-border/40 flex items-center justify-between shrink-0">
         <span className="text-[10px] font-bold uppercase tracking-wider text-brand-muted">
-          Cameroun · FCFA
+          Espace Apprenant
         </span>
         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200/50 text-teal-800 text-[10px] font-bold">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
-          <span>{tCommon('online')}</span>
+          <span>Actif</span>
         </div>
       </div>
 
@@ -284,17 +284,17 @@ export const DesktopSidebar: React.FC = () => {
         )}
       </nav>
 
-      {/* 4. Pied de Page : Assistance WhatsApp Compacte & Profil (Fixe en bas) */}
+      {/* 4. Pied de Page : Assistance WhatsApp (Fixe en bas) */}
       <div className="p-3.5 border-t border-brand-border/60 shrink-0 bg-white space-y-2.5">
-        {/* Support Compact */}
+        {/* Support Direct */}
         <a
-          href="https://wa.me/237690000000"
+          href="https://wa.me/237657546259"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full min-h-[34px] py-1 px-3 rounded-lg bg-teal-50 hover:bg-teal-100 border border-teal-200/60 text-teal-900 font-semibold flex items-center justify-center gap-1.5 transition-colors text-[11px]"
+          className="w-full min-h-[36px] py-1 px-3 rounded-lg bg-teal-50 hover:bg-teal-100 border border-teal-200/60 text-teal-900 font-semibold flex items-center justify-center gap-1.5 transition-colors text-[11px]"
         >
           <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
-          <span>Assistance WhatsApp</span>
+          <span>Assistance WhatsApp (657 54 62 59)</span>
           <ExternalLink className="w-3 h-3 text-teal-700" />
         </a>
 

@@ -805,14 +805,14 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
             {/* Intro Card */}
             <div className="bg-white p-4 sm:p-5 rounded-2xl shadow-xs border border-slate-100">
               <span className="text-xs font-bold uppercase tracking-wider text-[#13b8a6]">
-                Application PME & Commerce Camerounais
+                Application PME & Entreprise
               </span>
               <h2 className="text-lg sm:text-xl font-bold text-[#121c2a] mt-1">
-                Calculer le chiffre d'affaires et le panier moyen en FCFA
+                Calculer le chiffre d&apos;affaires et le panier moyen
               </h2>
               <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-                Dans les entreprises camerounaises et d'Afrique Centrale, l'analyse des bilans quotidiens de caisse
-                nécessite d'agréger rapidement les volumes vendus sans erreurs manuelles de calculatrice.
+                Dans les entreprises et commerces, l&apos;analyse des bilans quotidiens de caisse
+                nécessite d&apos;agréger rapidement les volumes vendus sans erreurs manuelles de calculatrice.
               </p>
 
               {/* Checked Objectives */}
@@ -961,7 +961,7 @@ export const LessonReader: React.FC<LessonReaderProps> = ({
                   Attention au séparateur régional !
                 </h3>
                 <p className="text-xs sm:text-sm text-[#5e4200] mt-1 leading-relaxed">
-                  Sur Excel paramétré en français (Cameroun/France), utilisez toujours le{' '}
+                  Sur Excel paramétré en français, utilisez toujours le{' '}
                   <strong>point-virgule (;)</strong> pour séparer les plages disjointes, et non la virgule anglo-saxonne :
                   <br />
                   <code className="font-mono text-xs font-bold bg-amber-200/60 px-1.5 py-0.5 rounded mt-1 inline-block">
