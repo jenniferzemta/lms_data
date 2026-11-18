@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { 
   Home, 
   Compass, 
   Award, 
-  CreditCard, 
   MessageSquare, 
   User, 
   LogOut,
@@ -34,14 +33,15 @@ import { useAuth } from '@/features/auth';
 
 export const DesktopSidebar: React.FC = () => {
   const tNav = useTranslations('Navigation');
-  const tCommon = useTranslations('Common');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.is_admin_role || user?.is_staff;
 
   const sections = [
     {
-      title: 'Cursus & Orientation',
+      title: isEn ? 'Curriculum & Guidance' : 'Cursus & Orientation',
       links: [
         {
           key: 'home',
@@ -59,7 +59,7 @@ export const DesktopSidebar: React.FC = () => {
         },
         {
           key: 'placement-test',
-          label: 'Test de positionnement',
+          label: isEn ? 'Placement Test' : 'Test de positionnement',
           href: '/placement-test',
           icon: Target,
           isActive: pathname.startsWith('/placement-test')
@@ -67,39 +67,39 @@ export const DesktopSidebar: React.FC = () => {
       ]
     },
     {
-      title: 'Laboratoires Interactifs',
+      title: isEn ? 'Interactive Laboratories' : 'Laboratoires Interactifs',
       links: [
         {
           key: 'labs-excel',
-          label: 'Labo Excel (Formules)',
+          label: isEn ? 'Excel Lab (Formulas)' : 'Labo Excel (Formules)',
           href: '/labs/excel',
           icon: Table,
           isActive: pathname.startsWith('/labs/excel')
         },
         {
           key: 'labs-sql',
-          label: 'Labo SQL (Relationnel)',
+          label: isEn ? 'SQL Lab (Relational)' : 'Labo SQL (Relationnel)',
           href: '/labs/sql',
           icon: Terminal,
           isActive: pathname.startsWith('/labs/sql')
         },
         {
           key: 'labs-python',
-          label: 'Labo Python & Pandas',
+          label: isEn ? 'Python & Pandas Lab' : 'Labo Python & Pandas',
           href: '/labs/python',
           icon: FileCode,
           isActive: pathname.startsWith('/labs/python')
         },
         {
           key: 'labs-powerbi',
-          label: 'Labo Power BI & DAX',
+          label: isEn ? 'Power BI & DAX Lab' : 'Labo Power BI & DAX',
           href: '/labs/powerbi',
           icon: BarChart3,
           isActive: pathname.startsWith('/labs/powerbi')
         },
         {
           key: 'labs-git',
-          label: 'Labo Git & GitHub',
+          label: isEn ? 'Git & GitHub Lab' : 'Labo Git & GitHub',
           href: '/labs/git',
           icon: GitBranch,
           isActive: pathname.startsWith('/labs/git')
@@ -107,25 +107,25 @@ export const DesktopSidebar: React.FC = () => {
       ]
     },
     {
-      title: 'Pratique Réelle & Outils',
+      title: isEn ? 'Hands-on Practice & Tools' : 'Pratique Réelle & Outils',
       links: [
         {
           key: 'missions',
-          label: 'Missions d\'Entreprise',
+          label: isEn ? 'Business Case Missions' : 'Missions d\'Entreprise',
           href: '/missions',
           icon: Briefcase,
           isActive: pathname.startsWith('/missions')
         },
         {
           key: 'audit',
-          label: 'Audit Intelligent (Code/Formules)',
+          label: isEn ? 'Code & Formula Audit' : 'Audit de Code & Formules',
           href: '/audit',
           icon: FileCheck2,
           isActive: pathname.startsWith('/audit')
         },
         {
           key: 'srs',
-          label: 'Révision Flashcard (SRS)',
+          label: isEn ? 'Flashcard Review (SRS)' : 'Révision Flashcard (SRS)',
           href: '/srs',
           icon: Brain,
           isActive: pathname.startsWith('/srs')
@@ -133,25 +133,25 @@ export const DesktopSidebar: React.FC = () => {
       ]
     },
     {
-      title: 'Carrière & Succès',
+      title: isEn ? 'Career & Credentials' : 'Carrière & Succès',
       links: [
         {
           key: 'dashboard',
-          label: 'Progrès & Certificats',
+          label: isEn ? 'Progress & Certificates' : 'Progrès & Certificats',
           href: '/dashboard',
           icon: Award,
           isActive: pathname.startsWith('/dashboard')
         },
         {
           key: 'badges',
-          label: 'Badges de Compétences',
+          label: isEn ? 'Skill Badges' : 'Badges de Compétences',
           href: '/badges',
           icon: Sparkles,
           isActive: pathname.startsWith('/badges')
         },
         {
           key: 'portfolio',
-          label: 'Mon Portfolio Public',
+          label: isEn ? 'My Public Portfolio' : 'Mon Portfolio Public',
           href: '/portfolio/my',
           icon: FolderKanban,
           isActive: pathname.startsWith('/portfolio')
@@ -159,25 +159,25 @@ export const DesktopSidebar: React.FC = () => {
       ]
     },
     {
-      title: 'Espaces Professionnels',
+      title: isEn ? 'Professional Spaces' : 'Espaces Professionnels',
       links: [
         {
           key: 'recruiter',
-          label: 'Espace Recruteur',
+          label: isEn ? 'Recruiter Space' : 'Espace Recruteur',
           href: '/recruiter',
           icon: Users,
           isActive: pathname.startsWith('/recruiter')
         },
         {
           key: 'enterprise',
-          label: 'Espace Entreprise B2B',
+          label: isEn ? 'Enterprise B2B Space' : 'Espace Entreprise B2B',
           href: '/enterprise',
           icon: Building2,
           isActive: pathname.startsWith('/enterprise')
         },
         {
           key: 'instructor',
-          label: 'Espace Formateur',
+          label: isEn ? 'Instructor Space' : 'Espace Formateur',
           href: '/instructor',
           icon: GraduationCap,
           isActive: pathname.startsWith('/instructor')
@@ -186,7 +186,7 @@ export const DesktopSidebar: React.FC = () => {
           ? [
               {
                 key: 'admin-portal',
-                label: 'Portail Administration',
+                label: isEn ? 'Administration Portal' : 'Portail Administration',
                 href: '/admin-portal',
                 icon: ShieldAlert,
                 isActive: pathname.startsWith('/admin-portal')
@@ -211,7 +211,7 @@ export const DesktopSidebar: React.FC = () => {
               DataMboa
             </span>
             <span className="text-[11px] text-brand-muted font-medium">
-              Plateforme e-learning
+              {isEn ? 'E-learning Platform' : 'Plateforme e-learning'}
             </span>
           </div>
         </Link>
@@ -220,16 +220,16 @@ export const DesktopSidebar: React.FC = () => {
       {/* 2. Statut Espace de Travail */}
       <div className="px-6 py-2 bg-brand-canvas border-b border-brand-border/40 flex items-center justify-between shrink-0">
         <span className="text-[10px] font-bold uppercase tracking-wider text-brand-muted">
-          Espace Apprenant
+          {isEn ? 'Learner Workspace' : 'Espace Apprenant'}
         </span>
         <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-teal-50 border border-teal-200/50 text-teal-800 text-[10px] font-bold">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
-          <span>Actif</span>
+          <span>{isEn ? 'Active' : 'Actif'}</span>
         </div>
       </div>
 
-      {/* 3. Navigation Verticale Défilable (Indépendante et fluide) */}
-      <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-4 overscroll-contain" aria-label="Menu principal">
+      {/* 3. Navigation Verticale Défilable */}
+      <nav className="flex-1 overflow-y-auto px-4 py-3 space-y-4 overscroll-contain" aria-label={isEn ? 'Main menu' : 'Menu principal'}>
         {sections.map((sec, idx) => (
           <div key={idx} className="space-y-1">
             <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-brand-muted/80 block">
@@ -263,7 +263,7 @@ export const DesktopSidebar: React.FC = () => {
         {(user?.role === 'ADMIN' || user?.is_staff || user?.role === 'INSTRUCTOR') && (
           <div className="pt-2 border-t border-slate-100 space-y-1">
             <span className="px-3 text-[10px] uppercase font-bold text-amber-800 tracking-wider block">
-              Espace Formateur
+              {isEn ? 'Instructor Space' : 'Espace Formateur'}
             </span>
             <Link
               href="/instructor"
@@ -274,7 +274,7 @@ export const DesktopSidebar: React.FC = () => {
               }`}
             >
               <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
-              <span className="truncate">Checklist Qualité Cours</span>
+              <span className="truncate">{isEn ? 'Course Quality Checklist' : 'Checklist Qualité Cours'}</span>
             </Link>
             <a
               href="http://localhost:8000/admin/"
@@ -299,7 +299,7 @@ export const DesktopSidebar: React.FC = () => {
           className="w-full min-h-[36px] py-1 px-3 rounded-lg bg-teal-50 hover:bg-teal-100 border border-teal-200/60 text-teal-900 font-semibold flex items-center justify-center gap-1.5 transition-colors text-[11px]"
         >
           <MessageSquare className="w-3.5 h-3.5 text-brand-teal" />
-          <span>Assistance WhatsApp (657 54 62 59)</span>
+          <span>{isEn ? 'WhatsApp Support (657 54 62 59)' : 'Assistance WhatsApp (657 54 62 59)'}</span>
           <ExternalLink className="w-3 h-3 text-teal-700" />
         </a>
 
@@ -315,7 +315,7 @@ export const DesktopSidebar: React.FC = () => {
                   {user.first_name || user.email.split('@')[0]}
                 </span>
                 <span className="text-[10px] text-brand-muted truncate">
-                  {user.is_learner ? 'Apprenant' : user.role}
+                  {user.is_learner ? (isEn ? 'Learner' : 'Apprenant') : user.role}
                 </span>
               </div>
             </Link>
@@ -323,8 +323,8 @@ export const DesktopSidebar: React.FC = () => {
             <button
               type="button"
               onClick={() => logout()}
-              aria-label="Déconnexion"
-              title="Déconnexion"
+              aria-label={isEn ? 'Sign Out' : 'Déconnexion'}
+              title={isEn ? 'Sign Out' : 'Déconnexion'}
               className="p-1 rounded-lg text-brand-muted hover:text-red-600 hover:bg-red-50 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -337,18 +337,17 @@ export const DesktopSidebar: React.FC = () => {
               className="min-h-[36px] px-2.5 py-1 rounded-xl bg-brand-primary text-white text-xs font-semibold flex items-center justify-center gap-1 hover:bg-brand-primary-dark transition shadow-2xs"
             >
               <LogIn className="w-3 h-3" />
-              <span>Connexion</span>
+              <span>{isEn ? 'Sign In' : 'Connexion'}</span>
             </Link>
             <Link
               href="/register"
               className="min-h-[36px] px-2.5 py-1 rounded-xl bg-brand-canvas text-brand-primary border border-brand-border text-xs font-semibold flex items-center justify-center hover:bg-slate-100 transition"
             >
-              <span>S'inscrire</span>
+              <span>{isEn ? 'Sign Up' : "S'inscrire"}</span>
             </Link>
           </div>
         )}
       </div>
-
     </aside>
   );
 };

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { PublicHeader, PublicFooter } from '@/components';
 import { 
@@ -27,6 +27,8 @@ import {
 
 export default function RecruiterPage() {
   const t = useTranslations('Recruiter');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const router = useRouter();
   const [certCode, setCertCode] = useState('');
   const [selectedSkill, setSelectedSkill] = useState('all');
@@ -36,34 +38,34 @@ export default function RecruiterPage() {
     {
       id: 'tal-1',
       name: 'Junior N. (Douala)',
-      title: 'Data Analyst Junior · Spécialiste Excel & SQL',
+      title: isEn ? 'Junior Data Analyst · Excel & SQL Specialist' : 'Data Analyst Junior · Spécialiste Excel & SQL',
       score: '96%',
-      tools: ['Excel DAX', 'SQL Microfinance', 'Power BI'],
+      tools: isEn ? ['Excel DAX', 'Microfinance SQL', 'Power BI'] : ['Excel DAX', 'SQL Microfinance', 'Power BI'],
       verifiedCourses: 3,
-      certCode: 'DM-EXC-2026-N104',
-      badge: 'Major de cohorte',
+      certCode: 'DM-EXC-2026-8841',
+      badge: isEn ? 'Top of Cohort' : 'Major de cohorte',
       portfolioSlug: 'junior-douala',
     },
     {
       id: 'tal-2',
       name: 'Carine M. (Yaoundé)',
-      title: 'Business Intelligence & Reporting Financier',
+      title: isEn ? 'Business Intelligence & Financial Reporting' : 'Business Intelligence & Reporting Financier',
       score: '94%',
-      tools: ['Power BI', 'SQL', 'Excel Avancé'],
+      tools: isEn ? ['Power BI', 'SQL', 'Advanced Excel'] : ['Power BI', 'SQL', 'Excel Avancé'],
       verifiedCourses: 3,
-      certCode: 'DM-PBI-2026-K921',
-      badge: 'Certifiée Expert',
+      certCode: 'DM-PBI-2026-3912',
+      badge: isEn ? 'Certified Expert' : 'Certifiée Expert',
       portfolioSlug: 'carine-yaounde',
     },
     {
       id: 'tal-3',
       name: 'Rodrigue T. (Bafoussam)',
-      title: 'Data Scientist & Développeur Python',
+      title: isEn ? 'Data Scientist & Python Analyst' : 'Data Scientist & Développeur Python',
       score: '91%',
       tools: ['Python Pandas', 'SQL', 'Git & GitHub'],
       verifiedCourses: 2,
-      certCode: 'DM-PYT-2026-R411',
-      badge: 'Portfolio GitHub Actif',
+      certCode: 'DM-PYT-2026-5520',
+      badge: isEn ? 'Active GitHub Portfolio' : 'Portfolio GitHub Actif',
       portfolioSlug: 'rodrigue-bafoussam',
     },
   ];

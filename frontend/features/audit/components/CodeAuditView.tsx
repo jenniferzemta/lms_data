@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { 
   FileCheck2, 
   Sparkles, 
@@ -21,6 +22,8 @@ import { auditService } from '../services/audit.service';
 import { AuditReport } from '../types';
 
 export const CodeAuditView: React.FC = () => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [activeTool, setActiveTool] = useState<'excel' | 'sql' | 'python'>('excel');
   const [content, setContent] = useState<string>(
     '=SOMME.SI(A2:A100; "Douala"; B2:B100) * 0.1925'
@@ -89,17 +92,19 @@ export const CodeAuditView: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-primary text-white">
-                Outil d&apos;Analyse Automatisée
+                {isEn ? 'Automated Analysis Tool' : "Outil d'Analyse Automatisée"}
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                Correction & Feedback Immédiat
+                {isEn ? 'Instant Grading & Feedback' : 'Correction & Feedback Immédiat'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-brand-text tracking-tight">
-              Audit & Correction Automatique de Code et Formules
+              {isEn ? 'Automated Code & Formula Audit' : 'Audit & Correction Automatique de Code et Formules'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Analyse statique et structurelle avancée pour formules Excel, requêtes SQL et scripts Python avec rapport pédagogique téléchargeable.
+              {isEn
+                ? 'Advanced static and structural analysis for Excel formulas, SQL queries, and Python scripts with downloadable feedback report.'
+                : 'Analyse statique et structurelle avancée pour formules Excel, requêtes SQL et scripts Python avec rapport pédagogique téléchargeable.'}
             </p>
           </div>
         </div>
@@ -117,7 +122,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <Table className="w-4 h-4" />
-          Formules Excel
+          {isEn ? 'Excel Formulas' : 'Formules Excel'}
         </button>
 
         <button
@@ -130,7 +135,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <Terminal className="w-4 h-4" />
-          Requêtes SQL
+          {isEn ? 'SQL Queries' : 'Requêtes SQL'}
         </button>
 
         <button
@@ -143,7 +148,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <FileCode className="w-4 h-4" />
-          Scripts Python & Pandas
+          {isEn ? 'Python & Pandas Scripts' : 'Scripts Python & Pandas'}
         </button>
       </div>
 
@@ -151,25 +156,25 @@ export const CodeAuditView: React.FC = () => {
       <div className="bg-white rounded-3xl border border-brand-border p-5 shadow-xs flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Collez votre formule ou code à auditer :
+            {isEn ? 'Paste your formula or code to audit:' : 'Collez votre formule ou code à auditer :'}
           </span>
 
           {/* Quick presets */}
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-400">Exemples rapides :</span>
+            <span className="text-[11px] text-slate-400">{isEn ? 'Quick samples:' : 'Exemples rapides :'}</span>
             <button
               type="button"
               onClick={() => setContent(presets[activeTool].bad)}
               className="text-xs px-2.5 py-1 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 font-semibold"
             >
-              Avec anomalies
+              {isEn ? 'With Issues' : 'Avec anomalies'}
             </button>
             <button
               type="button"
               onClick={() => setContent(presets[activeTool].good)}
               className="text-xs px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold"
             >
-              Conforme
+              {isEn ? 'Compliant' : 'Conforme'}
             </button>
           </div>
         </div>
@@ -178,7 +183,7 @@ export const CodeAuditView: React.FC = () => {
           rows={6}
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder={`Entrez votre code ${activeTool.toUpperCase()} ici...`}
+          placeholder={isEn ? `Enter your ${activeTool.toUpperCase()} code here...` : `Entrez votre code ${activeTool.toUpperCase()} ici...`}
           className="w-full p-4 rounded-2xl bg-slate-950 text-slate-100 font-mono text-xs sm:text-sm border border-slate-800 outline-hidden resize-y focus:ring-2 focus:ring-brand-primary"
           spellCheck={false}
         />
@@ -194,7 +199,7 @@ export const CodeAuditView: React.FC = () => {
             className="text-xs"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Effacer
+            {isEn ? 'Clear' : 'Effacer'}
           </Button>
 
           <Button
@@ -205,12 +210,12 @@ export const CodeAuditView: React.FC = () => {
             {isAuditing ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Analyse en cours...
+                {isEn ? 'Analyzing...' : 'Analyse en cours...'}
               </>
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                Lancer l'audit de complétude
+                {isEn ? 'Run Code Audit' : "Lancer l'audit de complétude"}
               </>
             )}
           </Button>
@@ -229,7 +234,7 @@ export const CodeAuditView: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                    Statut de conformité :
+                    {isEn ? 'Compliance Status:' : 'Statut de conformité :'}
                   </span>
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-800">
                     {report.status}
@@ -249,7 +254,7 @@ export const CodeAuditView: React.FC = () => {
               className="flex items-center gap-1.5 text-xs font-bold self-end sm:self-center shrink-0 min-h-[40px]"
             >
               <Download className="w-4 h-4" />
-              Télécharger le rapport (.md)
+              {isEn ? 'Download Report (.md)' : 'Télécharger le rapport (.md)'}
             </Button>
           </div>
 
@@ -257,10 +262,10 @@ export const CodeAuditView: React.FC = () => {
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              Points forts & bonnes pratiques ({report.strengths.length})
+              {isEn ? `Strengths & Best Practices (${report.strengths.length})` : `Points forts & bonnes pratiques (${report.strengths.length})`}
             </h3>
             {report.strengths.length === 0 ? (
-              <p className="text-xs text-slate-400 italic">Aucun point fort spécifique relevé.</p>
+              <p className="text-xs text-slate-400 italic">{isEn ? 'No specific strengths noted.' : 'Aucun point fort spécifique relevé.'}</p>
             ) : (
               <div className="space-y-1.5">
                 {report.strengths.map((str, idx) => (
@@ -277,12 +282,12 @@ export const CodeAuditView: React.FC = () => {
           <div>
             <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <AlertTriangle className="w-4 h-4 text-amber-500" />
-              Écarts et anomalies détectés ({report.issues.length})
+              {isEn ? `Detected Issues & Anomalies (${report.issues.length})` : `Écarts et anomalies détectés (${report.issues.length})`}
             </h3>
             {report.issues.length === 0 ? (
               <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-semibold flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                Félicitations ! Aucune anomalie détectée sur ce livrable.
+                {isEn ? 'Congratulations! No anomalies detected in this code.' : 'Félicitations ! Aucune anomalie détectée sur ce livrable.'}
               </div>
             ) : (
               <div className="space-y-3">
@@ -312,7 +317,7 @@ export const CodeAuditView: React.FC = () => {
                     {iss.tip && (
                       <div className="text-[11px] font-medium text-slate-700 bg-white/70 p-2 rounded-xl mt-1 flex items-start gap-1.5">
                         <Sparkles className="w-3.5 h-3.5 text-brand-primary shrink-0 mt-0.5" />
-                        <span><strong>Conseil pédagogique :</strong> {iss.tip}</span>
+                        <span><strong>{isEn ? 'Tip:' : 'Conseil pédagogique :'}</strong> {iss.tip}</span>
                       </div>
                     )}
                   </div>
@@ -326,7 +331,7 @@ export const CodeAuditView: React.FC = () => {
             <div className="p-4 rounded-2xl bg-brand-primary/5 border border-brand-primary/20">
               <h4 className="text-xs font-bold text-brand-primary uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4" />
-                Plan d'action correctif recommandé :
+                {isEn ? 'Recommended Action Plan:' : "Plan d'action correctif recommandé :"}
               </h4>
               <ul className="space-y-1 text-xs text-slate-700 font-medium">
                 {report.recommendations.map((rec, idx) => (

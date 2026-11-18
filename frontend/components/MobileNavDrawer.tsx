@@ -1,46 +1,45 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 import { 
   Home, 
   Compass, 
-  BookOpen, 
   Award, 
-  CreditCard, 
   MessageSquare, 
   User, 
-  LogOut, 
-  ExternalLink, 
-  LogIn, 
-  ShieldCheck, 
-  Terminal, 
-  FileCode, 
-  Table, 
-  Briefcase, 
-  Brain, 
-  FolderKanban, 
-  BarChart3, 
-  GitBranch, 
-  Target, 
+  LogOut,
+  LogIn,
+  ShieldCheck,
+  Terminal,
+  FileCode,
+  Table,
+  Briefcase,
+  Brain,
+  FolderKanban,
+  BarChart3,
+  GitBranch,
+  Target,
   FileCheck2,
-  X,
   Sparkles,
   Users,
   Building2,
   GraduationCap,
-  ShieldAlert
+  ShieldAlert,
+  X
 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 
-interface MobileNavDrawerProps {
+export interface MobileNavDrawerProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClose }) => {
   const tNav = useTranslations('Navigation');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'ADMIN' || user?.is_admin_role || user?.is_staff;
@@ -49,7 +48,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
 
   const sections = [
     {
-      title: 'Cursus & Orientation',
+      title: isEn ? 'Curriculum & Guidance' : 'Cursus & Orientation',
       links: [
         {
           key: 'home',
@@ -67,7 +66,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
         },
         {
           key: 'placement-test',
-          label: 'Test de positionnement (5 min)',
+          label: isEn ? 'Placement Test' : 'Test de positionnement',
           href: '/placement-test',
           icon: Target,
           isActive: pathname.startsWith('/placement-test')
@@ -75,39 +74,39 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
       ]
     },
     {
-      title: 'Laboratoires Interactifs (In-Browser)',
+      title: isEn ? 'Interactive Laboratories' : 'Laboratoires Interactifs',
       links: [
         {
           key: 'labs-excel',
-          label: 'Labo Excel (Formules & Tables)',
+          label: isEn ? 'Excel Lab (Formulas)' : 'Labo Excel (Formules)',
           href: '/labs/excel',
           icon: Table,
           isActive: pathname.startsWith('/labs/excel')
         },
         {
           key: 'labs-sql',
-          label: 'Labo SQL (Requêtes Relationnelles)',
+          label: isEn ? 'SQL Lab (Relational)' : 'Labo SQL (Relationnel)',
           href: '/labs/sql',
           icon: Terminal,
           isActive: pathname.startsWith('/labs/sql')
         },
         {
           key: 'labs-python',
-          label: 'Labo Python & Pandas',
+          label: isEn ? 'Python & Pandas Lab' : 'Labo Python & Pandas',
           href: '/labs/python',
           icon: FileCode,
           isActive: pathname.startsWith('/labs/python')
         },
         {
           key: 'labs-powerbi',
-          label: 'Labo Power BI & Mesures DAX',
+          label: isEn ? 'Power BI & DAX Lab' : 'Labo Power BI & DAX',
           href: '/labs/powerbi',
           icon: BarChart3,
           isActive: pathname.startsWith('/labs/powerbi')
         },
         {
           key: 'labs-git',
-          label: 'Labo Git & GitHub (Terminal)',
+          label: isEn ? 'Git & GitHub Lab' : 'Labo Git & GitHub',
           href: '/labs/git',
           icon: GitBranch,
           isActive: pathname.startsWith('/labs/git')
@@ -115,25 +114,25 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
       ]
     },
     {
-      title: 'Pratique Réelle & Outils',
+      title: isEn ? 'Hands-on Practice & Tools' : 'Pratique Réelle & Outils',
       links: [
         {
           key: 'missions',
-          label: 'Missions d\'Entreprise',
+          label: isEn ? 'Business Case Missions' : 'Missions d\'Entreprise',
           href: '/missions',
           icon: Briefcase,
           isActive: pathname.startsWith('/missions')
         },
         {
           key: 'audit',
-          label: 'Audit Intelligent (Code/Formules)',
+          label: isEn ? 'Code & Formula Audit' : 'Audit de Code & Formules',
           href: '/audit',
           icon: FileCheck2,
           isActive: pathname.startsWith('/audit')
         },
         {
           key: 'srs',
-          label: 'Révision Flashcard (SRS)',
+          label: isEn ? 'Flashcard Review (SRS)' : 'Révision Flashcard (SRS)',
           href: '/srs',
           icon: Brain,
           isActive: pathname.startsWith('/srs')
@@ -141,25 +140,25 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
       ]
     },
     {
-      title: 'Carrière & Reconnaissance',
+      title: isEn ? 'Career & Credentials' : 'Carrière & Succès',
       links: [
         {
           key: 'dashboard',
-          label: 'Progrès & Certificats',
+          label: isEn ? 'Progress & Certificates' : 'Progrès & Certificats',
           href: '/dashboard',
           icon: Award,
           isActive: pathname.startsWith('/dashboard')
         },
         {
           key: 'badges',
-          label: 'Badges de Compétences',
+          label: isEn ? 'Skill Badges' : 'Badges de Compétences',
           href: '/badges',
           icon: Sparkles,
           isActive: pathname.startsWith('/badges')
         },
         {
           key: 'portfolio',
-          label: 'Mon Portfolio Public',
+          label: isEn ? 'My Public Portfolio' : 'Mon Portfolio Public',
           href: '/portfolio/my',
           icon: FolderKanban,
           isActive: pathname.startsWith('/portfolio')
@@ -167,25 +166,25 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
       ]
     },
     {
-      title: 'Espaces Professionnels',
+      title: isEn ? 'Professional Spaces' : 'Espaces Professionnels',
       links: [
         {
           key: 'recruiter',
-          label: 'Espace Recruteur',
+          label: isEn ? 'Recruiter Space' : 'Espace Recruteur',
           href: '/recruiter',
           icon: Users,
           isActive: pathname.startsWith('/recruiter')
         },
         {
           key: 'enterprise',
-          label: 'Espace Entreprise B2B',
+          label: isEn ? 'Enterprise B2B Space' : 'Espace Entreprise B2B',
           href: '/enterprise',
           icon: Building2,
           isActive: pathname.startsWith('/enterprise')
         },
         {
           key: 'instructor',
-          label: 'Espace Formateur',
+          label: isEn ? 'Instructor Space' : 'Espace Formateur',
           href: '/instructor',
           icon: GraduationCap,
           isActive: pathname.startsWith('/instructor')
@@ -194,7 +193,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
           ? [
               {
                 key: 'admin-portal',
-                label: 'Portail Administration',
+                label: isEn ? 'Administration Portal' : 'Portail Administration',
                 href: '/admin-portal',
                 icon: ShieldAlert,
                 isActive: pathname.startsWith('/admin-portal')
@@ -228,7 +227,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
                 DataMboa
               </span>
               <span className="text-[10px] text-brand-muted font-medium">
-                Navigation complète
+                {isEn ? 'Full Navigation' : 'Navigation complète'}
               </span>
             </div>
           </Link>
@@ -236,7 +235,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer le menu"
+            aria-label={isEn ? 'Close menu' : 'Fermer le menu'}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-brand-muted hover:text-brand-primary hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -279,7 +278,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
           {(user?.role === 'ADMIN' || user?.is_staff || user?.role === 'INSTRUCTOR') && (
             <div className="pt-2 border-t border-slate-100 space-y-1">
               <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-amber-800 block">
-                Espace Formateur
+                {isEn ? 'Instructor Space' : 'Espace Formateur'}
               </span>
               <Link
                 href="/instructor"
@@ -287,7 +286,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
                 className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold min-h-[44px] bg-amber-50 text-amber-900 border border-amber-200"
               >
                 <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
-                <span>Checklist Qualité Cours</span>
+                <span>{isEn ? 'Course Quality Checklist' : 'Checklist Qualité Cours'}</span>
               </Link>
             </div>
           )}
@@ -302,7 +301,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
             className="w-full min-h-[44px] px-3 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-900 font-semibold flex items-center justify-center gap-2 transition text-xs active:scale-98"
           >
             <MessageSquare className="w-4 h-4 text-brand-teal" />
-            <span>Assistance WhatsApp (657 54 62 59)</span>
+            <span>{isEn ? 'WhatsApp Support (657 54 62 59)' : 'Assistance WhatsApp (657 54 62 59)'}</span>
           </a>
 
           {user ? (
@@ -316,7 +315,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
                     {user.first_name || user.email.split('@')[0]}
                   </span>
                   <span className="text-[10px] text-brand-muted truncate">
-                    {user.is_learner ? 'Apprenant' : user.role}
+                    {user.is_learner ? (isEn ? 'Learner' : 'Apprenant') : user.role}
                   </span>
                 </div>
               </Link>
@@ -327,7 +326,7 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
                   onClose();
                   logout();
                 }}
-                aria-label="Déconnexion"
+                aria-label={isEn ? 'Sign Out' : 'Déconnexion'}
                 className="min-h-[40px] min-w-[40px] flex items-center justify-center rounded-lg text-brand-muted hover:text-red-600 hover:bg-red-50"
               >
                 <LogOut className="w-4 h-4" />
@@ -341,14 +340,14 @@ export const MobileNavDrawer: React.FC<MobileNavDrawerProps> = ({ isOpen, onClos
                 className="min-h-[44px] px-3 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-brand-primary-dark transition shadow-2xs"
               >
                 <LogIn className="w-3.5 h-3.5" />
-                <span>Connexion</span>
+                <span>{isEn ? 'Sign In' : 'Connexion'}</span>
               </Link>
               <Link
                 href="/register"
                 onClick={onClose}
                 className="min-h-[44px] px-3 py-2 rounded-xl bg-white text-brand-primary border border-brand-border text-xs font-semibold flex items-center justify-center hover:bg-slate-50 transition shadow-2xs"
               >
-                <span>Inscription</span>
+                <span>{isEn ? 'Sign Up' : 'Inscription'}</span>
               </Link>
             </div>
           )}

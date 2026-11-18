@@ -34,29 +34,30 @@ interface CoursePageProps {
   }>;
 }
 
-function getBloomBadge(bloomLevel: string): { label: string; colorClass: string } {
+function getSkillBadge(bloomLevel: string, isEn: boolean): { label: string; colorClass: string } {
   const norm = (bloomLevel || '').toUpperCase();
   switch (norm) {
     case 'KNOWLEDGE':
     case 'REMEMBER':
-      return { label: 'Mémoriser', colorClass: 'bg-slate-100 text-slate-700 border-slate-300' };
+      return { label: isEn ? 'Fundamentals' : 'Fondamentaux', colorClass: 'bg-slate-100 text-slate-700 border-slate-300' };
     case 'UNDERSTAND':
-      return { label: 'Comprendre', colorClass: 'bg-sky-50 text-sky-800 border-sky-300' };
+      return { label: isEn ? 'Comprehension' : 'Comprendre', colorClass: 'bg-sky-50 text-sky-800 border-sky-300' };
     case 'APPLY':
-      return { label: 'Appliquer', colorClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+      return { label: isEn ? 'Practical Application' : 'Mise en pratique', colorClass: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
     case 'ANALYZE':
-      return { label: 'Analyser', colorClass: 'bg-indigo-50 text-indigo-800 border-indigo-300' };
+      return { label: isEn ? 'Analytical Thinking' : 'Analyse métier', colorClass: 'bg-indigo-50 text-indigo-800 border-indigo-300' };
     case 'EVALUATE':
-      return { label: 'Évaluer', colorClass: 'bg-amber-50 text-amber-900 border-amber-300' };
+      return { label: isEn ? 'Evaluation & Audit' : 'Évaluation & Audit', colorClass: 'bg-amber-50 text-amber-900 border-amber-300' };
     case 'CREATE':
-      return { label: 'Créer', colorClass: 'bg-purple-50 text-purple-900 border-purple-300' };
+      return { label: isEn ? 'Design & Build' : 'Conception', colorClass: 'bg-purple-50 text-purple-900 border-purple-300' };
     default:
-      return { label: 'Compétence pratique', colorClass: 'bg-teal-50 text-teal-800 border-teal-300' };
+      return { label: isEn ? 'Practical Skill' : 'Compétence pratique', colorClass: 'bg-teal-50 text-teal-800 border-teal-300' };
   }
 }
 
 export default async function CourseDetailPage({ params }: CoursePageProps) {
   const { slug, locale } = await params;
+  const isEn = locale === 'en';
   const tCourse = await getTranslations({ locale, namespace: 'Course' });
 
   let course: CourseDetail | null = null;
@@ -114,9 +115,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             </Link>
           </div>
 
-          {/* ============================================================= */}
-          {/* 1. HERO SECTION                                               */}
-          {/* ============================================================= */}
+          {/* 1. HERO SECTION */}
           <div className="bg-white rounded-3xl p-5 sm:p-8 border border-brand-border shadow-2xs mb-8">
             <div className="flex flex-wrap items-center gap-2 mb-4">
               {isFree ? (
@@ -146,7 +145,9 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
               {isEnrolled && (
                 <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  {isCompleted ? 'Cours validé (100%)' : `En cours (${progress?.progress_percentage}%)`}
+                  {isCompleted
+                    ? (isEn ? 'Course Completed (100%)' : 'Cours validé (100%)')
+                    : (isEn ? `In Progress (${progress?.progress_percentage}%)` : `En cours (${progress?.progress_percentage}%)`)}
                 </span>
               )}
             </div>
@@ -183,17 +184,22 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
 
               <div className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span className="font-semibold text-slate-900">Certificat vérifiable</span>
+                <span className="font-semibold text-slate-900">
+                  {isEn ? 'Verifiable Certificate' : 'Certificat vérifiable'}
+                </span>
               </div>
             </div>
 
-            {/* Learner Progress Bar if enrolled (F1.8) */}
+            {/* Learner Progress Bar if enrolled */}
             {isEnrolled && progress && (
               <div className="mb-6 p-4 rounded-2xl bg-[#f8f9ff] border border-slate-200/80 space-y-2">
                 <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <span className="font-bold text-slate-900">Progression globale</span>
+                  <span className="font-bold text-slate-900">
+                    {isEn ? 'Overall Progress' : 'Progression globale'}
+                  </span>
                   <span className="font-bold text-[#006b5f]">
-                    {progress.completed_lessons_count} / {progress.total_lessons_count} leçons ({progress.progress_percentage}%)
+                    {progress.completed_lessons_count} / {progress.total_lessons_count}{' '}
+                    {isEn ? 'lessons' : 'leçons'} ({progress.progress_percentage}%)
                   </span>
                 </div>
                 <div className="w-full bg-[#dee9fc] h-2 rounded-full overflow-hidden">
@@ -214,7 +220,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                 {isEnrolled ? (
                   <>
                     <RotateCcw className="w-4 h-4" />
-                    <span>Reprendre le cours</span>
+                    <span>{isEn ? 'Resume Course' : 'Reprendre le cours'}</span>
                   </>
                 ) : (
                   <>
@@ -226,9 +232,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             </div>
           </div>
 
-          {/* ============================================================= */}
-          {/* 2. PILIER 1 : OBJECTIFS SMART & BLOOM (F1.16, R2, R3)         */}
-          {/* ============================================================= */}
+          {/* 2. SKILLS & LEARNING OUTCOMES */}
           {outcomes.length > 0 && (
             <section className="bg-white rounded-3xl p-5 sm:p-7 border border-brand-border shadow-2xs mb-8">
               <div className="flex items-center gap-2.5 mb-3">
@@ -237,17 +241,17 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-bold text-brand-primary">
-                    Ce que vous saurez accomplir
+                    {isEn ? 'What You Will Master' : 'Ce que vous saurez accomplir'}
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Compétences et savoir-faire validés par la pratique
+                    {isEn ? 'Practical skills and competencies validated through hands-on practice' : 'Compétences et savoir-faire validés par la pratique'}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
                 {outcomes.map((outcome, idx) => {
-                  const badge = getBloomBadge(outcome.bloom_level);
+                  const badge = getSkillBadge(outcome.bloom_level, isEn);
                   return (
                     <div
                       key={idx}
@@ -275,9 +279,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             </section>
           )}
 
-          {/* ============================================================= */}
-          {/* 3. PILIER 2 : PROFIL DU FORMATEUR (F1.15, R9)                 */}
-          {/* ============================================================= */}
+          {/* 3. INSTRUCTOR PROFILE */}
           <section className="bg-white rounded-3xl p-5 sm:p-7 border border-brand-border shadow-2xs mb-8">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center border border-amber-200">
@@ -285,16 +287,15 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-brand-primary">
-                  Formateur Référent & Équipe Pédagogique
+                  {isEn ? 'Lead Instructor & Teaching Team' : 'Formateur Référent & Équipe Pédagogique'}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Encadrement professionnel certifié et assistance continue
+                  {isEn ? 'Certified professional guidance and continuous support' : 'Encadrement professionnel certifié et assistance continue'}
                 </p>
               </div>
             </div>
 
             <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-[#f8f9ff] border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              {/* Avatar placeholder with initials */}
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-[#006b5f] to-[#13b8a6] text-white flex items-center justify-center text-xl sm:text-2xl font-bold font-serif shrink-0 shadow-sm border-2 border-white">
                 AF
               </div>
@@ -306,36 +307,40 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
                   </h3>
                   <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-full border border-emerald-300 inline-flex items-center gap-1">
                     <Check className="w-3 h-3 text-emerald-600" />
-                    Formateur Accrédité
+                    {isEn ? 'Accredited Instructor' : 'Formateur Accrédité'}
                   </span>
-                  <span className="text-[11px] text-slate-500">Formateur Senior</span>
+                  <span className="text-[11px] text-slate-500">{isEn ? 'Senior Instructor' : 'Formateur Senior'}</span>
                 </div>
 
                 <p className="text-xs sm:text-sm font-semibold text-[#006b5f]">
-                  {course.instructor_role || 'Lead Data Analyst & Formateur Principal DataMboa'}
+                  {course.instructor_role || (isEn ? 'Lead Data Analyst & Principal Instructor at DataMboa' : 'Lead Data Analyst & Formateur Principal DataMboa')}
                 </p>
 
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed pt-1">
                   {course.instructor_bio ||
-                    "8+ années d'expérience en Business Intelligence et modélisation financière en Afrique centrale. A formé plus de 1 200 cadres et analystes au Cameroun et dans la sous-région CEMAC."}
+                    (isEn
+                      ? '8+ years of experience in Business Intelligence and financial modeling. Has trained over 1,200 executives and data analysts.'
+                      : "8+ années d'expérience en Business Intelligence et modélisation financière. A formé plus de 1 200 cadres et analystes.")}
                 </p>
               </div>
             </div>
           </section>
 
-          {/* ============================================================= */}
-          {/* 4. PILIER 3 : PUBLIC CIBLE & PRÉREQUIS (F1.15, R9)             */}
-          {/* ============================================================= */}
+          {/* 4. TARGET AUDIENCE & PREREQUISITES */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Target Audience */}
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-brand-border shadow-2xs space-y-2.5">
               <div className="flex items-center gap-2 text-[#006b5f]">
                 <UserCheck className="w-5 h-5 text-brand-teal" />
-                <h3 className="text-base font-bold text-slate-900">Public Cible</h3>
+                <h3 className="text-base font-bold text-slate-900">
+                  {isEn ? 'Target Audience' : 'Public Cible'}
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {course.target_audience ||
-                  "Comptables, gestionnaires de stock, contrôleurs de gestion, étudiants en gestion/finance et analystes juniors d'Afrique francophone souhaitant structurer et fiabiliser leurs reportings d'entreprise sans erreur."}
+                  (isEn
+                    ? 'Accountants, inventory managers, financial controllers, business/finance students, and junior analysts seeking to structure and automate reliable corporate reports.'
+                    : "Comptables, gestionnaires de stock, contrôleurs de gestion, étudiants en gestion/finance et analystes juniors souhaitant structurer et fiabiliser leurs reportings d'entreprise.")}
               </p>
             </div>
 
@@ -343,18 +348,20 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             <div className="bg-white rounded-3xl p-5 sm:p-6 border border-brand-border shadow-2xs space-y-2.5">
               <div className="flex items-center gap-2 text-amber-700">
                 <FileCheck2 className="w-5 h-5 text-amber-600" />
-                <h3 className="text-base font-bold text-slate-900">Prérequis Nécessaires</h3>
+                <h3 className="text-base font-bold text-slate-900">
+                  {isEn ? 'Prerequisites' : 'Prérequis Nécessaires'}
+                </h3>
               </div>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {course.prerequisites ||
-                  "Aucun prérequis en analyse de données. Utilisation basique d'un ordinateur (clavier, souris, gestionnaire de fichiers) et accès à Excel 2016 ou plus récent."}
+                  (isEn
+                    ? 'No prior data analytics prerequisites. Basic computer or smartphone usage and web browser access.'
+                    : "Aucun prérequis en analyse de données. Utilisation basique d'un ordinateur ou smartphone et accès à un navigateur web.")}
               </p>
             </div>
           </div>
 
-          {/* ============================================================= */}
-          {/* 5. PILIER 4 : PROGRAMME DÉTAILLÉ & MODULES (F1.15, R9)        */}
-          {/* ============================================================= */}
+          {/* 5. DETAILED CURRICULUM & MODULES */}
           <section className="space-y-4 mb-8">
             <div className="flex items-center justify-between">
               <div>
@@ -377,9 +384,7 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
             />
           </section>
 
-          {/* ============================================================= */}
-          {/* 6. PILIER 5 : MODALITÉS & ÉVALUATION CERTIFIANTE (F1.15, R9)  */}
-          {/* ============================================================= */}
+          {/* 6. TRAINING MODALITIES & CERTIFICATION */}
           <section className="bg-white rounded-3xl p-5 sm:p-7 border border-brand-border shadow-2xs mb-8 space-y-4">
             <div className="flex items-center gap-2.5">
               <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-800 flex items-center justify-center border border-purple-200">
@@ -387,42 +392,60 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold text-brand-primary">
-                  Modalités Pédagogiques & Certification Officielle
+                  {isEn ? 'Training Modalities & Official Certification' : 'Modalités Pédagogiques & Certification Officielle'}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Cadre d'apprentissage conçu pour le contexte africain
+                  {isEn ? 'Hands-on learning framework designed for operational readiness' : "Cadre d'apprentissage conçu pour l'opérationnalité immédiate"}
                 </p>
               </div>
             </div>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               {course.pedagogical_modalities ||
-                "Formation 100% pratique orientée cas d'entreprise réels à Douala et Yaoundé. Chaque notion est illustrée en vidéo HD avec mode économie de données, complétée par un jeu de données téléchargeable (XLSX), un quiz formatif immédiat et sanctionnée par un certificat officiel vérifiable."}
+                (isEn
+                  ? '100% hands-on training focused on real enterprise cases. Each concept is illustrated with lightweight HD video, downloadable datasets, interactive quizzes, and validated by an official verifiable certificate.'
+                  : "Formation 100% pratique orientée cas d'entreprise réels. Chaque notion est illustrée en vidéo avec mode économie de données, complétée par un jeu de données téléchargeable, un quiz interactif et sanctionnée par un certificat officiel vérifiable.")}
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <Zap className="w-5 h-5 text-amber-600 mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Économie de données</div>
-                <div className="text-[11px] text-slate-500">Streaming optimisé pour réseaux mobiles 3G/4G</div>
+                <div className="text-xs font-bold text-slate-900">
+                  {isEn ? 'Data Saver Mode' : 'Économie de données'}
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {isEn ? 'Optimized streaming for 3G/4G mobile networks' : 'Streaming optimisé pour réseaux mobiles 3G/4G'}
+                </div>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <BookOpen className="w-5 h-5 text-[#006b5f] mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Cas réels d&apos;entreprises</div>
-                <div className="text-[11px] text-slate-500">Datasets et cas pratiques authentiques</div>
+                <div className="text-xs font-bold text-slate-900">
+                  {isEn ? 'Real Business Cases' : "Cas réels d'entreprises"}
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {isEn ? 'Authentic datasets and operational scenarios' : 'Datasets et cas pratiques authentiques'}
+                </div>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <Target className="w-5 h-5 text-indigo-600 mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Quiz de validation (Seuil 70%)</div>
-                <div className="text-[11px] text-slate-500">Validation formative avec feedback explicatif immédiat</div>
+                <div className="text-xs font-bold text-slate-900">
+                  {isEn ? 'Validation Quiz (70% Threshold)' : 'Quiz de validation (Seuil 70%)'}
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {isEn ? 'Formative assessment with immediate feedback' : 'Validation formative avec feedback explicatif immédiat'}
+                </div>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-center space-y-1">
                 <Award className="w-5 h-5 text-purple-600 mx-auto" />
-                <div className="text-xs font-bold text-slate-900">Certificat Vérifiable</div>
-                <div className="text-[11px] text-slate-500">Code unique infalsifiable et partage LinkedIn / WhatsApp</div>
+                <div className="text-xs font-bold text-slate-900">
+                  {isEn ? 'Verifiable Certificate' : 'Certificat Vérifiable'}
+                </div>
+                <div className="text-[11px] text-slate-500">
+                  {isEn ? 'Tamper-proof unique code & LinkedIn/WhatsApp share' : 'Code unique infalsifiable et partage LinkedIn / WhatsApp'}
+                </div>
               </div>
             </div>
           </section>

@@ -1,13 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { Table, Database, BarChart3, Code2, GitBranch, ShieldCheck, MessageSquare } from 'lucide-react';
+import { ShieldCheck, MessageSquare } from 'lucide-react';
 
 export const PublicFooter: React.FC = () => {
   const tNav = useTranslations('PublicNav');
   const tLanding = useTranslations('Landing');
+  const locale = useLocale();
+  const isEn = locale === 'en';
 
   return (
     <footer className="bg-white border-t border-brand-border py-12 text-xs text-brand-muted">
@@ -41,27 +43,27 @@ export const PublicFooter: React.FC = () => {
             <ul className="space-y-1.5">
               <li>
                 <Link href="/courses/excel-bases-analyse" className="hover:text-brand-primary transition">
-                  Excel Professionnel
+                  {isEn ? 'Professional Excel' : 'Excel Professionnel'}
                 </Link>
               </li>
               <li>
                 <Link href="/courses/sql-debutant-requetes-filtres" className="hover:text-brand-primary transition">
-                  SQL & Analytics Microfinance
+                  {isEn ? 'SQL & Microfinance Analytics' : 'SQL & Analytics Microfinance'}
                 </Link>
               </li>
               <li>
                 <Link href="/courses/powerbi-debutant-modelisation-etoile" className="hover:text-brand-primary transition">
-                  Power BI & Tableaux de Bord
+                  {isEn ? 'Power BI & Dashboards' : 'Power BI & Tableaux de Bord'}
                 </Link>
               </li>
               <li>
                 <Link href="/courses/python-debutant-pandas-exploration" className="hover:text-brand-primary transition">
-                  Python & Manipulation Pandas
+                  {isEn ? 'Python & Pandas Data Analysis' : 'Python & Manipulation Pandas'}
                 </Link>
               </li>
               <li>
                 <Link href="/courses/git-debutant-versioning-local" className="hover:text-brand-primary transition">
-                  Git & GitHub pour Analystes
+                  {isEn ? 'Git & GitHub for Analysts' : 'Git & GitHub pour Analystes'}
                 </Link>
               </li>
             </ul>
@@ -70,7 +72,7 @@ export const PublicFooter: React.FC = () => {
           {/* Espaces Professionnels */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Espaces & Portails
+              {isEn ? 'Spaces & Portals' : 'Espaces & Portails'}
             </div>
             <ul className="space-y-1.5">
               <li>
@@ -89,13 +91,13 @@ export const PublicFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/placement" className="hover:text-brand-primary transition">
+                <Link href="/placement-test" className="hover:text-brand-primary transition">
                   {tNav('placement')}
                 </Link>
               </li>
               <li>
                 <Link href="/verify/DM-EXC-2026-DEMO" className="hover:text-brand-primary transition">
-                  Vérification de Certificat
+                  {isEn ? 'Certificate Verification' : 'Vérification de Certificat'}
                 </Link>
               </li>
             </ul>
@@ -104,10 +106,12 @@ export const PublicFooter: React.FC = () => {
           {/* Contact & Assistance WhatsApp */}
           <div className="space-y-2.5">
             <div className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">
-              Assistance & Contact
+              {isEn ? 'Support & Contact' : 'Assistance & Contact'}
             </div>
             <p className="text-slate-600 leading-relaxed text-[11px]">
-              Une question avant de vous lancer ? Échangez directement avec un conseiller.
+              {isEn
+                ? 'Have a question before enrolling? Chat directly with a course advisor.'
+                : 'Une question avant de vous lancer ? Échangez directement avec un conseiller.'}
             </p>
             <a
               href="https://wa.me/237657546259?text=Bonjour%20DataMboa,%20j'ai%20une%20question%20concernant%20les%20formations"
@@ -120,10 +124,14 @@ export const PublicFooter: React.FC = () => {
             </a>
             <ul className="space-y-1.5 pt-2 text-[11px]">
               <li>
-                <span className="hover:text-brand-primary cursor-pointer">Conditions Générales (CGU)</span>
+                <span className="hover:text-brand-primary cursor-pointer">
+                  {isEn ? 'Terms of Service' : 'Conditions Générales (CGU)'}
+                </span>
               </li>
               <li>
-                <span className="hover:text-brand-primary cursor-pointer">Protection des Données</span>
+                <span className="hover:text-brand-primary cursor-pointer">
+                  {isEn ? 'Privacy & Data Protection' : 'Protection des Données'}
+                </span>
               </li>
             </ul>
           </div>
@@ -132,12 +140,12 @@ export const PublicFooter: React.FC = () => {
         {/* Bottom Bar */}
         <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500">
           <div>
-            © {new Date().getFullYear()} DataMboa. Plateforme d&apos;apprentissage pratique.
+            © {new Date().getFullYear()} DataMboa. {isEn ? 'Hands-on data analytics learning platform.' : "Plateforme d'apprentissage pratique."}
           </div>
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Plateforme active · 100% in-browser
+              {isEn ? 'Platform Online · 100% In-Browser' : 'Plateforme active · 100% in-browser'}
             </span>
           </div>
         </div>

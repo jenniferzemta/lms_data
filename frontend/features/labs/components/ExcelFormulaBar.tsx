@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLocale } from 'next-intl';
 import { FunctionSquare, Check, RotateCcw } from 'lucide-react';
 
 interface ExcelFormulaBarProps {
@@ -18,18 +19,33 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
   onSubmitFormula,
   onResetActiveCell
 }) => {
-  const quickFormulas = [
-    { label: '=SOMME(', value: '=SOMME(' },
-    { label: '=MOYENNE(', value: '=MOYENNE(' },
-    { label: '=SI(', value: '=SI(' },
-    { label: '=SOMME.SI(', value: '=SOMME.SI(' },
-    { label: '=RECHERCHEV(', value: '=RECHERCHEV(' },
-    { label: ';', value: '; ' },
-    { label: '*', value: '*' },
-    { label: '/', value: '/' },
-    { label: '+', value: '+' },
-    { label: '-', value: '-' }
-  ];
+  const locale = useLocale();
+  const isEn = locale === 'en';
+  const quickFormulas = isEn
+    ? [
+        { label: '=SUM(', value: '=SUM(' },
+        { label: '=AVERAGE(', value: '=AVERAGE(' },
+        { label: '=IF(', value: '=IF(' },
+        { label: '=SUMIF(', value: '=SUMIF(' },
+        { label: '=VLOOKUP(', value: '=VLOOKUP(' },
+        { label: ';', value: '; ' },
+        { label: '*', value: '*' },
+        { label: '/', value: '/' },
+        { label: '+', value: '+' },
+        { label: '-', value: '-' }
+      ]
+    : [
+        { label: '=SOMME(', value: '=SOMME(' },
+        { label: '=MOYENNE(', value: '=MOYENNE(' },
+        { label: '=SI(', value: '=SI(' },
+        { label: '=SOMME.SI(', value: '=SOMME.SI(' },
+        { label: '=RECHERCHEV(', value: '=RECHERCHEV(' },
+        { label: ';', value: '; ' },
+        { label: '*', value: '*' },
+        { label: '/', value: '/' },
+        { label: '+', value: '+' },
+        { label: '-', value: '-' }
+      ];
 
   const handleQuickInsert = (snippet: string) => {
     let nextValue: string;
@@ -70,7 +86,11 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
             value={formulaInput}
             onChange={(e) => onChangeFormula(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Saisissez une valeur ou une formule (ex: =SOMME(F2:F11))..."
+            placeholder={
+              isEn
+                ? 'Enter a value or formula (e.g., =SUM(F2:F11))...'
+                : 'Saisissez une valeur ou une formule (ex: =SOMME(F2:F11))...'
+            }
             className="w-full px-3 py-2 bg-white border border-brand-border rounded-lg font-mono text-sm text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-accent/40 focus:border-brand-accent transition-all"
           />
         </div>
@@ -80,10 +100,10 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
           type="button"
           onClick={onSubmitFormula}
           className="inline-flex items-center justify-center gap-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-lg transition-colors shadow-xs min-h-[40px] shrink-0"
-          title="Valider la formule (Entrée)"
+          title={isEn ? 'Apply formula (Enter)' : 'Valider la formule (Entrée)'}
         >
           <Check className="w-4 h-4" />
-          <span className="hidden sm:inline">Valider</span>
+          <span className="hidden sm:inline">{isEn ? 'Apply' : 'Valider'}</span>
         </button>
 
         {/* Clear Button */}
@@ -91,7 +111,7 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
           type="button"
           onClick={onResetActiveCell}
           className="inline-flex items-center justify-center p-2 text-slate-500 hover:text-rose-600 hover:bg-slate-200/60 rounded-lg transition-colors shrink-0"
-          title="Effacer la cellule"
+          title={isEn ? 'Clear cell' : 'Effacer la cellule'}
         >
           <RotateCcw className="w-4 h-4" />
         </button>
@@ -100,7 +120,7 @@ export const ExcelFormulaBar: React.FC<ExcelFormulaBarProps> = ({
       {/* Tactile Quick-Insert Formula Bar */}
       <div className="flex items-center gap-1.5 p-2 bg-white overflow-x-auto scrollbar-thin text-xs">
         <span className="text-[11px] font-semibold text-slate-600 uppercase tracking-wider shrink-0 mr-1 hidden md:inline">
-          Formules rapides :
+          {isEn ? 'Quick Formulas:' : 'Formules rapides :'}
         </span>
         {quickFormulas.map((item) => (
           <button

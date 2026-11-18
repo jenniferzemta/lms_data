@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import { SAMPLE_POWERBI_EXERCISES } from '../data/powerBiDataset';
 import { PowerBiLabEngine, PowerBiLabState } from '../engines/PowerBiLabEngine';
 import { PowerBiLabView } from './PowerBiLabView';
@@ -31,6 +32,8 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
   initialExerciseId,
   onAllCompleted,
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const engine = useMemo(() => new PowerBiLabEngine(), []);
 
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(() => {
@@ -110,7 +113,7 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
   };
 
   if (!labState) {
-    return <div className="p-12 text-center text-slate-400">Initialisation du moteur DAX...</div>;
+    return <div className="p-12 text-center text-slate-400">{isEn ? 'Initializing DAX engine...' : 'Initialisation du moteur DAX...'}</div>;
   }
 
   return (
@@ -121,11 +124,11 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
           <div className="flex items-center gap-2 mb-1">
             <span className="px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 font-bold text-xs flex items-center gap-1">
               <PieChart className="w-3.5 h-3.5" />
-              Laboratoire Power BI & DAX
+              {isEn ? 'Power BI & DAX Laboratory' : 'Laboratoire Power BI & DAX'}
             </span>
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs text-slate-500 font-semibold">
-              Kamer Boissons SARL (FCFA)
+              {isEn ? 'Kamer Boissons SARL' : 'Kamer Boissons SARL'}
             </span>
           </div>
 
@@ -155,14 +158,14 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
             className="px-3 py-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 min-h-[40px]"
           >
             <Lightbulb className="w-4 h-4 text-amber-500" />
-            <span>Indices ({consultedHintsCount}/{exercise.hints.length})</span>
+            <span>{isEn ? 'Hints' : 'Indices'} ({consultedHintsCount}/{exercise.hints.length})</span>
           </button>
 
           {/* Export DAX */}
           <button
             onClick={handleExport}
             className="p-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs flex items-center justify-center min-h-[40px] min-w-[40px]"
-            title="Exporter les mesures DAX (.dax)"
+            title={isEn ? 'Export DAX measures (.dax)' : 'Exporter les mesures DAX (.dax)'}
           >
             <Download className="w-4 h-4" />
           </button>
@@ -174,7 +177,7 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
             className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs min-h-[40px]"
           >
             <Sparkles className="w-4 h-4" />
-            <span>Valider l&apos;atelier</span>
+            <span>{isEn ? 'Validate Workshop' : "Valider l'atelier"}</span>
           </button>
         </div>
       </header>
@@ -187,7 +190,7 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
             mobileTab === 'instructions' ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-xs' : 'text-slate-500'
           }`}
         >
-          Consignes
+          {isEn ? 'Instructions' : 'Consignes'}
         </button>
         <button
           onClick={() => setMobileTab('report')}
@@ -195,18 +198,18 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
             mobileTab === 'report' ? 'bg-white dark:bg-slate-900 text-brand-600 shadow-xs' : 'text-slate-500'
           }`}
         >
-          Rapport & DAX
+          {isEn ? 'Report & DAX' : 'Rapport & DAX'}
         </button>
       </div>
 
       {/* Main Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1 min-h-0">
-        {/* Left Column (4 cols): Context & Instructions */}
+        {/* Left Column */}
         <div className={`lg:col-span-4 space-y-4 ${mobileTab === 'instructions' ? 'block' : 'hidden lg:block'}`}>
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 shadow-xs">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <BookOpen className="w-4 h-4 text-brand-600" />
-              Consigne de l&apos;atelier
+              {isEn ? 'Workshop Instructions' : "Consigne de l'atelier"}
             </h3>
             <p className="text-sm font-semibold text-slate-900 dark:text-white leading-snug">
               {exercise.instruction}
@@ -232,7 +235,7 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
                   <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400" />
                 )}
                 <span className="font-bold text-sm">
-                  {validationResult.isSuccess ? 'Atelier Validé !' : 'Des critères manquent'}
+                  {validationResult.isSuccess ? (isEn ? 'Workshop Validated!' : 'Atelier Validé !') : (isEn ? 'Criteria missing' : 'Des critères manquent')}
                 </span>
                 <span className="ml-auto font-black text-sm">{validationResult.score}/100</span>
               </div>
@@ -256,7 +259,7 @@ export const PowerBiLabContainer: React.FC<PowerBiLabContainerProps> = ({
                   onClick={handleNextExercise}
                   className="w-full mt-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors min-h-[40px]"
                 >
-                  <span>Passer à l&apos;atelier suivant</span>
+                  <span>{isEn ? 'Next Workshop' : "Passer à l'atelier suivant"}</span>
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}

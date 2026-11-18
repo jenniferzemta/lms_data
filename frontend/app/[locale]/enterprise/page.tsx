@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { PublicHeader, PublicFooter } from '@/components';
 import {
@@ -23,53 +23,76 @@ import {
 
 export default function EnterprisePage() {
   const t = useTranslations('Enterprise');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [quoteSuccess, setQuoteSuccess] = useState(false);
 
   const packs = [
     {
-      title: 'Pack Reporting & Excel Avancé',
-      subtitle: 'Contrôle de gestion, finance & logistique',
+      title: isEn ? 'Reporting & Advanced Excel Pack' : 'Pack Reporting & Excel Avancé',
+      subtitle: isEn ? 'Financial controlling, accounting & logistics' : 'Contrôle de gestion, finance & logistique',
       icon: Table,
       color: 'teal',
-      hours: '30 heures de pratique',
-      audience: 'Comptables, contrôleurs, gestionnaires de stock',
-      features: [
-        'Automatisation Power Query sans coder',
-        'Formules matricielles & RECHERCHEX',
-        'Modélisation de bilans et tableaux de trésorerie',
-        'Tableaux de bord dynamiques prêts pour la direction',
-      ],
-      priceEst: 'À partir de 250 000 / cohorte (jusqu\'à 10 collaborateurs)',
+      hours: isEn ? '30 hours of hands-on practice' : '30 heures de pratique',
+      audience: isEn ? 'Accountants, financial controllers, inventory managers' : 'Comptables, contrôleurs, gestionnaires de stock',
+      features: isEn
+        ? [
+            'No-code Power Query automation',
+            'Array formulas & XLOOKUP',
+            'Balance sheet & cash flow modeling',
+            'Executive-ready dynamic dashboards',
+          ]
+        : [
+            'Automatisation Power Query sans coder',
+            'Formules matricielles & RECHERCHEX',
+            'Modélisation de bilans et tableaux de trésorerie',
+            'Tableaux de bord dynamiques prêts pour la direction',
+          ],
+      priceEst: isEn ? 'Starting at 250,000 / cohort (up to 10 employees)' : "À partir de 250 000 / cohorte (jusqu'à 10 collaborateurs)",
     },
     {
-      title: 'Pack Décisionnel Power BI',
-      subtitle: 'Tableaux de bord de direction & KPIs',
+      title: isEn ? 'Power BI Executive Pack' : 'Pack Décisionnel Power BI',
+      subtitle: isEn ? 'Executive dashboards & KPIs' : 'Tableaux de bord de direction & KPIs',
       icon: BarChart3,
       color: 'amber',
-      hours: '40 heures de pratique',
-      audience: 'Responsables financiers, auditeurs, directeurs opérationnels',
-      features: [
-        'Modélisation en étoile (Faits & Dimensions)',
-        'Mesures DAX avancées (CALCULATE, DIVIDE)',
-        'Sécurité par rôle (RLS) pour directeurs régionaux',
-        'Publication et partage de rapports interactifs',
-      ],
-      priceEst: 'À partir de 450 000 / cohorte (jusqu\'à 10 collaborateurs)',
+      hours: isEn ? '40 hours of hands-on practice' : '40 heures de pratique',
+      audience: isEn ? 'CFOs, financial managers, auditors, operations directors' : 'Responsables financiers, auditeurs, directeurs opérationnels',
+      features: isEn
+        ? [
+            'Star Schema modeling (Facts & Dimensions)',
+            'Advanced DAX measures (CALCULATE, DIVIDE)',
+            'Row-Level Security (RLS) for regional directors',
+            'Publishing and sharing interactive reports',
+          ]
+        : [
+            'Modélisation en étoile (Faits & Dimensions)',
+            'Mesures DAX avancées (CALCULATE, DIVIDE)',
+            'Sécurité par rôle (RLS) pour directeurs régionaux',
+            'Publication et partage de rapports interactifs',
+          ],
+      priceEst: isEn ? 'Starting at 450,000 / cohort (up to 10 employees)' : "À partir de 450 000 / cohorte (jusqu'à 10 collaborateurs)",
     },
     {
-      title: 'Pack Data Analytics (SQL & Python)',
-      subtitle: 'Extraction de données massives & automatisation',
+      title: isEn ? 'Data Analytics Pack (SQL & Python)' : 'Pack Data Analytics (SQL & Python)',
+      subtitle: isEn ? 'Large-scale data extraction & automation' : 'Extraction de données massives & automatisation',
       icon: Database,
       color: 'blue',
-      hours: '50 heures de pratique',
-      audience: 'Analystes data, informaticiens, auditeurs SI',
-      features: [
-        'Requêtes SQL complexes sur bases microfinance/banque',
-        'Nettoyage et manipulation de millions de lignes en Python',
-        'Gestion de versions de scripts sous Git & GitHub',
-        'Export automatisé de rapports vers Excel',
-      ],
-      priceEst: 'À partir de 600 000 / cohorte (jusqu\'à 10 collaborateurs)',
+      hours: isEn ? '50 hours of hands-on practice' : '50 heures de pratique',
+      audience: isEn ? 'Data analysts, IT engineers, IS auditors' : 'Analystes data, informaticiens, auditeurs SI',
+      features: isEn
+        ? [
+            'Complex SQL queries on banking/microfinance databases',
+            'Cleaning and processing millions of rows in Python',
+            'Script version control with Git & GitHub',
+            'Automated multi-sheet report export to Excel',
+          ]
+        : [
+            'Requêtes SQL complexes sur bases microfinance/banque',
+            'Nettoyage et manipulation de millions de lignes en Python',
+            'Gestion de versions de scripts sous Git & GitHub',
+            'Export automatisé de rapports vers Excel',
+          ],
+      priceEst: isEn ? 'Starting at 600,000 / cohort (up to 10 employees)' : "À partir de 600 000 / cohorte (jusqu'à 10 collaborateurs)",
     },
   ];
 

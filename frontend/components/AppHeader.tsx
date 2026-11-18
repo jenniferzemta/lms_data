@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { User, Search, Bell, LogOut, Menu } from 'lucide-react';
@@ -10,9 +10,10 @@ import { DataSaverToggle } from '@/lib/data-saver';
 import { MobileNavDrawer } from './MobileNavDrawer';
 
 export const AppHeader: React.FC = () => {
-  const tCommon = useTranslations('Common');
   const tNav = useTranslations('Navigation');
   const tCatalog = useTranslations('Catalog');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const { user, logout } = useAuth();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -26,7 +27,7 @@ export const AppHeader: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsDrawerOpen(true)}
-              aria-label="Ouvrir le menu de navigation"
+              aria-label={isEn ? 'Open navigation menu' : 'Ouvrir le menu de navigation'}
               className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-brand-primary hover:bg-slate-100 transition-colors"
             >
               <Menu className="w-5 h-5" />
@@ -45,13 +46,13 @@ export const AppHeader: React.FC = () => {
               </span>
             </Link>
 
-            {/* Desktop Global Search (Douala Student Portal Style) */}
+            {/* Desktop Global Search */}
             <div className="hidden lg:flex items-center relative w-72 xl:w-96">
               <Search className="w-4 h-4 text-brand-muted absolute left-3.5 pointer-events-none" />
               <input
                 type="search"
                 placeholder={tCatalog('searchPlaceholder')}
-                aria-label="Recherche rapide"
+                aria-label={isEn ? 'Quick search' : 'Recherche rapide'}
                 className="w-full h-10 pl-10 pr-12 rounded-xl bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs text-brand-text placeholder:text-brand-muted border border-brand-border/70 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/10 transition-all outline-none"
               />
               <kbd className="absolute right-3 hidden xl:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono text-brand-muted bg-white border border-brand-border shadow-2xs">
@@ -62,7 +63,7 @@ export const AppHeader: React.FC = () => {
 
         {/* Right Slot: Network Status + Data Saver + Language + Notifications + User Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Data Saver Mode Toggle (F1.14) */}
+          {/* Data Saver Mode Toggle */}
           <div className="hidden sm:inline-flex">
             <DataSaverToggle variant="badge" />
           </div>
@@ -96,7 +97,7 @@ export const AppHeader: React.FC = () => {
                     {user.first_name || user.email.split('@')[0]}
                   </span>
                   <span className="text-[10px] text-brand-muted">
-                    {user.is_learner ? 'Apprenant' : user.role}
+                    {user.is_learner ? (isEn ? 'Learner' : 'Apprenant') : user.role}
                   </span>
                 </div>
               </Link>
@@ -105,8 +106,8 @@ export const AppHeader: React.FC = () => {
               <button
                 type="button"
                 onClick={() => logout()}
-                aria-label="Se déconnecter"
-                title="Se déconnecter"
+                aria-label={isEn ? 'Sign Out' : 'Se déconnecter'}
+                title={isEn ? 'Sign Out' : 'Se déconnecter'}
                 className="lg:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-brand-muted hover:text-rose-600 hover:bg-rose-50 transition-colors"
               >
                 <LogOut className="w-4 h-4" />

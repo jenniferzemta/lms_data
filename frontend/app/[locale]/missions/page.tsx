@@ -1,11 +1,14 @@
 import React from 'react';
+import { getLocale } from 'next-intl/server';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
 import { DesktopSidebar } from '@/components/DesktopSidebar';
 import { MissionCard, missionsService } from '@/features/missions';
-import { Briefcase, Target, ShieldCheck, Sparkles } from 'lucide-react';
+import { Briefcase, Target } from 'lucide-react';
 
 export default async function MissionsCatalogPage() {
+  const locale = await getLocale();
+  const isEn = locale === 'en';
   const missions = await missionsService.getMissions();
 
   return (
@@ -22,13 +25,15 @@ export default async function MissionsCatalogPage() {
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold rounded-full mb-3">
               <Briefcase className="w-3.5 h-3.5 text-amber-600" />
-              <span>Scénarios d&apos;Entreprises Locales</span>
+              <span>{isEn ? 'Real Enterprise Scenarios' : "Scénarios d'Entreprises Locales"}</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight">
-              Missions & Études de Cas Réelles
+              {isEn ? 'Business Case Missions & Real-World Studies' : 'Missions & Études de Cas Réelles'}
             </h1>
             <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-              Résolvez des défis analytiques concrets d&apos;entreprises locales (microfinance, grande distribution, Mobile Money), téléchargez les données réelles et auto-évaluez vos livrables avec nos corrigés de référence.
+              {isEn
+                ? 'Solve concrete analytical challenges from real enterprises (microfinance, retail distribution, logistics), download genuine datasets, and self-evaluate your deliverables with our reference model solutions.'
+                : "Résolvez des défis analytiques concrets d'entreprises locales (microfinance, grande distribution, Mobile Money), téléchargez les données réelles et auto-évaluez vos livrables avec nos corrigés de référence."}
             </p>
           </div>
 
@@ -42,9 +47,11 @@ export default async function MissionsCatalogPage() {
           {missions.length === 0 && (
             <div className="p-8 text-center bg-white border border-brand-border rounded-2xl max-w-md mx-auto">
               <Target className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <h3 className="font-bold text-base text-slate-700">Aucune mission disponible</h3>
+              <h3 className="font-bold text-base text-slate-700">
+                {isEn ? 'No missions available' : 'Aucune mission disponible'}
+              </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Les missions d&apos;entreprise sont en cours de déploiement.
+                {isEn ? 'Enterprise missions are currently being deployed.' : "Les missions d'entreprise sont en cours de déploiement."}
               </p>
             </div>
           )}

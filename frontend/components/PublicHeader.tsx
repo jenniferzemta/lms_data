@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import { useAuth } from '@/features/auth';
@@ -18,12 +18,13 @@ import {
   ArrowRight,
   MessageSquare,
   LayoutDashboard,
-  LogOut,
-  UserCheck
+  LogOut
 } from 'lucide-react';
 
 export const PublicHeader: React.FC = () => {
   const t = useTranslations('PublicNav');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -32,7 +33,7 @@ export const PublicHeader: React.FC = () => {
   // Public visitor navigation links - NO admin-portal here for visitors!
   const navLinks = [
     { label: t('courses'), href: '/courses', icon: BookOpen },
-    { label: t('placement'), href: '/placement', icon: Sparkles },
+    { label: t('placement'), href: '/placement-test', icon: Sparkles },
     { label: t('recruiter'), href: '/recruiter', icon: Users },
     { label: t('enterprise'), href: '/enterprise', icon: Building2 },
     { label: t('instructor'), href: '/instructor', icon: GraduationCap },
@@ -64,7 +65,7 @@ export const PublicHeader: React.FC = () => {
           </div>
 
           {/* Desktop Navigation Links (Public visitor links) */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2" aria-label="Navigation principale">
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2" aria-label={isEn ? 'Main navigation' : 'Navigation principale'}>
             {navLinks.map((item) => {
               const Icon = item.icon;
               return (
@@ -94,7 +95,7 @@ export const PublicHeader: React.FC = () => {
           {/* Right Slot: Profile Indicator + Language Switcher + Auth Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
             
-            {/* Explicit Profile Indicator Badge (Solves visitor vs learner vs admin) */}
+            {/* Explicit Profile Indicator Badge */}
             <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold bg-slate-50 border-slate-200 text-slate-700">
               <span className={`w-1.5 h-1.5 rounded-full ${
                 !isAuthenticated 
@@ -107,8 +108,8 @@ export const PublicHeader: React.FC = () => {
                 {!isAuthenticated 
                   ? t('visitorBadge') 
                   : isAdmin 
-                  ? 'Profil : Administrateur' 
-                  : 'Profil : Apprenant'}
+                  ? (isEn ? 'Profile: Administrator' : 'Profil : Administrateur') 
+                  : (isEn ? 'Profile: Learner' : 'Profil : Apprenant')}
               </span>
             </div>
 
@@ -122,16 +123,16 @@ export const PublicHeader: React.FC = () => {
                   className="min-h-[44px] px-3.5 py-2 rounded-xl bg-brand-primary hover:bg-brand-primary-dark text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs"
                 >
                   <LayoutDashboard className="w-3.5 h-3.5" />
-                  <span>Espace de Travail</span>
+                  <span>{isEn ? 'Workspace' : 'Espace de Travail'}</span>
                 </Link>
                 <button
                   type="button"
                   onClick={() => logout()}
-                  title="Se déconnecter (Revenir en mode Visiteur)"
+                  title={isEn ? 'Sign out (Switch to Visitor Mode)' : 'Se déconnecter (Revenir en mode Visiteur)'}
                   className="min-h-[44px] px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all text-xs font-semibold flex items-center gap-1"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Quitter</span>
+                  <span>{isEn ? 'Sign Out' : 'Quitter'}</span>
                 </button>
               </div>
             ) : (
@@ -179,10 +180,10 @@ export const PublicHeader: React.FC = () => {
             {/* Mobile Profile State Header */}
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
               <span className="text-[11px] font-bold uppercase tracking-wider text-brand-muted">
-                Mode Actuel
+                {isEn ? 'Current Mode' : 'Mode Actuel'}
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                {!isAuthenticated ? t('visitorBadge') : isAdmin ? 'Administrateur' : 'Apprenant'}
+                {!isAuthenticated ? t('visitorBadge') : isAdmin ? (isEn ? 'Administrator' : 'Administrateur') : (isEn ? 'Learner' : 'Apprenant')}
               </span>
             </div>
 
@@ -245,7 +246,7 @@ export const PublicHeader: React.FC = () => {
                     className="min-h-[44px] w-full rounded-xl bg-brand-primary text-white text-xs font-bold flex items-center justify-center gap-2 py-2.5 shadow-xs"
                   >
                     <LayoutDashboard className="w-4 h-4" />
-                    <span>Accéder à mon Espace de Travail</span>
+                    <span>{isEn ? 'Go to My Workspace' : 'Accéder à mon Espace de Travail'}</span>
                   </Link>
                   <button
                     type="button"
@@ -256,7 +257,7 @@ export const PublicHeader: React.FC = () => {
                     className="min-h-[44px] w-full rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold flex items-center justify-center gap-2 py-2.5"
                   >
                     <LogOut className="w-4 h-4 text-red-500" />
-                    <span>Se déconnecter (Mode Visiteur)</span>
+                    <span>{isEn ? 'Sign Out (Visitor Mode)' : 'Se déconnecter (Mode Visiteur)'}</span>
                   </button>
                 </>
               ) : (

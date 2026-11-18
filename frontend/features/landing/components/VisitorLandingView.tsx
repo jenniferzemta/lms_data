@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { 
   Table, 
@@ -31,81 +31,98 @@ import { DataMboaStudioMockup } from './DataMboaStudioMockup';
 
 export function VisitorLandingView() {
   const t = useTranslations('Landing');
-  const tNav = useTranslations('PublicNav');
+  const locale = useLocale();
+  const isEn = locale === 'en';
 
   const tracks = [
     {
       id: 'excel',
-      name: 'Excel Professionnel',
-      subtitle: 'Fondamentaux, Power Query & Modélisation DAX',
+      name: isEn ? 'Professional Excel' : 'Excel Professionnel',
+      subtitle: isEn ? 'Fundamentals, Power Query & DAX Modeling' : 'Fondamentaux, Power Query & Modélisation DAX',
       icon: Table,
       color: 'teal',
-      badge: '3 Niveaux · 18 Modules',
+      badge: isEn ? '3 Levels · 18 Modules' : '3 Niveaux · 18 Modules',
       href: '/login?next=/courses/excel-bases-analyse',
-      highlights: ['Formules matricielles & RECHERCHEX', 'Automatisation Power Query', 'Modélisation financière'],
+      highlights: isEn
+        ? ['Array formulas & XLOOKUP', 'Power Query Automation', 'Financial modeling']
+        : ['Formules matricielles & RECHERCHEX', 'Automatisation Power Query', 'Modélisation financière'],
     },
     {
       id: 'sql',
-      name: 'SQL & Bases Relationnelles',
-      subtitle: 'Extractions, Jointures & Analytics de Microfinance',
+      name: isEn ? 'SQL & Relational Databases' : 'SQL & Bases Relationnelles',
+      subtitle: isEn ? 'Queries, Joins & Microfinance Analytics' : 'Extractions, Jointures & Analytics de Microfinance',
       icon: Database,
       color: 'blue',
-      badge: '3 Niveaux · Portefeuille Réel',
+      badge: isEn ? '3 Levels · Real Portfolio' : '3 Niveaux · Portefeuille Réel',
       href: '/login?next=/courses/sql-debutant-requetes-filtres',
-      highlights: ['SELECT, filtres WHERE & agrégations', 'Calcul du PAR 30 (Crédit)', 'Fonctions de fenêtrage (OVER)'],
+      highlights: isEn
+        ? ['SELECT, WHERE filters & aggregations', 'PAR 30 Credit Risk Analysis', 'Window Functions (OVER)']
+        : ['SELECT, filtres WHERE & agrégations', 'Calcul du PAR 30 (Crédit)', 'Fonctions de fenêtrage (OVER)'],
     },
     {
       id: 'powerbi',
-      name: 'Power BI & Décisionnel',
-      subtitle: 'Modélisation en Étoile & Tableaux de Bord de Direction',
+      name: isEn ? 'Power BI & Business Intelligence' : 'Power BI & Décisionnel',
+      subtitle: isEn ? 'Star Schema Modeling & Executive Dashboards' : 'Modélisation en Étoile & Tableaux de Bord de Direction',
       icon: BarChart3,
       color: 'amber',
-      badge: '3 Niveaux · DAX & RLS',
+      badge: isEn ? '3 Levels · DAX & RLS' : '3 Niveaux · DAX & RLS',
       href: '/login?next=/courses/powerbi-debutant-modelisation-etoile',
-      highlights: ['Schéma en étoile Faits vs Dimensions', 'Mesures DAX (CALCULATE, DIVIDE)', 'Sécurité par rôle (RLS) régional'],
+      highlights: isEn
+        ? ['Star Schema Facts vs Dimensions', 'DAX Measures (CALCULATE, DIVIDE)', 'Row-Level Security (RLS)']
+        : ['Schéma en étoile Faits vs Dimensions', 'Mesures DAX (CALCULATE, DIVIDE)', 'Sécurité par rôle (RLS) régional'],
     },
     {
       id: 'python',
-      name: 'Python & Data Science',
-      subtitle: 'Manipulation Pandas, Nettoyage & Rapports Automatisés',
+      name: isEn ? 'Python & Data Science' : 'Python & Data Science',
+      subtitle: isEn ? 'Pandas DataFrames, Cleaning & Automated Reports' : 'Manipulation Pandas, Nettoyage & Rapports Automatisés',
       icon: Code2,
       color: 'purple',
-      badge: '3 Niveaux · Pandas',
+      badge: isEn ? '3 Levels · Pandas' : '3 Niveaux · Pandas',
       href: '/login?next=/courses/python-debutant-pandas-exploration',
-      highlights: ['Inspection de DataFrames volumineux', 'Imputation de valeurs manquantes', 'Export de rapports multi-onglets Excel'],
+      highlights: isEn
+        ? ['Large DataFrame inspection', 'Missing value imputation', 'Multi-sheet Excel report export']
+        : ['Inspection de DataFrames volumineux', 'Imputation de valeurs manquantes', 'Export de rapports multi-onglets Excel'],
     },
     {
       id: 'git',
-      name: 'Git & GitHub pour Analystes',
-      subtitle: 'Gestion de Versions, Collaboration & Showcase Emploi',
+      name: isEn ? 'Git & GitHub for Analysts' : 'Git & GitHub pour Analystes',
+      subtitle: isEn ? 'Version Control, Collaboration & Job Portfolio' : 'Gestion de Versions, Collaboration & Showcase Emploi',
       icon: GitBranch,
       color: 'emerald',
-      badge: '3 Niveaux · Portfolio Pro',
+      badge: isEn ? '3 Levels · Pro Portfolio' : '3 Niveaux · Portfolio Pro',
       href: '/login?next=/courses/git-debutant-versioning-local',
-      highlights: ['Versioning local (init, add, commit)', 'Résolution de conflits de fusion', 'Portfolio GitHub vérifiable par recruteurs'],
+      highlights: isEn
+        ? ['Local versioning (init, add, commit)', 'Merge conflict resolution', 'Recruiter-verifiable GitHub portfolio']
+        : ['Versioning local (init, add, commit)', 'Résolution de conflits de fusion', 'Portfolio GitHub vérifiable par recruteurs'],
     },
   ];
 
   const testimonials = [
     {
       name: 'Mireille K.',
-      role: 'Contrôleur de Gestion Junior · Douala',
-      company: 'PME Agro-alimentaire',
-      comment: 'Avant DataMboa, je passais 4 heures par semaine à copier-coller des données de vente sur Excel. Grâce au cours Power Query et aux cas réels, tout est désormais automatisé en 1 clic.',
+      role: isEn ? 'Junior Financial Controller · Douala' : 'Contrôleur de Gestion Junior · Douala',
+      company: isEn ? 'Agri-food SME' : 'PME Agro-alimentaire',
+      comment: isEn
+        ? 'Before DataMboa, I spent 4 hours a week copying and pasting sales data in Excel. Thanks to the Power Query course and real business cases, everything is now automated in 1 click.'
+        : 'Avant DataMboa, je passais 4 heures par semaine à copier-coller des données de vente sur Excel. Grâce au cours Power Query et aux cas réels, tout est désormais automatisé en 1 clic.',
       rating: 5,
     },
     {
       name: 'Arsène F.',
-      role: 'Analyste Crédit & Risques · Yaoundé',
-      company: 'Établissement de Microfinance',
-      comment: 'Le laboratoire SQL directement dans le navigateur m\'a permis de m\'entraîner le soir sur mon téléphone sans installer de logiciel lourd. J\'ai obtenu ma promotion grâce aux requêtes apprises.',
+      role: isEn ? 'Credit & Risk Analyst · Yaoundé' : 'Analyste Crédit & Risques · Yaoundé',
+      company: isEn ? 'Microfinance Institution' : 'Établissement de Microfinance',
+      comment: isEn
+        ? 'The in-browser SQL laboratory allowed me to practice in the evening on my phone without installing heavy software. I earned my promotion thanks to the queries I learned.'
+        : 'Le laboratoire SQL directement dans le navigateur m\'a permis de m\'entraîner le soir sur mon téléphone sans installer de logiciel lourd. J\'ai obtenu ma promotion grâce aux requêtes apprises.',
       rating: 5,
     },
     {
       name: 'Dr. Steve T.',
-      role: 'Auditeur Financier · Bafoussam',
-      company: 'Cabinet d\'Expertise',
-      comment: 'La validation par QR code et les projets pratiques réels font toute la différence auprès des recruteurs locaux. Une vraie formation professionnelle taillée pour notre économie.',
+      role: isEn ? 'Financial Auditor · Bafoussam' : 'Auditeur Financier · Bafoussam',
+      company: isEn ? 'Accounting & Audit Firm' : 'Cabinet d\'Expertise',
+      comment: isEn
+        ? 'QR code verification and practical real-world business projects make all the difference with recruiters. A truly professional training program tailored to our economy.'
+        : 'La validation par QR code et les projets pratiques réels font toute la différence auprès des recruteurs locaux. Une vraie formation professionnelle taillée pour notre économie.',
       rating: 5,
     },
   ];
@@ -207,17 +224,17 @@ export function VisitorLandingView() {
       <section className="bg-slate-50/80 rounded-2xl p-4 sm:p-5 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
         <div className="flex items-center gap-2 font-bold text-slate-800">
           <Building2 className="w-4 h-4 text-brand-teal shrink-0" />
-          <span>Cas d&apos;entreprise réels intégrés au cursus :</span>
+          <span>{isEn ? 'Real business case studies integrated into the curriculum:' : 'Cas d\'entreprise réels intégrés au cursus :'}</span>
         </div>
         <div className="flex flex-wrap items-center gap-3 font-semibold text-slate-700">
           <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
-            Kamer SARL (Quincaillerie Douala)
+            {isEn ? 'Kamer SARL (Retail Distribution Douala)' : 'Kamer SARL (Quincaillerie Douala)'}
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
-            Microfinance Bafoussam (Portefeuille Crédits)
+            {isEn ? 'Microfinance Bafoussam (Loan Portfolio)' : 'Microfinance Bafoussam (Portefeuille Crédits)'}
           </span>
           <span className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 shadow-2xs">
-            Logistique Centrale Yaoundé
+            {isEn ? 'Central Logistics Yaoundé' : 'Logistique Centrale Yaoundé'}
           </span>
         </div>
       </section>
@@ -466,7 +483,7 @@ export function VisitorLandingView() {
             <div className="space-y-1">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-teal-100/70 text-teal-900 text-[10px] font-bold">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                <span>Conseiller d&apos;orientation · 657 54 62 59</span>
+                <span>{isEn ? 'Course Advisor · 657 54 62 59' : 'Conseiller d\'orientation · 657 54 62 59'}</span>
               </div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900">
                 {t('visitorFeedbackTitle')}

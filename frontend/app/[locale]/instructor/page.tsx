@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { AppHeader } from '@/components/AppHeader';
 import { BottomNav } from '@/components/BottomNav';
@@ -45,6 +45,8 @@ interface CourseCardState {
 
 export default function InstructorPage() {
   const t = useTranslations('Instructor');
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const { user, isAuthenticated, isLoading } = useAuth();
 
   const [courses, setCourses] = useState<CourseCardState[]>([]);
@@ -234,7 +236,15 @@ export default function InstructorPage() {
               <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
                 <p>
-                  <strong>Accès restreint :</strong> Vous consultez cette page en aperçu. La modification et la publication de cours requièrent un compte avec le rôle <code>INSTRUCTOR</code> ou <code>ADMIN</code>.
+                  {isEn ? (
+                    <>
+                      <strong>Restricted access:</strong> You are viewing this page in preview mode. Modifying and publishing courses requires an account with the <code>INSTRUCTOR</code> or <code>ADMIN</code> role.
+                    </>
+                  ) : (
+                    <>
+                      <strong>Accès restreint :</strong> Vous consultez cette page en aperçu. La modification et la publication de cours requièrent un compte avec le rôle <code>INSTRUCTOR</code> ou <code>ADMIN</code>.
+                    </>
+                  )}
                 </p>
               </div>
             )}
@@ -251,7 +261,7 @@ export default function InstructorPage() {
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-brand-primary" />
-                <span>Qualité des Cours</span>
+                <span>{isEn ? 'Course Quality' : 'Qualité des Cours'}</span>
               </button>
 
               <button
@@ -264,7 +274,7 @@ export default function InstructorPage() {
                 }`}
               >
                 <FileText className="w-4 h-4 text-brand-primary" />
-                <span>Devoirs & Livrables</span>
+                <span>{isEn ? 'Assignments & Deliverables' : 'Devoirs & Livrables'}</span>
               </button>
 
               <button
@@ -277,7 +287,7 @@ export default function InstructorPage() {
                 }`}
               >
                 <Brain className="w-4 h-4 text-brand-primary" />
-                <span>Objectifs & Remédiation (R18)</span>
+                <span>{isEn ? 'Skills & Remediation' : 'Objectifs & Remédiation'}</span>
               </button>
             </div>
 
@@ -289,13 +299,13 @@ export default function InstructorPage() {
                   {t('qualityChecklistTitle')}
                 </h2>
                 <span className="text-xs text-brand-muted font-medium">
-                  {courses.length} cours répertorié(s)
+                  {courses.length} {isEn ? 'course(s) listed' : 'cours répertorié(s)'}
                 </span>
               </div>
 
               {isLoadingCourses ? (
                 <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
-                  Chargement des formations et analyse de conformité...
+                  {isEn ? 'Loading courses and compliance analysis...' : 'Chargement des formations et analyse de conformité...'}
                 </div>
               ) : courses.length === 0 ? (
                 <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
@@ -472,18 +482,18 @@ export default function InstructorPage() {
             </div>
             )}
 
-            {/* TAB 2: Submissions to Grade (F2.6) */}
+            {/* TAB 2: Submissions to Grade */}
             {activeTab === 'submissions' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base sm:text-lg font-bold text-brand-primary">
-                    Correction des Devoirs & Livrables Professionnels
+                    {isEn ? 'Grading of Assignments & Professional Deliverables' : 'Correction des Devoirs & Livrables Professionnels'}
                   </h2>
                 </div>
 
                 {isLoadingSubmissions ? (
                   <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
-                    Chargement des devoirs soumis...
+                    {isEn ? 'Loading submitted assignments...' : 'Chargement des devoirs soumis...'}
                   </div>
                 ) : (
                   <InstructorSubmissionsList
@@ -494,18 +504,18 @@ export default function InstructorPage() {
               </div>
             )}
 
-            {/* TAB 3: Learning Objectives & Bloom Analytics (F2.12, R18) */}
+            {/* TAB 3: Learning Objectives & Analytics */}
             {activeTab === 'analytics' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base sm:text-lg font-bold text-brand-primary">
-                    Suivi Formateur — Atteinte des Objectifs & Remédiation (R18)
+                    {isEn ? 'Instructor Monitoring — Skill Attainment & Remediation' : 'Suivi Formateur — Atteinte des Objectifs & Remédiation'}
                   </h2>
                 </div>
 
                 {isLoadingAnalytics || !analytics ? (
                   <div className="p-12 text-center text-xs text-brand-muted bg-white rounded-2xl border border-brand-border">
-                    Calcul des métriques de rétention et acquisition des compétences...
+                    {isEn ? 'Calculating retention metrics and skill acquisition...' : 'Calcul des métriques de rétention et acquisition des compétences...'}
                   </div>
                 ) : (
                   <LearningObjectivesDashboard analytics={analytics} />

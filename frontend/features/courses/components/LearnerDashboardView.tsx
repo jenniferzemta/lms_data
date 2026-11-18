@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { coursesService } from '../services/courses.service';
 import { LearnerDashboardData } from '../types';
@@ -19,7 +18,6 @@ import {
   Database,
   Code2,
   Sparkles,
-  Loader2,
   Compass,
 } from 'lucide-react';
 import { RecommendationsFeed } from '@/features/recommendations';
@@ -30,8 +28,7 @@ interface LearnerDashboardViewProps {
 
 export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ locale }) => {
   const router = useRouter();
-  const tCommon = useTranslations('Common');
-  const tNav = useTranslations('Navigation');
+  const isEn = locale === 'en';
 
   const [data, setData] = useState<LearnerDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,12 +49,15 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
       })
       .catch((err) => {
         if (isMounted) {
-          // If 401 unauthorized, router push to login
           if (err?.status === 401 || err?.status === 403) {
             router.push('/login');
             return;
           }
-          setError('Impossible de charger le tableau de bord pour le moment.');
+          setError(
+            isEn
+              ? 'Unable to load dashboard at the moment.'
+              : 'Impossible de charger le tableau de bord pour le moment.'
+          );
           setIsLoading(false);
         }
       });
@@ -65,16 +65,18 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
     return () => {
       isMounted = false;
     };
-  }, [router]);
+  }, [router, isEn]);
 
   const handleShareCertificate = (code: string, courseTitle: string) => {
     const certUrl = `${window.location.origin}/verify/${code}`;
-    const text = `🎓 J'ai obtenu ma certification DataMboa en ${courseTitle} ! Vérifiez mon diplôme ici : ${certUrl}`;
+    const text = isEn
+      ? `🎓 I earned my official DataMboa certification in ${courseTitle}! Verify my diploma here: ${certUrl}`
+      : `🎓 J'ai obtenu ma certification DataMboa en ${courseTitle} ! Vérifiez mon diplôme ici : ${certUrl}`;
 
     if (navigator.share) {
       navigator
         .share({
-          title: `Certification DataMboa - ${courseTitle}`,
+          title: `DataMboa Certification - ${courseTitle}`,
           text: text,
           url: certUrl,
         })
@@ -94,9 +96,6 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
     return <BookOpen className="w-5 h-5 text-[#006b5f]" />;
   };
 
-  // ---------------------------------------------------------------------------
-  // SKELETON LOADING STATE
-  // ---------------------------------------------------------------------------
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
@@ -111,22 +110,23 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // ERROR STATE
-  // ---------------------------------------------------------------------------
   if (error || !data) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <div className="w-14 h-14 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <BookOpen className="w-6 h-6" />
         </div>
-        <h2 className="text-lg font-bold text-[#121c2a]">Tableau de bord indisponible</h2>
-        <p className="text-sm text-slate-600 mt-2">{error || 'Veuillez vous reconnecter pour accéder à vos progrès.'}</p>
+        <h2 className="text-lg font-bold text-[#121c2a]">
+          {isEn ? 'Dashboard Unavailable' : 'Tableau de bord indisponible'}
+        </h2>
+        <p className="text-sm text-slate-600 mt-2">
+          {error || (isEn ? 'Please sign in again to access your progress.' : 'Veuillez vous reconnecter pour accéder à vos progrès.')}
+        </p>
         <Link
           href="/login"
           className="mt-5 inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-[#006b5f] text-white font-bold text-sm min-h-[44px]"
         >
-          Se connecter
+          {isEn ? 'Sign In' : 'Se connecter'}
         </Link>
       </div>
     );
@@ -137,9 +137,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
 
   return (
     <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
-      {/* --------------------------------------------------------------------- */}
-      {/* 1. WELCOME BANNER (Salutation + Points XP)                             */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 1. WELCOME BANNER */}
       <section className="bg-gradient-to-r from-[#006b5f] via-[#00574d] to-[#121c2a] rounded-3xl p-5 sm:p-7 text-white shadow-sm relative overflow-hidden">
         <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-[#13b8a6]/20 rounded-full blur-2xl pointer-events-none" />
 
@@ -147,14 +145,16 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs uppercase font-extrabold tracking-wider text-[#13b8a6] bg-teal-950/60 px-2.5 py-0.5 rounded-full border border-teal-500/30">
-                Espace Apprenant DataMboa
+                {isEn ? 'DataMboa Learner Workspace' : 'Espace Apprenant DataMboa'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-extrabold text-white mt-2 leading-tight">
-              Bienvenue, {user.name} 👋
+              {isEn ? `Welcome, ${user.name} 👋` : `Bienvenue, ${user.name} 👋`}
             </h1>
             <p className="text-xs sm:text-sm text-teal-100/90 mt-1 max-w-xl">
-              Votre progression dans le cursus d&apos;analyse de données concrète pour l&apos;entreprise africaine.
+              {isEn
+                ? 'Your progress across practical data analytics tracks and business case studies.'
+                : "Votre progression dans le cursus d'analyse de données concrète."}
             </p>
           </div>
 
@@ -164,21 +164,22 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
               <Zap className="w-5 h-5 fill-current" />
             </div>
             <div>
-              <div className="text-xs uppercase font-bold text-amber-200">Total Points XP</div>
+              <div className="text-xs uppercase font-bold text-amber-200">
+                {isEn ? 'Total XP Points' : 'Total Points XP'}
+              </div>
               <div className="text-lg font-black tracking-tight text-white">{stats.xp_points} pts</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 2. STATS OVERVIEW CARDS (Où j'en suis)                                 */}
-      {/* --------------------------------------------------------------------- */}
-      <section aria-label="Statistiques d'apprentissage" className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {/* Formations en cours */}
+      {/* 2. STATS OVERVIEW CARDS */}
+      <section aria-label={isEn ? 'Learning statistics' : "Statistiques d'apprentissage"} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">Formations</span>
+            <span className="text-xs font-bold text-slate-500 uppercase">
+              {isEn ? 'Courses' : 'Formations'}
+            </span>
             <div className="w-8 h-8 rounded-lg bg-teal-50 text-[#006b5f] flex items-center justify-center">
               <BookOpen className="w-4 h-4" />
             </div>
@@ -187,14 +188,17 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
             {stats.enrolled_courses_count}
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-            {stats.completed_courses_count} validée{stats.completed_courses_count > 1 ? 's' : ''} à 100%
+            {isEn
+              ? `${stats.completed_courses_count} completed at 100%`
+              : `${stats.completed_courses_count} validée${stats.completed_courses_count > 1 ? 's' : ''} à 100%`}
           </p>
         </div>
 
-        {/* Leçons validées */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">Leçons Validées</span>
+            <span className="text-xs font-bold text-slate-500 uppercase">
+              {isEn ? 'Completed Lessons' : 'Leçons Validées'}
+            </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -203,14 +207,15 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
             {stats.completed_lessons_count}
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-            Ateliers & Cas pratiques résolus
+            {isEn ? 'Workshops & business cases solved' : 'Ateliers & Cas pratiques résolus'}
           </p>
         </div>
 
-        {/* Temps d'apprentissage */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">Temps d&apos;étude</span>
+            <span className="text-xs font-bold text-slate-500 uppercase">
+              {isEn ? 'Study Time' : "Temps d'étude"}
+            </span>
             <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center">
               <Clock className="w-4 h-4" />
             </div>
@@ -219,14 +224,15 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
             {learningHours} h
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-            Cumul de pratique et vidéos
+            {isEn ? 'Cumulative labs & video study' : 'Cumul de pratique et vidéos'}
           </p>
         </div>
 
-        {/* Certifications validées */}
         <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-2xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase">Certificats</span>
+            <span className="text-xs font-bold text-slate-500 uppercase">
+              {isEn ? 'Certificates' : 'Certificats'}
+            </span>
             <div className="w-8 h-8 rounded-lg bg-amber-50 text-[#7c5800] flex items-center justify-center">
               <Award className="w-4 h-4" />
             </div>
@@ -235,30 +241,26 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
             {stats.certificates_count}
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5 font-medium">
-            Vérifiables avec sceau officiel
+            {isEn ? 'Verifiable with official seal' : 'Vérifiables avec sceau officiel'}
           </p>
         </div>
       </section>
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 2.5 RECOMMANDATIONS & RAPPELS INTELLIGENTS (F3.8, F3.9)               */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 2.5 RECOMMENDATIONS */}
       <RecommendationsFeed />
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 3. 1-CLICK RESUME CARD (Qu'est-ce que je fais)                         */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 3. 1-CLICK RESUME CARD */}
       {resume_lesson ? (
-        <section aria-label="Reprendre l'apprentissage" className="bg-white rounded-3xl border border-teal-200/80 p-5 sm:p-6 shadow-xs relative overflow-hidden">
+        <section aria-label={isEn ? 'Resume learning' : "Reprendre l'apprentissage"} className="bg-white rounded-3xl border border-teal-200/80 p-5 sm:p-6 shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between gap-2 mb-3">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-[#13b8a6] animate-pulse" />
               <span className="text-xs font-bold uppercase tracking-wider text-[#006b5f]">
-                Reprendre en un clic
+                {isEn ? '1-Click Resume' : 'Reprendre en un clic'}
               </span>
             </div>
             <span className="text-xs font-bold text-slate-500">
-              {resume_lesson.progress_percentage}% du cours validé
+              {resume_lesson.progress_percentage}% {isEn ? 'of course completed' : 'du cours validé'}
             </span>
           </div>
 
@@ -277,7 +279,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                 </span>
                 <span className="text-slate-300">•</span>
                 <span className="text-[#006b5f] font-semibold">
-                  +25 pts XP à la clé
+                  {isEn ? '+25 XP pts reward' : '+25 pts XP à la clé'}
                 </span>
               </div>
             </div>
@@ -287,12 +289,11 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-[#006b5f] hover:bg-[#00574d] text-white font-bold rounded-2xl min-h-[44px] shadow-sm transition shrink-0 group text-sm"
             >
               <Play className="w-4 h-4 fill-current group-hover:scale-110 transition-transform" />
-              <span>Continuer la leçon</span>
+              <span>{isEn ? 'Continue Lesson' : 'Continuer la leçon'}</span>
               <ArrowRight className="w-4 h-4 ml-1" />
             </Link>
           </div>
 
-          {/* Progress bar */}
           <div className="w-full bg-[#dee9fc] h-1.5 rounded-full overflow-hidden mt-5">
             <div
               className="bg-[#13b8a6] h-full rounded-full transition-all duration-300"
@@ -306,38 +307,40 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
             <Compass className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-base font-bold text-[#121c2a]">Aucune formation en cours pour l&apos;instant</h2>
+            <h2 className="text-base font-bold text-[#121c2a]">
+              {isEn ? 'No courses in progress yet' : "Aucune formation en cours pour l'instant"}
+            </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-md mx-auto">
-              Démarrez gratuitement votre première formation pratique en analyse de données (Excel Fondamentaux Kamer SARL).
+              {isEn
+                ? 'Start your first free hands-on data analytics course (Excel Fundamentals).'
+                : 'Démarrez gratuitement votre première formation pratique en analyse de données.'}
             </p>
           </div>
           <Link
             href="/courses"
             className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#006b5f] text-white font-bold text-sm rounded-xl min-h-[44px]"
           >
-            <span>Explorer le Catalogue</span>
+            <span>{isEn ? 'Explore Catalog' : 'Explorer le Catalogue'}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </section>
       ) : null}
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 4. ENROLLED COURSES (Mes Formations Actives)                            */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 4. ENROLLED COURSES */}
       {enrolled_courses.length > 0 && (
-        <section aria-label="Mes formations">
+        <section aria-label={isEn ? 'My courses' : 'Mes formations'}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-[#006b5f]" />
               <h2 className="text-base sm:text-lg font-bold text-[#121c2a]">
-                Mes Formations ({enrolled_courses.length})
+                {isEn ? `My Courses (${enrolled_courses.length})` : `Mes Formations (${enrolled_courses.length})`}
               </h2>
             </div>
             <Link
               href="/courses"
               className="text-xs font-bold text-[#006b5f] hover:underline flex items-center gap-1 min-h-[44px]"
             >
-              <span>Catalogue</span>
+              <span>{isEn ? 'Catalog' : 'Catalogue'}</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -359,7 +362,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                       {isDone ? (
                         <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          Certifié
+                          {isEn ? 'Certified' : 'Certifié'}
                         </span>
                       ) : (
                         <span className="text-xs font-bold text-slate-600">
@@ -373,10 +376,12 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                     </h3>
 
                     <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-                      <span>{c.completed_lessons_count} / {c.total_lessons_count} leçons validées</span>
+                      <span>
+                        {c.completed_lessons_count} / {c.total_lessons_count}{' '}
+                        {isEn ? 'lessons completed' : 'leçons validées'}
+                      </span>
                     </div>
 
-                    {/* Progress bar */}
                     <div className="w-full bg-[#dee9fc] h-2 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${
@@ -395,10 +400,12 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                         className="px-4 py-2 bg-amber-50 hover:bg-amber-100 text-[#7c5800] border border-amber-200 text-xs font-bold rounded-xl flex items-center gap-1.5 min-h-[44px]"
                       >
                         <Award className="w-4 h-4" />
-                        <span>Voir mon diplôme</span>
+                        <span>{isEn ? 'View Diploma' : 'Voir mon diplôme'}</span>
                       </Link>
                     ) : (
-                      <span className="text-xs text-slate-400 font-medium">En progression</span>
+                      <span className="text-xs text-slate-400 font-medium">
+                        {isEn ? 'In progress' : 'En progression'}
+                      </span>
                     )}
 
                     <Link
@@ -409,7 +416,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                       }
                       className="px-4 py-2 bg-[#006b5f] hover:bg-[#00574d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 min-h-[44px] ml-auto"
                     >
-                      <span>{isDone ? 'Revoir' : 'Continuer'}</span>
+                      <span>{isDone ? (isEn ? 'Review' : 'Revoir') : (isEn ? 'Continue' : 'Continuer')}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
@@ -420,18 +427,18 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
         </section>
       )}
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 5. OFFICIAL CERTIFICATES (Mes Certifications & Partage)                */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 5. OFFICIAL CERTIFICATES */}
       {certificates.length > 0 && (
-        <section aria-label="Mes certifications officielles" className="bg-gradient-to-br from-amber-50/50 via-white to-teal-50/40 rounded-3xl p-5 sm:p-6 border border-amber-200 shadow-2xs">
+        <section aria-label={isEn ? 'My official certifications' : 'Mes certifications officielles'} className="bg-gradient-to-br from-amber-50/50 via-white to-teal-50/40 rounded-3xl p-5 sm:p-6 border border-amber-200 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-[#ffdea7] text-[#7c5800] flex items-center justify-center font-bold">
                 <Award className="w-4 h-4" />
               </div>
               <h2 className="text-base sm:text-lg font-bold text-[#121c2a]">
-                Mes Certifications Officielles DataMboa ({certificates.length})
+                {isEn
+                  ? `My Official DataMboa Certifications (${certificates.length})`
+                  : `Mes Certifications Officielles DataMboa (${certificates.length})`}
               </h2>
             </div>
           </div>
@@ -449,7 +456,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                     </span>
                     {cert.final_grade && (
                       <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
-                        Moyenne : {cert.final_grade}%
+                        {isEn ? `Grade: ${cert.final_grade}%` : `Moyenne : ${cert.final_grade}%`}
                       </span>
                     )}
                   </div>
@@ -459,7 +466,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                   </h3>
 
                   <p className="text-xs text-slate-500">
-                    Formateur référent : {cert.instructor_name}
+                    {isEn ? `Lead Instructor: ${cert.instructor_name}` : `Formateur référent : ${cert.instructor_name}`}
                   </p>
                 </div>
 
@@ -468,7 +475,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                     href={cert.verification_path}
                     className="px-3.5 py-2 bg-[#006b5f] hover:bg-[#00574d] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 min-h-[44px]"
                   >
-                    <span>Afficher le diplôme</span>
+                    <span>{isEn ? 'Display Diploma' : 'Afficher le diplôme'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
 
@@ -478,7 +485,11 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                     className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center gap-1.5 min-h-[44px]"
                   >
                     <Share2 className="w-3.5 h-3.5" />
-                    <span>{shareSuccessCode === cert.certificate_code ? 'Copié !' : 'Partager'}</span>
+                    <span>
+                      {shareSuccessCode === cert.certificate_code
+                        ? (isEn ? 'Copied!' : 'Copié !')
+                        : (isEn ? 'Share' : 'Partager')}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -487,15 +498,13 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
         </section>
       )}
 
-      {/* --------------------------------------------------------------------- */}
-      {/* 6. RECOMMENDED COURSES (Prochaine Étape de la Roadmap)                */}
-      {/* --------------------------------------------------------------------- */}
+      {/* 6. RECOMMENDED COURSES */}
       {recommendations.length > 0 && (
-        <section aria-label="Recommandations">
+        <section aria-label={isEn ? 'Recommendations' : 'Recommandations'}>
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-5 h-5 text-[#13b8a6]" />
             <h2 className="text-base sm:text-lg font-bold text-[#121c2a]">
-              Prochaine Étape : Poursuivre le Cursus
+              {isEn ? 'Next Step: Continue the Curriculum' : 'Prochaine Étape : Poursuivre le Cursus'}
             </h2>
           </div>
 
@@ -511,7 +520,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                       {rec.tool} • {rec.level}
                     </span>
                     <span className="text-xs font-bold text-slate-500">
-                      ~{rec.duration_hours}h d&apos;apprentissage
+                      ~{rec.duration_hours}h {isEn ? 'of learning' : "d'apprentissage"}
                     </span>
                   </div>
 
@@ -524,7 +533,7 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
                   href={`/courses/${rec.slug}`}
                   className="w-full mt-2 py-2.5 bg-slate-50 hover:bg-[#006b5f] hover:text-white text-[#006b5f] border border-slate-200 hover:border-[#006b5f] rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-colors min-h-[44px]"
                 >
-                  <span>Découvrir le syllabus</span>
+                  <span>{isEn ? 'View Syllabus' : 'Découvrir le syllabus'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
@@ -535,4 +544,3 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
     </div>
   );
 };
-

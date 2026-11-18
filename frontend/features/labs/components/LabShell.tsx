@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocale } from 'next-intl';
 import {
   LabExercise,
   LabResult,
@@ -45,6 +46,8 @@ export const LabShell: React.FC<LabShellProps> = ({
   onNextExercise,
   hasNextExercise = false
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const engine = useMemo(() => new SqlLabEngine(), []);
 
   // State
@@ -205,10 +208,10 @@ export const LabShell: React.FC<LabShellProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-brand-teal">
-                Laboratoire SQL Intégré (SQLite Navigateur)
+                {isEn ? 'Integrated SQL Laboratory (In-Browser SQLite)' : 'Laboratoire SQL Intégré (SQLite Navigateur)'}
               </span>
               <Badge variant="teal">
-                Atelier pratique
+                {isEn ? 'Practical Workshop' : 'Atelier pratique'}
               </Badge>
             </div>
             <h1 className="text-base sm:text-xl font-bold font-heading text-brand-primary leading-tight mt-0.5">
@@ -222,7 +225,7 @@ export const LabShell: React.FC<LabShellProps> = ({
           {lastSavedTimestamp && (
             <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-brand-muted font-medium bg-slate-50 px-2.5 py-1 rounded-xl border border-brand-border/60">
               <Save className="w-3.5 h-3.5 text-brand-teal" />
-              <span>Sauvegardé auto</span>
+              <span>{isEn ? 'Auto-saved' : 'Sauvegardé auto'}</span>
             </span>
           )}
 
@@ -233,14 +236,14 @@ export const LabShell: React.FC<LabShellProps> = ({
             className="min-h-[44px] px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 transition-colors"
           >
             <Lightbulb className="w-4 h-4 text-amber-600" />
-            <span>Indices ({consultedHintsCount}/{exercise.hints.length})</span>
+            <span>{isEn ? 'Hints' : 'Indices'} ({consultedHintsCount}/{exercise.hints.length})</span>
           </Button>
 
           <Button
             type="button"
             variant="outline"
             onClick={handleExportSql}
-            title="Télécharger la requête (.sql)"
+            title={isEn ? 'Download query (.sql)' : 'Télécharger la requête (.sql)'}
             className="min-h-[44px] min-w-[44px] p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-brand-border"
           >
             <Download className="w-4 h-4" />
@@ -248,7 +251,7 @@ export const LabShell: React.FC<LabShellProps> = ({
 
           <label
             htmlFor="sql-file-upload"
-            title="Importer un fichier SQL"
+            title={isEn ? 'Import SQL file' : 'Importer un fichier SQL'}
             className="min-h-[44px] min-w-[44px] px-2.5 rounded-xl flex items-center justify-center text-slate-700 hover:bg-slate-100 border border-brand-border cursor-pointer transition-colors"
           >
             <Upload className="w-4 h-4" />
@@ -263,7 +266,7 @@ export const LabShell: React.FC<LabShellProps> = ({
         </div>
       </div>
 
-      {/* Mobile Targeted Adaptive Switcher (< 768px Tabs, R23) */}
+      {/* Mobile Targeted Adaptive Switcher (< 768px Tabs) */}
       <div className="flex md:hidden bg-white p-1 rounded-2xl border border-brand-border shadow-2xs">
         <button
           type="button"
@@ -275,7 +278,7 @@ export const LabShell: React.FC<LabShellProps> = ({
           }`}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Consigne</span>
+          <span>{isEn ? 'Instructions' : 'Consigne'}</span>
         </button>
 
         <button
@@ -288,7 +291,7 @@ export const LabShell: React.FC<LabShellProps> = ({
           }`}
         >
           <FileCode2 className="w-3.5 h-3.5" />
-          <span>Éditeur SQL</span>
+          <span>{isEn ? 'SQL Editor' : 'Éditeur SQL'}</span>
         </button>
 
         <button
@@ -301,16 +304,16 @@ export const LabShell: React.FC<LabShellProps> = ({
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
-          <span>Résultats</span>
+          <span>{isEn ? 'Results' : 'Résultats'}</span>
           {queryResult && (
             <span className="w-2 h-2 rounded-full bg-brand-teal absolute top-2 right-2" />
           )}
         </button>
       </div>
 
-      {/* Main Targeted Adaptive Grid Layout (Desktop: 2 columns, Mobile: Tabbed) */}
+      {/* Main Targeted Adaptive Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* Left Column: Context, Instruction, Pedagogic Rules & Database Schema Explorer */}
+        {/* Left Column */}
         <div
           className={`lg:col-span-4 flex flex-col gap-4 ${
             activeMobileTab !== 'instructions' ? 'hidden md:flex' : 'flex'
@@ -322,7 +325,7 @@ export const LabShell: React.FC<LabShellProps> = ({
               {exercise.context}
             </span>
             <h2 className="text-sm sm:text-base font-bold text-brand-primary mt-1 mb-2 font-heading">
-              Objectif Métier
+              {isEn ? 'Business Objective' : 'Objectif Métier'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-sans">
               {exercise.instruction}
@@ -331,7 +334,7 @@ export const LabShell: React.FC<LabShellProps> = ({
             {/* Criteria Checklist */}
             <div className="mt-4 pt-3 border-t border-slate-100">
               <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider mb-2">
-                Critères de validation attendus :
+                {isEn ? 'Expected Validation Criteria:' : 'Critères de validation attendus :'}
               </h3>
               <ul className="space-y-2">
                 {exercise.rules.map((rule) => {
@@ -362,7 +365,7 @@ export const LabShell: React.FC<LabShellProps> = ({
             </div>
           </div>
 
-          {/* Database Schema Explorer (Collapsible accordion) */}
+          {/* Database Schema Explorer */}
           <SqlSchemaExplorer onInsertText={handleInsertSnippet} />
         </div>
 
@@ -383,7 +386,7 @@ export const LabShell: React.FC<LabShellProps> = ({
             />
           </div>
 
-          {/* Validation Feedback Banner (if user verified) */}
+          {/* Validation Feedback Banner */}
           {validationResult && (
             <div
               role="alert"
@@ -404,8 +407,8 @@ export const LabShell: React.FC<LabShellProps> = ({
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="font-bold text-sm sm:text-base font-heading">
                       {validationResult.isSuccess
-                        ? 'Atelier SQL Réussi avec Succès !'
-                        : 'Vérification en cours'}
+                        ? (isEn ? 'SQL Workshop Completed Successfully!' : 'Atelier SQL Réussi avec Succès !')
+                        : (isEn ? 'Verification in Progress' : 'Vérification en cours')}
                     </h4>
                     <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white shadow-2xs">
                       Score : {validationResult.score}%
@@ -439,7 +442,7 @@ export const LabShell: React.FC<LabShellProps> = ({
                         variant="primary"
                         className="min-h-[44px] px-4 rounded-xl flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs"
                       >
-                        <span>Passer à l&apos;atelier suivant</span>
+                        <span>{isEn ? 'Next Workshop' : "Passer à l'atelier suivant"}</span>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
@@ -453,20 +456,22 @@ export const LabShell: React.FC<LabShellProps> = ({
           <div className={activeMobileTab === 'editor' ? 'hidden md:block' : 'block'}>
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-brand-primary">
-                Résultat de la requête SQL
+                {isEn ? 'SQL Query Results' : 'Résultat de la requête SQL'}
               </span>
               <span className="text-[11px] text-brand-muted">
-                Moteur relationnel in-memory
+                {isEn ? 'In-memory relational engine' : 'Moteur relationnel in-memory'}
               </span>
             </div>
 
             <SqlResultsTable result={queryResult} />
           </div>
 
-          {/* Sticky Bottom Verification Toolbar (>= 44px Touch Target) */}
+          {/* Sticky Bottom Verification Toolbar */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border flex items-center justify-between gap-3 shadow-xs">
             <span className="text-xs text-brand-muted hidden sm:inline">
-              Vérifiez votre solution lorsque vous êtes satisfait du résultat affiché.
+              {isEn
+                ? 'Verify your solution once you are satisfied with the query output.'
+                : 'Vérifiez votre solution lorsque vous êtes satisfait du résultat affiché.'}
             </span>
 
             <Button
@@ -477,7 +482,7 @@ export const LabShell: React.FC<LabShellProps> = ({
               className="w-full sm:w-auto min-h-[48px] px-6 rounded-xl flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary-dark text-white font-extrabold text-sm shadow-md active:scale-[0.99] transition-all ml-auto"
             >
               <Check className="w-5 h-5 text-brand-teal" />
-              <span>{isEvaluating ? 'Vérification en cours...' : 'Vérifier la solution'}</span>
+              <span>{isEvaluating ? (isEn ? 'Verifying...' : 'Vérification en cours...') : (isEn ? 'Verify Solution' : 'Vérifier la solution')}</span>
             </Button>
           </div>
         </div>

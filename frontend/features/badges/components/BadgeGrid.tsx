@@ -1,20 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BadgeItem, BadgeCategory } from '../types';
+import { useLocale } from 'next-intl';
+import { BadgeItem } from '../types';
 import { BadgeCard } from './BadgeCard';
-import { Award, Zap, Trophy, Filter } from 'lucide-react';
+import { Zap, Trophy } from 'lucide-react';
 
 interface BadgeGridProps {
   badges: BadgeItem[];
 }
 
 export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
 
   const earnedCount = badges.filter((b) => b.is_earned).length;
   const totalBadges = badges.length || 1;
-  const progressPct = Math.round((earnedCount / totalBadges) * 100);
 
   const totalXpEarned = badges
     .filter((b) => b.is_earned)
@@ -28,11 +30,11 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
       : badges.filter((b) => b.category === selectedCategory);
 
   const categories = [
-    { key: 'ALL', label: 'Tous' },
-    { key: 'LAB', label: 'Laboratoires' },
-    { key: 'COURSE', label: 'Cours & Quiz' },
-    { key: 'MISSION', label: 'Missions Pro' },
-    { key: 'STREAK', label: 'Assiduité' }
+    { key: 'ALL', label: isEn ? 'All' : 'Tous' },
+    { key: 'LAB', label: isEn ? 'Laboratories' : 'Laboratoires' },
+    { key: 'COURSE', label: isEn ? 'Courses & Quizzes' : 'Cours & Quiz' },
+    { key: 'MISSION', label: isEn ? 'Business Missions' : 'Missions Pro' },
+    { key: 'STREAK', label: isEn ? 'Consistency' : 'Assiduité' }
   ];
 
   return (
@@ -45,10 +47,12 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-bold">
-              Vos Badges & Compétences Débloquées
+              {isEn ? 'Your Unlocked Skill Badges & Credentials' : 'Vos Badges & Compétences Débloquées'}
             </h2>
             <p className="text-xs sm:text-sm text-white/80 mt-0.5">
-              Reconnaissance des compétences pratiques selon le standard Open Badges.
+              {isEn
+                ? 'Recognition of hands-on analytical skills following the Open Badges standard.'
+                : 'Reconnaissance des compétences pratiques selon le standard Open Badges.'}
             </p>
           </div>
         </div>
@@ -57,7 +61,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
         <div className="flex items-center gap-6 bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-white/10 shrink-0">
           <div>
             <span className="text-[11px] uppercase tracking-wider text-white/70 block">
-              Badges obtenus
+              {isEn ? 'Earned Badges' : 'Badges obtenus'}
             </span>
             <div className="text-xl sm:text-2xl font-black font-mono">
               {earnedCount} / {totalBadges}
@@ -68,7 +72,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
 
           <div>
             <span className="text-[11px] uppercase tracking-wider text-white/70 block">
-              Points XP cumulés
+              {isEn ? 'Total XP Points' : 'Points XP cumulés'}
             </span>
             <div className="text-xl sm:text-2xl font-black font-mono text-amber-300 flex items-center gap-1">
               <Zap className="w-4 h-4 fill-amber-300" />

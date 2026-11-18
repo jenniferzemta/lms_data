@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocale } from 'next-intl';
 import { SAMPLE_EXCEL_EXERCISES } from '../data/sampleExcelExercises';
 import { ExcelLabEngine } from '../engines/ExcelLabEngine';
 import { ExcelFormulaBar } from './ExcelFormulaBar';
@@ -36,6 +37,8 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
   initialExerciseId,
   onAllCompleted
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const engine = useMemo(() => new ExcelLabEngine(), []);
 
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(() => {
@@ -239,14 +242,14 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-base sm:text-lg font-bold text-brand-text truncate">
-                    Laboratoire Excel : Tableur Interactif
+                    {isEn ? 'Excel Laboratory: Interactive Spreadsheet' : 'Laboratoire Excel : Tableur Interactif'}
                   </h1>
                   <Badge variant="teal">
-                    Atelier pratique
+                    {isEn ? 'Practical Workshop' : 'Atelier pratique'}
                   </Badge>
                 </div>
                 <p className="text-xs text-slate-500 hidden sm:block">
-                  ETS MBALLA & FRÈRES — Quincaillerie & Matériaux de Construction (Douala)
+                  {isEn ? 'MBALLA & BROTHERS LTD — Hardware & Building Materials (Douala)' : 'ETS MBALLA & FRÈRES — Quincaillerie & Matériaux de Construction (Douala)'}
                 </p>
               </div>
             </div>
@@ -259,27 +262,27 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-semibold rounded-lg transition-colors min-h-[38px] shrink-0"
               >
                 <Lightbulb className="w-4 h-4 text-amber-600" />
-                <span>Indices ({3 - consultedHintsCount})</span>
+                <span>{isEn ? 'Hints' : 'Indices'} ({3 - consultedHintsCount})</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleSaveProgress}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors min-h-[38px] shrink-0"
-                title="Enregistrer la feuille"
+                title={isEn ? 'Save sheet' : 'Enregistrer la feuille'}
               >
                 <Save className="w-3.5 h-3.5 text-slate-500" />
                 <span className="hidden sm:inline">
-                  {lastSavedTimestamp ? 'Sauvegardé' : 'Sauvegarder'}
+                  {lastSavedTimestamp ? (isEn ? 'Saved' : 'Sauvegardé') : (isEn ? 'Save' : 'Sauvegarder')}
                 </span>
               </button>
 
               <label
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors min-h-[38px] shrink-0 cursor-pointer"
-                title="Importer un fichier CSV"
+                title={isEn ? 'Import CSV file' : 'Importer un fichier CSV'}
               >
                 <Upload className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Importer</span>
+                <span className="hidden sm:inline">{isEn ? 'Import' : 'Importer'}</span>
                 <input
                   type="file"
                   accept=".csv,.txt"
@@ -292,20 +295,20 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                 type="button"
                 onClick={handleResetEntireGrid}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors min-h-[38px] shrink-0"
-                title="Réinitialiser la feuille"
+                title={isEn ? 'Reset sheet' : 'Réinitialiser la feuille'}
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Réinitialiser</span>
+                <span className="hidden sm:inline">{isEn ? 'Reset' : 'Réinitialiser'}</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleExportCsv}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors min-h-[38px] shrink-0"
-                title="Télécharger la feuille au format CSV"
+                title={isEn ? 'Download sheet as CSV' : 'Télécharger la feuille au format CSV'}
               >
                 <Download className="w-3.5 h-3.5 text-slate-500" />
-                <span className="hidden sm:inline">Exporter</span>
+                <span className="hidden sm:inline">{isEn ? 'Export' : 'Exporter'}</span>
               </button>
 
               <Button
@@ -316,7 +319,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                 className="bg-emerald-600 hover:bg-emerald-700 text-white min-h-[38px] shrink-0 shadow-xs"
               >
                 <CheckCircle2 className="w-4 h-4 mr-1.5" />
-                {isValidating ? 'Calcul...' : 'Vérifier la Feuille'}
+                {isValidating ? (isEn ? 'Calculating...' : 'Calcul...') : (isEn ? 'Verify Sheet' : 'Vérifier la Feuille')}
               </Button>
             </div>
           </div>
@@ -366,7 +369,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Consigne</span>
+            <span>{isEn ? 'Instructions' : 'Consigne'}</span>
           </button>
           <button
             type="button"
@@ -378,7 +381,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             }`}
           >
             <Table className="w-3.5 h-3.5" />
-            <span>Tableur</span>
+            <span>{isEn ? 'Spreadsheet' : 'Tableur'}</span>
           </button>
           <button
             type="button"
@@ -390,7 +393,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Résultats</span>
+            <span>{isEn ? 'Results' : 'Résultats'}</span>
             {validationResult && (
               <span
                 className={`w-2 h-2 rounded-full absolute top-1.5 right-1.5 ${
@@ -405,7 +408,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
       {/* Main Responsive Grid Layout */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex-1 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Left Column: Context, Instructions, Validation Rules (Desk: col-span-4) */}
+          {/* Left Column */}
           <div
             className={`lg:col-span-4 flex flex-col gap-4 ${
               activeMobileTab === 'instructions' ? 'block' : 'hidden lg:flex'
@@ -415,7 +418,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             <div className="bg-white border border-brand-border rounded-xl p-4 shadow-xs">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
                 <BookOpen className="w-4 h-4 text-brand-primary" />
-                Mise en situation professionnelle
+                {isEn ? 'Professional Business Case' : 'Mise en situation professionnelle'}
               </h2>
               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
                 {exercise.context}
@@ -426,7 +429,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             <div className="bg-white border border-brand-border rounded-xl p-4 shadow-xs">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-emerald-600" />
-                Consigne de l&apos;Atelier
+                {isEn ? 'Workshop Instructions' : "Consigne de l'Atelier"}
               </h2>
               <div className="text-xs sm:text-sm text-slate-800 font-medium whitespace-pre-line leading-relaxed bg-emerald-50/50 p-3 rounded-lg border border-emerald-100">
                 {exercise.instruction}
@@ -437,7 +440,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             <div className="bg-white border border-brand-border rounded-xl p-4 shadow-xs">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
                 <CheckCircle2 className="w-4 h-4 text-brand-primary" />
-                Critères de validation automatique ({exercise.rules.length})
+                {isEn ? `Automated Validation Criteria (${exercise.rules.length})` : `Critères de validation automatique (${exercise.rules.length})`}
               </h2>
               <div className="space-y-2">
                 {exercise.rules.map((rule) => {
@@ -468,15 +471,14 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
             </div>
           </div>
 
-          {/* Right Column: Formula Bar, Excel Grid, Results (Desk: col-span-8) */}
+          {/* Right Column */}
           <div
             className={`lg:col-span-8 flex flex-col gap-4 ${
               activeMobileTab === 'grid' || activeMobileTab === 'results' ? 'block' : 'hidden lg:flex'
             }`}
           >
-            {/* Show Spreadsheet in 'grid' tab on mobile or always on desktop */}
+            {/* Show Spreadsheet */}
             <div className={`${activeMobileTab === 'grid' ? 'block' : 'hidden lg:block'} space-y-3`}>
-              {/* Formula Bar with Quick Inserts */}
               <ExcelFormulaBar
                 activeCell={labState.activeCell}
                 formulaInput={labState.formulaInput}
@@ -485,7 +487,6 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                 onResetActiveCell={handleResetActiveCell}
               />
 
-              {/* Editable Spreadsheet Table */}
               <ExcelGrid
                 cells={labState.cells}
                 activeCell={labState.activeCell}
@@ -495,14 +496,14 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
               />
             </div>
 
-            {/* Validation Feedback Banner / Panel */}
+            {/* Validation Feedback Banner */}
             {validationResult && (
               <div
                 className={`border rounded-xl p-4 shadow-xs transition-all ${
                   validationResult.isSuccess
                     ? 'bg-emerald-50 border-emerald-300 text-emerald-900'
                     : 'bg-amber-50 border-amber-300 text-amber-900'
-                } ${activeMobileTab === 'results' ? 'block' : 'block'}`}
+                }`}
               >
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div className="flex items-start gap-3">
@@ -518,8 +519,8 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                     <div>
                       <h3 className="font-bold text-sm sm:text-base">
                         {validationResult.isSuccess
-                          ? 'Atelier réussi ! Formules validées.'
-                          : 'Attention : certaines formules demandent correction'}
+                          ? (isEn ? 'Workshop Passed! Formulas Validated.' : 'Atelier réussi ! Formules validées.')
+                          : (isEn ? 'Warning: Some formulas need correction' : 'Attention : certaines formules demandent correction')}
                       </h3>
                       <p className="text-xs sm:text-sm mt-0.5 opacity-90">{validationResult.message}</p>
                     </div>
@@ -528,7 +529,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                   <div className="flex items-center gap-3 self-end sm:self-center">
                     <div className="text-right">
                       <span className="text-[11px] uppercase tracking-wider font-semibold opacity-75">
-                        Score final
+                        {isEn ? 'Final Score' : 'Score final'}
                       </span>
                       <div className="text-xl font-black font-mono">
                         {validationResult.score} / 100
@@ -545,7 +546,7 @@ export const ExcelLabView: React.FC<ExcelLabViewProps> = ({
                         }}
                         className="bg-emerald-700 hover:bg-emerald-800 text-white"
                       >
-                        <span>Atelier suivant</span>
+                        <span>{isEn ? 'Next Workshop' : 'Atelier suivant'}</span>
                         <ChevronRight className="w-4 h-4 ml-1" />
                       </Button>
                     )}

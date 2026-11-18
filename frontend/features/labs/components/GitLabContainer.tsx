@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLocale } from 'next-intl';
 import { 
   GitBranch, 
   CheckCircle2, 
@@ -25,6 +26,8 @@ import { GitLabState, LabExercise, LabResult } from '../types';
 import { coursesService } from '@/features/courses/services/courses.service';
 
 export const GitLabContainer: React.FC = () => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [engine] = useState(() => new GitLabEngine());
   const [exerciseIndex, setExerciseIndex] = useState<number>(0);
   const exercise: LabExercise = SAMPLE_GIT_EXERCISES[exerciseIndex];
@@ -139,20 +142,22 @@ export const GitLabContainer: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-primary text-white">
-                Simulateur Intégré
+                {isEn ? 'Integrated Simulator' : 'Simulateur Intégré'}
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                Atelier pratique
+                {isEn ? 'Practical Workshop' : 'Atelier pratique'}
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                100% Côté Client (Aucun serveur requis)
+                {isEn ? '100% Client-Side (No Server Required)' : '100% Côté Client (Aucun serveur requis)'}
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-brand-text tracking-tight">
-              Laboratoire Git & GitHub interactif dans le navigateur
+              {isEn ? 'Interactive Git & GitHub Laboratory in Your Browser' : 'Laboratoire Git & GitHub interactif dans le navigateur'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Simulateur Git complet avec terminal bash, zone de staging et graphe de commits visuel pour analystes de données.
+              {isEn
+                ? 'Full Git simulator with bash terminal, staging area, and visual commit graph for data analysts.'
+                : 'Simulateur Git complet avec terminal bash, zone de staging et graphe de commits visuel pour analystes de données.'}
             </p>
           </div>
         </div>
@@ -166,7 +171,7 @@ export const GitLabContainer: React.FC = () => {
             className="flex items-center gap-1.5 text-xs font-bold"
           >
             <HelpCircle className="w-4 h-4 text-amber-500" />
-            Indices {consultedHintsCount > 0 && `(${consultedHintsCount})`}
+            {isEn ? 'Hints' : 'Indices'} {consultedHintsCount > 0 && `(${consultedHintsCount})`}
           </Button>
 
           <Button
@@ -174,10 +179,10 @@ export const GitLabContainer: React.FC = () => {
             size="sm"
             onClick={handleExport}
             className="flex items-center gap-1.5 text-xs font-bold"
-            title="Exporter l'historique des commits"
+            title={isEn ? 'Export commit history' : "Exporter l'historique des commits"}
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Exporter</span>
+            <span className="hidden sm:inline">{isEn ? 'Export' : 'Exporter'}</span>
           </Button>
 
           <Button
@@ -185,7 +190,7 @@ export const GitLabContainer: React.FC = () => {
             size="sm"
             onClick={handleReset}
             className="flex items-center gap-1.5 text-xs font-bold"
-            title="Réinitialiser l'atelier"
+            title={isEn ? 'Reset workshop' : "Réinitialiser l'atelier"}
           >
             <RotateCcw className="w-4 h-4" />
           </Button>
@@ -217,11 +222,13 @@ export const GitLabContainer: React.FC = () => {
       <div className="bg-white rounded-3xl border border-brand-border p-5 shadow-xs flex flex-col gap-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Mise en situation :</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+              {isEn ? 'Business Scenario:' : 'Mise en situation :'}
+            </span>
             <span className="text-xs font-semibold text-slate-700">{exercise.context}</span>
           </div>
           <span className="text-xs font-bold text-brand-primary">
-            Atelier {exerciseIndex + 1} sur {SAMPLE_GIT_EXERCISES.length}
+            {isEn ? `Workshop ${exerciseIndex + 1} of ${SAMPLE_GIT_EXERCISES.length}` : `Atelier ${exerciseIndex + 1} sur ${SAMPLE_GIT_EXERCISES.length}`}
           </span>
         </div>
 
@@ -230,7 +237,9 @@ export const GitLabContainer: React.FC = () => {
             <Sparkles className="w-4 h-4" />
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-bold text-slate-900 mb-1">Consigne de l'atelier :</h3>
+            <h3 className="text-sm font-bold text-slate-900 mb-1">
+              {isEn ? 'Workshop Instructions:' : "Consigne de l'atelier :"}
+            </h3>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
               {exercise.instruction}
             </p>
@@ -238,7 +247,7 @@ export const GitLabContainer: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Tab Switcher (Terminal vs Graph) */}
+      {/* Mobile Tab Switcher */}
       <div className="flex lg:hidden rounded-2xl bg-slate-200 p-1">
         <button
           type="button"
@@ -248,7 +257,7 @@ export const GitLabContainer: React.FC = () => {
           }`}
         >
           <Terminal className="w-4 h-4" />
-          Terminal Git
+          {isEn ? 'Git Terminal' : 'Terminal Git'}
         </button>
         <button
           type="button"
@@ -258,13 +267,12 @@ export const GitLabContainer: React.FC = () => {
           }`}
         >
           <Layers className="w-4 h-4" />
-          Graphe & 3 Zones Git
+          {isEn ? 'Graph & 3 Git Zones' : 'Graphe & 3 Zones Git'}
         </button>
       </div>
 
-      {/* Main Workspace Split (Terminal + Visualizer Graph) */}
+      {/* Main Workspace Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[550px]">
-        {/* Left Column: Interactive Terminal (7 cols) */}
         <div
           className={`lg:col-span-7 h-[550px] lg:h-[620px] ${
             activeTabMobile === 'terminal' ? 'block' : 'hidden lg:block'
@@ -277,7 +285,6 @@ export const GitLabContainer: React.FC = () => {
           />
         </div>
 
-        {/* Right Column: Visualizer DAG Graph (5 cols) */}
         <div
           className={`lg:col-span-5 h-[550px] lg:h-[620px] ${
             activeTabMobile === 'visualizer' ? 'block' : 'hidden lg:block'
@@ -292,7 +299,7 @@ export const GitLabContainer: React.FC = () => {
         <div className="flex-1">
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            Critères d'évaluation de l'atelier :
+            {isEn ? 'Workshop Evaluation Criteria:' : "Critères d'évaluation de l'atelier :"}
           </h4>
 
           <div className="space-y-1.5">
@@ -340,12 +347,12 @@ export const GitLabContainer: React.FC = () => {
             {isValidating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Vérification...
+                {isEn ? 'Verifying...' : 'Vérification...'}
               </>
             ) : (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                Vérifier mes commandes Git
+                {isEn ? 'Verify My Git Commands' : 'Vérifier mes commandes Git'}
               </>
             )}
           </Button>
@@ -357,7 +364,7 @@ export const GitLabContainer: React.FC = () => {
               onClick={() => setExerciseIndex((prev) => prev + 1)}
               className="flex items-center gap-2 text-sm font-bold min-h-[48px] px-5 animate-pulse"
             >
-              Atelier suivant
+              {isEn ? 'Next Workshop' : 'Atelier suivant'}
               <ArrowRight className="w-4 h-4" />
             </Button>
           )}

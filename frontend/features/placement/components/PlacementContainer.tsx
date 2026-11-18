@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useLocale } from 'next-intl';
 import { PlacementWizard } from './PlacementWizard';
 import { PlacementResultView } from './PlacementResultView';
 import { placementService } from '../services/placement.service';
 import { PlacementQuestion, PlacementResult } from '../types';
 
 export const PlacementContainer: React.FC = () => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [questions, setQuestions] = useState<PlacementQuestion[]>([]);
   const [result, setResult] = useState<PlacementResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -47,7 +50,7 @@ export const PlacementContainer: React.FC = () => {
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-3 border-brand-primary border-t-transparent rounded-full animate-spin" />
           <span className="text-sm font-semibold text-slate-500">
-            Chargement du test de positionnement adaptatif...
+            {isEn ? 'Loading adaptive placement diagnostic...' : 'Chargement du test de positionnement adaptatif...'}
           </span>
         </div>
       </div>

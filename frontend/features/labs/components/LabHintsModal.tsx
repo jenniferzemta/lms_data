@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { Lightbulb, X, HelpCircle, CheckCircle, Lock } from 'lucide-react';
 import { Button } from '@/ui/Button';
 
@@ -17,6 +18,8 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
   hints,
   onHintConsulted
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [unlockedCount, setUnlockedCount] = useState<number>(1);
 
   if (!isOpen) return null;
@@ -45,10 +48,12 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
             </div>
             <div>
               <h3 id="hints-modal-title" className="font-bold text-sm text-amber-950 font-heading">
-                Indices Pédagogiques (Divulgation Progressive)
+                {isEn ? 'Step-by-Step Workshop Hints' : 'Indices & Pistes de Résolution'}
               </h3>
               <p className="text-[11px] text-amber-800">
-                Chaque indice vous guide sans donner immédiatement la solution complète.
+                {isEn
+                  ? 'Each hint guides you step by step without giving away the full answer immediately.'
+                  : 'Chaque indice vous guide étape par étape sans donner immédiatement la solution complète.'}
               </p>
             </div>
           </div>
@@ -56,7 +61,7 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Fermer la boîte d'indices"
+            aria-label={isEn ? 'Close hints modal' : "Fermer la boîte d'indices"}
             className="w-11 h-11 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-amber-900 hover:bg-amber-200/60 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -82,19 +87,23 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
                     {isUnlocked ? (
                       <>
                         <CheckCircle className="w-3.5 h-3.5 text-amber-600" />
-                        <span className="text-amber-900">Indice {index + 1} / {hints.length}</span>
+                        <span className="text-amber-900">
+                          {isEn ? `Hint ${index + 1} / ${hints.length}` : `Indice ${index + 1} / ${hints.length}`}
+                        </span>
                       </>
                     ) : (
                       <>
                         <Lock className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Indice {index + 1} (Verrouillé)</span>
+                        <span>
+                          {isEn ? `Hint ${index + 1} (Locked)` : `Indice ${index + 1} (Verrouillé)`}
+                        </span>
                       </>
                     )}
                   </span>
 
                   {isUnlocked && (
                     <span className="text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                      Consulté (-10 pts)
+                      {isEn ? 'Viewed (-10 pts)' : 'Consulté (-10 pts)'}
                     </span>
                   )}
                 </div>
@@ -105,7 +114,9 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
                   </p>
                 ) : (
                   <p className="text-xs italic text-slate-400">
-                    Débloquez cet indice supplémentaire si vous avez besoin d&apos;une piste plus précise.
+                    {isEn
+                      ? 'Unlock this additional hint if you need a more specific clue.'
+                      : "Débloquez cet indice supplémentaire si vous avez besoin d'une piste plus précise."}
                   </p>
                 )}
               </div>
@@ -121,7 +132,7 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
             onClick={onClose}
             className="min-h-[44px] text-xs font-semibold text-brand-muted"
           >
-            Fermer
+            {isEn ? 'Close' : 'Fermer'}
           </Button>
 
           {unlockedCount < hints.length ? (
@@ -132,11 +143,11 @@ export const LabHintsModal: React.FC<LabHintsModalProps> = ({
               className="min-h-[44px] px-4 rounded-xl flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs"
             >
               <HelpCircle className="w-4 h-4" />
-              <span>Débloquer l&apos;indice {unlockedCount + 1}</span>
+              <span>{isEn ? `Unlock Hint ${unlockedCount + 1}` : `Débloquer l'indice ${unlockedCount + 1}`}</span>
             </Button>
           ) : (
             <span className="text-[11px] font-semibold text-emerald-700">
-              Tous les indices disponibles sont débloqués.
+              {isEn ? 'All available hints are unlocked.' : 'Tous les indices disponibles sont débloqués.'}
             </span>
           )}
         </div>

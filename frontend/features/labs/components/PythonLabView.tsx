@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useLocale } from 'next-intl';
 import { PYTHON_PANDAS_EXERCISES } from '../data/samplePythonExercises';
 import { PythonLabEngine } from '../engines/PythonLabEngine';
 import { PythonEditor } from './PythonEditor';
@@ -38,6 +39,8 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
   initialExerciseId,
   onAllCompleted
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const engine = useMemo(() => new PythonLabEngine(), []);
 
   const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<number>(() => {
@@ -255,10 +258,10 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700">
-                Laboratoire Python (Pandas Navigateur)
+                {isEn ? 'Python Laboratory (In-Browser Pandas)' : 'Laboratoire Python (Pandas Navigateur)'}
               </span>
               <Badge variant="amber">
-                Atelier pratique
+                {isEn ? 'Practical Workshop' : 'Atelier pratique'}
               </Badge>
             </div>
             <h1 className="text-base sm:text-xl font-bold font-heading text-brand-primary leading-tight mt-0.5">
@@ -272,7 +275,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
           {lastSavedTimestamp && (
             <span className="hidden md:inline-flex items-center gap-1.5 text-[11px] text-brand-muted font-medium bg-slate-50 px-2.5 py-1 rounded-xl border border-brand-border/60">
               <Save className="w-3.5 h-3.5 text-brand-teal" />
-              <span>Sauvegardé auto</span>
+              <span>{isEn ? 'Auto-saved' : 'Sauvegardé auto'}</span>
             </span>
           )}
 
@@ -283,14 +286,14 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
             className="min-h-[44px] px-3 rounded-xl flex items-center gap-1.5 text-xs font-bold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 transition-colors"
           >
             <Lightbulb className="w-4 h-4 text-amber-600" />
-            <span>Indices ({consultedHintsCount}/{exercise.hints.length})</span>
+            <span>{isEn ? 'Hints' : 'Indices'} ({consultedHintsCount}/{exercise.hints.length})</span>
           </Button>
 
           <Button
             type="button"
             variant="outline"
             onClick={handleExport}
-            title="Télécharger le script (.py)"
+            title={isEn ? 'Download script (.py)' : 'Télécharger le script (.py)'}
             className="min-h-[44px] min-w-[44px] p-2 rounded-xl text-slate-700 hover:bg-slate-100 border border-brand-border"
           >
             <Download className="w-4 h-4" />
@@ -298,7 +301,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
 
           <label
             htmlFor="py-file-upload"
-            title="Importer un fichier Python"
+            title={isEn ? 'Import Python file' : 'Importer un fichier Python'}
             className="min-h-[44px] min-w-[44px] px-2.5 rounded-xl flex items-center justify-center text-slate-700 hover:bg-slate-100 border border-brand-border cursor-pointer transition-colors"
           >
             <Upload className="w-4 h-4" />
@@ -313,7 +316,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
         </div>
       </div>
 
-      {/* Mobile Targeted Adaptive Switcher (< 768px Tabs, R23) */}
+      {/* Mobile Targeted Adaptive Switcher */}
       <div className="flex md:hidden bg-white p-1 rounded-2xl border border-brand-border shadow-2xs">
         <button
           type="button"
@@ -325,7 +328,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
           }`}
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>Consigne</span>
+          <span>{isEn ? 'Instructions' : 'Consigne'}</span>
         </button>
 
         <button
@@ -338,7 +341,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
           }`}
         >
           <FileCode className="w-3.5 h-3.5" />
-          <span>Script Python</span>
+          <span>{isEn ? 'Python Script' : 'Script Python'}</span>
         </button>
 
         <button
@@ -360,7 +363,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
 
       {/* Main Targeted Adaptive Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
-        {/* Left Column: Context, Instruction & Dataset Explorer */}
+        {/* Left Column */}
         <div
           className={`lg:col-span-4 flex flex-col gap-4 ${
             activeMobileTab !== 'instructions' ? 'hidden md:flex' : 'flex'
@@ -371,7 +374,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
               {exercise.context}
             </span>
             <h2 className="text-sm sm:text-base font-bold text-brand-primary mt-1 mb-2 font-heading">
-              Consigne de l&apos;Atelier
+              {isEn ? 'Workshop Instructions' : "Consigne de l'Atelier"}
             </h2>
             <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-sans">
               {exercise.instruction}
@@ -379,7 +382,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
 
             <div className="mt-4 pt-3 border-t border-slate-100">
               <h3 className="text-xs font-bold text-brand-primary uppercase tracking-wider mb-2">
-                Critères de validation :
+                {isEn ? 'Validation Criteria:' : 'Critères de validation :'}
               </h3>
               <ul className="space-y-2">
                 {exercise.rules.map((rule) => {
@@ -413,7 +416,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
           <PythonDatasetExplorer onInsertText={handleInsertSnippet} />
         </div>
 
-        {/* Right Column: Code Editor, Console Output and Validation Feedback */}
+        {/* Right Column */}
         <div
           className={`lg:col-span-8 flex flex-col gap-4 ${
             activeMobileTab === 'instructions' ? 'hidden md:flex' : 'flex'
@@ -450,8 +453,8 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="font-bold text-sm sm:text-base font-heading">
                       {validationResult.isSuccess
-                        ? 'Atelier Python Validé avec Succès !'
-                        : 'Vérification du script'}
+                        ? (isEn ? 'Python Workshop Validated Successfully!' : 'Atelier Python Validé avec Succès !')
+                        : (isEn ? 'Script Verification' : 'Vérification du script')}
                     </h4>
                     <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white shadow-2xs">
                       Score : {validationResult.score}%
@@ -483,7 +486,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
                         variant="primary"
                         className="min-h-[44px] px-4 rounded-xl flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs"
                       >
-                        <span>Passer à l&apos;atelier suivant</span>
+                        <span>{isEn ? 'Next Workshop' : "Passer à l'atelier suivant"}</span>
                         <ChevronRight className="w-4 h-4" />
                       </Button>
                     </div>
@@ -498,10 +501,12 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
             <PythonConsoleOutput result={executionResult} />
           </div>
 
-          {/* Sticky Bottom Verification Toolbar (>= 44px) */}
+          {/* Sticky Bottom Verification Toolbar */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-brand-border flex items-center justify-between gap-3 shadow-xs">
             <span className="text-xs text-brand-muted hidden sm:inline">
-              Cliquez sur Vérifier pour valider votre code face aux exigences du cas pratique.
+              {isEn
+                ? 'Click Verify to validate your code against the business case requirements.'
+                : 'Cliquez sur Vérifier pour valider votre code face aux exigences du cas pratique.'}
             </span>
 
             <Button
@@ -512,7 +517,7 @@ export const PythonLabView: React.FC<PythonLabViewProps> = ({
               className="w-full sm:w-auto min-h-[48px] px-6 rounded-xl flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-primary-dark text-white font-extrabold text-sm shadow-md active:scale-[0.99] transition-all ml-auto"
             >
               <Check className="w-5 h-5 text-amber-400" />
-              <span>{isEvaluating ? 'Vérification...' : 'Vérifier la solution'}</span>
+              <span>{isEvaluating ? (isEn ? 'Verifying...' : 'Vérification...') : (isEn ? 'Verify Solution' : 'Vérifier la solution')}</span>
             </Button>
           </div>
         </div>

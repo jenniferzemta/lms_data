@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef } from 'react';
+import { useLocale } from 'next-intl';
 import { Play, RotateCcw, Copy, Check } from 'lucide-react';
 import { Button } from '@/ui/Button';
 
@@ -33,6 +34,8 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
   onReset,
   isRunning = false
 }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [copied, setCopied] = React.useState(false);
 
@@ -119,16 +122,16 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           spellCheck={false}
-          aria-label="Éditeur de code SQL"
+          aria-label={isEn ? 'SQL Code Editor' : 'Éditeur de code SQL'}
           className="w-full h-full p-3 bg-transparent text-emerald-300 placeholder:text-slate-600 outline-none resize-none font-mono leading-6 selection:bg-emerald-500/30 overflow-y-auto"
-          placeholder="-- Saisissez votre requête SQL ici..."
+          placeholder={isEn ? '-- Enter your SQL query here...' : '-- Saisissez votre requête SQL ici...'}
         />
       </div>
 
-      {/* Mobile-First Fast-Input Bar (Tactile shortcuts >= 44px) */}
+      {/* Mobile-First Fast-Input Bar */}
       <div className="px-2.5 py-2 bg-slate-950/60 border-t border-slate-800/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
         <span className="text-[10px] font-bold uppercase text-slate-500 shrink-0 pl-1">
-          Touches rapides :
+          {isEn ? 'Quick Keys:' : 'Touches rapides :'}
         </span>
         {SQL_QUICK_KEYWORDS.map((kw) => (
           <button
@@ -145,7 +148,9 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
       {/* Action Footer Bar */}
       <div className="flex items-center justify-between p-3 bg-slate-950 border-t border-slate-800">
         <span className="text-[11px] text-slate-400 font-sans">
-          Raccourci : Exécutez pour prévisualiser les résultats en direct.
+          {isEn
+            ? 'Shortcut: Run to preview live query results.'
+            : 'Raccourci : Exécutez pour prévisualiser les résultats en direct.'}
         </span>
 
         <Button
@@ -156,7 +161,7 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
           className="min-h-[44px] px-4 rounded-xl flex items-center gap-2 bg-brand-teal hover:bg-brand-teal-dark text-white font-bold text-xs sm:text-sm shadow-xs"
         >
           <Play className={`w-4 h-4 fill-current ${isRunning ? 'animate-spin' : ''}`} />
-          <span>{isRunning ? 'Exécution...' : 'Exécuter la requête'}</span>
+          <span>{isRunning ? (isEn ? 'Running...' : 'Exécution...') : (isEn ? 'Run Query' : 'Exécuter la requête')}</span>
         </Button>
       </div>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useLocale } from 'next-intl';
 import { SqlQueryResult } from '../types';
 import { AlertCircle, Clock, Database, CheckCircle2 } from 'lucide-react';
 
@@ -9,13 +10,20 @@ interface SqlResultsTableProps {
 }
 
 export const SqlResultsTable: React.FC<SqlResultsTableProps> = ({ result }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
+
   if (!result) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center bg-white rounded-2xl border border-brand-border/70 min-h-[180px]">
         <Database className="w-8 h-8 text-slate-300 mb-2" />
-        <h4 className="text-xs font-bold text-brand-primary">Aucun résultat pour le moment</h4>
+        <h4 className="text-xs font-bold text-brand-primary">
+          {isEn ? 'No query results yet' : 'Aucun résultat pour le moment'}
+        </h4>
         <p className="text-[11px] text-brand-muted max-w-xs mt-1">
-          Rédigez votre requête SQL et cliquez sur « Exécuter la requête » pour afficher les données.
+          {isEn
+            ? 'Write your SQL query and click "Run Query" to display the data.'
+            : 'Rédigez votre requête SQL et cliquez sur « Exécuter la requête » pour afficher les données.'}
         </p>
       </div>
     );
@@ -29,7 +37,9 @@ export const SqlResultsTable: React.FC<SqlResultsTableProps> = ({ result }) => {
       >
         <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider">Erreur SQL</h4>
+          <h4 className="text-xs font-bold text-rose-800 uppercase tracking-wider">
+            {isEn ? 'SQL Error' : 'Erreur SQL'}
+          </h4>
           <p className="text-xs font-mono text-rose-900 mt-1 leading-relaxed whitespace-pre-wrap">
             {result.error}
           </p>
@@ -47,7 +57,16 @@ export const SqlResultsTable: React.FC<SqlResultsTableProps> = ({ result }) => {
         <div className="flex items-center gap-2">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[11px]">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{rowCount} {rowCount > 1 ? 'lignes retournées' : 'ligne retournée'}</span>
+            <span>
+              {rowCount}{' '}
+              {isEn
+                ? rowCount > 1
+                  ? 'rows returned'
+                  : 'row returned'
+                : rowCount > 1
+                ? 'lignes retournées'
+                : 'ligne retournée'}
+            </span>
           </span>
         </div>
 
@@ -57,11 +76,13 @@ export const SqlResultsTable: React.FC<SqlResultsTableProps> = ({ result }) => {
         </div>
       </div>
 
-      {/* Responsive Table with Sticky First Column (Rule 20 / Rule 4.2) */}
+      {/* Responsive Table */}
       <div className="overflow-x-auto max-h-[340px] relative">
         {rows.length === 0 ? (
           <div className="p-8 text-center text-xs text-brand-muted">
-            La requête a été exécutée avec succès mais ne retourne aucun enregistrement.
+            {isEn
+              ? 'Query executed successfully, but returned 0 rows.'
+              : 'La requête a été exécutée avec succès mais ne retourne aucun enregistrement.'}
           </div>
         ) : (
           <table className="w-full text-left text-xs border-collapse">

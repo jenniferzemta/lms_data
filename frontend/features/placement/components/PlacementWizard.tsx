@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLocale } from 'next-intl';
 import { 
   ArrowRight, 
   ArrowLeft, 
@@ -22,6 +23,8 @@ interface PlacementWizardProps {
 }
 
 export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onCompleted }) => {
+  const locale = useLocale();
+  const isEn = locale === 'en';
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -48,15 +51,15 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
   const getToolLabel = (tool: string) => {
     switch (tool) {
       case 'excel':
-        return 'Tableur Excel';
+        return isEn ? 'Excel Spreadsheet' : 'Tableur Excel';
       case 'sql':
-        return 'Base SQL';
+        return isEn ? 'SQL Database' : 'Base SQL';
       case 'python':
         return 'Python & Pandas';
       case 'powerbi':
         return 'Power BI & DAX';
       default:
-        return 'Analyse de données';
+        return isEn ? 'Data Analytics' : 'Analyse de données';
     }
   };
 
@@ -99,9 +102,9 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
             <span className="w-6 h-6 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center text-xs">
               {currentIndex + 1}
             </span>
-            Question {currentIndex + 1} sur {total}
+            {isEn ? `Question ${currentIndex + 1} of ${total}` : `Question ${currentIndex + 1} sur ${total}`}
           </span>
-          <span className="text-brand-primary">{progressPct}% complété</span>
+          <span className="text-brand-primary">{progressPct}% {isEn ? 'completed' : 'complété'}</span>
         </div>
 
         {/* Progress Bar */}
@@ -115,14 +118,14 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
 
       {/* Question Card */}
       <div className="bg-white rounded-3xl border border-brand-border p-6 sm:p-8 shadow-xs flex flex-col gap-6">
-        {/* Tool & Bloom Header */}
+        {/* Tool Header */}
         <div className="flex flex-wrap items-center gap-2">
           <span className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-800 text-xs font-bold flex items-center gap-1.5">
             {getToolIcon(currentQ.tool)}
             {getToolLabel(currentQ.tool)}
           </span>
           <span className="px-2.5 py-0.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold">
-            Évaluation pratique
+            {isEn ? 'Practical Assessment' : 'Évaluation pratique'}
           </span>
           <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold ml-auto">
             {currentQ.weight} points
@@ -134,7 +137,7 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
           {currentQ.question}
         </h2>
 
-        {/* Multiple Choice Options (Mobile-First touch >= 44px) */}
+        {/* Multiple Choice Options */}
         <div className="space-y-3">
           {currentQ.options.map((option) => {
             const isSelected = answers[currentQ.id] === option.id;
@@ -176,7 +179,7 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
             className="flex items-center gap-1.5 text-xs font-bold min-h-[44px]"
           >
             <ArrowLeft className="w-4 h-4" />
-            Précédent
+            {isEn ? 'Previous' : 'Précédent'}
           </Button>
 
           <Button
@@ -187,16 +190,16 @@ export const PlacementWizard: React.FC<PlacementWizardProps> = ({ questions, onC
             {isSubmitting ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Évaluation de votre niveau...
+                {isEn ? 'Evaluating your level...' : 'Évaluation de votre niveau...'}
               </>
             ) : currentIndex === total - 1 ? (
               <>
                 <ShieldCheck className="w-4 h-4" />
-                Obtenir mon diagnostic
+                {isEn ? 'Get My Diagnostic' : 'Obtenir mon diagnostic'}
               </>
             ) : (
               <>
-                Suivant
+                {isEn ? 'Next' : 'Suivant'}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
