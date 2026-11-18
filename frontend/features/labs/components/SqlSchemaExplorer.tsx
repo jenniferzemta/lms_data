@@ -46,13 +46,13 @@ export const SqlSchemaExplorer: React.FC<SqlSchemaExplorerProps> = ({ onInsertTe
               className="rounded-xl border border-brand-border/70 overflow-hidden bg-slate-50/50"
             >
               {/* Table Bar Header */}
-              <button
-                type="button"
-                onClick={() => toggleTable(table.name)}
-                className="w-full min-h-[44px] px-3 py-2 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors"
-                aria-expanded={isExpanded}
-              >
-                <div className="flex items-center gap-2 min-w-0">
+              <div className="w-full min-h-[44px] px-3 py-2 flex items-center justify-between text-left hover:bg-slate-100/70 transition-colors">
+                <button
+                  type="button"
+                  onClick={() => toggleTable(table.name)}
+                  className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                  aria-expanded={isExpanded}
+                >
                   {isExpanded ? (
                     <ChevronDown className="w-4 h-4 text-brand-teal shrink-0" />
                   ) : (
@@ -65,13 +65,12 @@ export const SqlSchemaExplorer: React.FC<SqlSchemaExplorerProps> = ({ onInsertTe
                   <span className="text-[10px] text-brand-muted hidden sm:inline">
                     ({table.rowCount} lignes)
                   </span>
-                </div>
+                </button>
 
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
                   <button
                     type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       setPreviewTable(isPreviewing ? null : table.name);
                     }}
                     title="Aperçu des 3 premières lignes"
@@ -81,7 +80,7 @@ export const SqlSchemaExplorer: React.FC<SqlSchemaExplorerProps> = ({ onInsertTe
                     <Eye className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </button>
+              </div>
 
               {/* Expanded Columns Details */}
               {isExpanded && (
