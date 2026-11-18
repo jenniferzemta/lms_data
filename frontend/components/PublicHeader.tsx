@@ -4,15 +4,15 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { 
-  Menu, 
-  X, 
-  LogIn, 
-  Sparkles, 
-  BookOpen, 
-  Users, 
-  Building2, 
-  GraduationCap, 
+import {
+  Menu,
+  X,
+  LogIn,
+  Sparkles,
+  BookOpen,
+  Users,
+  Building2,
+  GraduationCap,
   ShieldAlert,
   ArrowRight,
   MessageSquare
@@ -34,7 +34,7 @@ export const PublicHeader: React.FC = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-40 h-16 bg-white/95 backdrop-blur-md border-b border-brand-border shadow-2xs">
         <div className="max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-          
+
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <Link
@@ -109,11 +109,11 @@ export const PublicHeader: React.FC = () => {
 
       {/* Mobile Backdrop & Drawer Menu */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 lg:hidden flex flex-col bg-slate-900/40 backdrop-blur-sm animate-fade-in"
           onClick={() => setIsMobileMenuOpen(false)}
         >
-          <div 
+          <div
             className="w-full bg-white border-b border-brand-border p-5 space-y-4 shadow-xl pt-20"
             onClick={(e) => e.stopPropagation()}
           >

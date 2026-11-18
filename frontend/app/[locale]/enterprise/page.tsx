@@ -4,18 +4,18 @@ import React, { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { PublicHeader, PublicFooter } from '@/components';
-import { 
-  Building2, 
-  Users, 
-  CheckCircle2, 
-  Table, 
-  BarChart3, 
-  Database, 
-  Award, 
-  FileSpreadsheet, 
-  ShieldCheck, 
-  Clock, 
-  Mail, 
+import {
+  Building2,
+  Users,
+  CheckCircle2,
+  Table,
+  BarChart3,
+  Database,
+  Award,
+  FileSpreadsheet,
+  ShieldCheck,
+  Clock,
+  Mail,
   ArrowRight,
   Sparkles,
   MessageSquare
@@ -84,7 +84,7 @@ export default function EnterprisePage() {
       <PublicHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-10">
-        
+
         {/* 1. HERO ENTREPRISE */}
         <section className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-border shadow-xs relative overflow-hidden">
           <div className="max-w-3xl space-y-4 relative z-10">

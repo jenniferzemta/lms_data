@@ -13,7 +13,7 @@ export const PublicFooter: React.FC = () => {
     <footer className="bg-white border-t border-brand-border py-12 text-xs text-brand-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-          
+
           {/* Brand Presentation */}
           <div className="lg:col-span-2 space-y-3">
             <div className="flex items-center gap-2.5">
