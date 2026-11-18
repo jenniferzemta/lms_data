@@ -251,7 +251,7 @@ export default function InstructorPage() {
                 }`}
               >
                 <ShieldCheck className="w-4 h-4 text-brand-primary" />
-                <span>Qualité des Cours (F1.12)</span>
+                <span>Qualité des Cours</span>
               </button>
 
               <button
@@ -264,7 +264,7 @@ export default function InstructorPage() {
                 }`}
               >
                 <FileText className="w-4 h-4 text-brand-primary" />
-                <span>Devoirs & Livrables (F2.6)</span>
+                <span>Devoirs & Livrables</span>
               </button>
 
               <button
@@ -477,7 +477,7 @@ export default function InstructorPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="text-base sm:text-lg font-bold text-brand-primary">
-                    Correction des Devoirs & Livrables Professionnels (F2.6)
+                    Correction des Devoirs & Livrables Professionnels
                   </h2>
                 </div>
 

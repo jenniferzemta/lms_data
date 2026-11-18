@@ -89,14 +89,14 @@ export const CodeAuditView: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-primary text-white">
-                V3 — Intelligence (F3.1, F3.2)
+                Outil d&apos;Analyse Automatisée
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                Critère R24 (Correction immédiate)
+                Correction & Feedback Immédiat
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-brand-text tracking-tight">
-              Audit Intelligent de Code & Formules
+              Audit & Correction Automatique de Code et Formules
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
               Analyse statique et structurelle avancée pour formules Excel, requêtes SQL et scripts Python avec rapport pédagogique téléchargeable.
@@ -117,7 +117,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <Table className="w-4 h-4" />
-          Formules Excel (F3.1)
+          Formules Excel
         </button>
 
         <button
@@ -130,7 +130,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <Terminal className="w-4 h-4" />
-          Requêtes SQL (F3.2)
+          Requêtes SQL
         </button>
 
         <button
@@ -143,7 +143,7 @@ export const CodeAuditView: React.FC = () => {
           }`}
         >
           <FileCode className="w-4 h-4" />
-          Scripts Python & Pandas (F3.2)
+          Scripts Python & Pandas
         </button>
       </div>
 

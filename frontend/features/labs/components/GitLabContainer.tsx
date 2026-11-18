@@ -139,7 +139,7 @@ export const GitLabContainer: React.FC = () => {
           <div className="flex flex-col">
             <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-brand-primary text-white">
-                V3 — Intelligence (F3.3)
+                Simulateur Intégré
               </span>
               <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
                 Atelier pratique

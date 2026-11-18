@@ -22,7 +22,7 @@ export default async function MissionsCatalogPage() {
           <div className="mb-8">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 text-xs font-bold rounded-full mb-3">
               <Briefcase className="w-3.5 h-3.5 text-amber-600" />
-              <span>Scénarios d&apos;Entreprise Africaine (F2.7, R11)</span>
+              <span>Scénarios d&apos;Entreprises Locales</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight">
               Missions & Études de Cas Réelles

@@ -62,7 +62,7 @@ export const MissionRubricEvaluation: React.FC<MissionRubricEvaluationProps> = (
           </div>
           <div>
             <h3 className="font-bold text-sm sm:text-base text-brand-text">
-              Grille d&apos;Auto-Évaluation Guidée (Critère R24)
+              Grille d&apos;Auto-Évaluation Guidée
             </h3>
             <p className="text-xs text-slate-500">
               Évaluez votre travail avec rigueur pour débloquer le diagnostic et corrigé type de référence.

@@ -68,7 +68,7 @@ export const LearningObjectivesDashboard: React.FC<LearningObjectivesDashboardPr
             </h3>
           </div>
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-50 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200 dark:border-brand-900/40">
-            Critère R18
+            Suivi Qualité
           </span>
         </div>
 

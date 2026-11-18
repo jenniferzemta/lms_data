@@ -45,7 +45,7 @@ export const BadgeGrid: React.FC<BadgeGridProps> = ({ badges }) => {
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-bold">
-              Vos Badges & Compétences Débloquées (F2.8)
+              Vos Badges & Compétences Débloquées
             </h2>
             <p className="text-xs sm:text-sm text-white/80 mt-0.5">
               Reconnaissance des compétences pratiques selon le standard Open Badges.
