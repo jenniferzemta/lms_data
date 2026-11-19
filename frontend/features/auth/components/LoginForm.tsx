@@ -129,6 +129,45 @@ export const LoginForm: React.FC = () => {
             <span>{isLoading ? t('loggingIn') : t('loginButton')}</span>
           </span>
         </Button>
+
+        {/* Quick Demo Fill Buttons */}
+        <div className="pt-2">
+          <p className="text-[11px] font-medium text-brand-muted mb-2 text-center">
+            {locale === 'fr' ? 'Accès rapide (comptes démo) :' : 'Quick access (demo accounts):'}
+          </p>
+          <div className="grid grid-cols-3 gap-1.5 text-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('admin@datamboa.com');
+                setPassword('AdminPassword123!');
+              }}
+              className="py-1.5 px-2 rounded-lg bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 text-[11px] font-semibold transition flex flex-col items-center justify-center min-h-[44px]"
+            >
+              <span>🛡️ Admin</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('instructor@datamboa.com');
+                setPassword('InstructorPass123!');
+              }}
+              className="py-1.5 px-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[11px] font-semibold transition flex flex-col items-center justify-center min-h-[44px]"
+            >
+              <span>👨‍🏫 Formateur</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('learner@datamboa.com');
+                setPassword('Password123!');
+              }}
+              className="py-1.5 px-2 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[11px] font-semibold transition flex flex-col items-center justify-center min-h-[44px]"
+            >
+              <span>🎓 Apprenant</span>
+            </button>
+          </div>
+        </div>
       </form>
 
       <div className="mt-6 pt-5 border-t border-brand-border text-center text-xs text-brand-muted">

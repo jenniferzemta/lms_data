@@ -19,7 +19,10 @@ import {
   Code2,
   Sparkles,
   Compass,
+  Download,
 } from 'lucide-react';
+import { downloadCertificateAsImage } from '../utils/certificate-download';
+import { Certificate } from '../types';
 import { RecommendationsFeed } from '@/features/recommendations';
 
 interface LearnerDashboardViewProps {
@@ -34,6 +37,30 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [shareSuccessCode, setShareSuccessCode] = useState<string | null>(null);
+  const [isDownloadingSample, setIsDownloadingSample] = useState(false);
+
+  const handleDownloadSample = async () => {
+    setIsDownloadingSample(true);
+    const demoCertificate: Certificate = {
+      certificate_code: 'DM-EXC-2026-DEMO',
+      recipient_name: 'Laure Jennifer Zemta',
+      course_title: isEn
+        ? 'Professional Excel & Business Data Analysis'
+        : 'Excel Professionnel & Analyse de Données de Gestion',
+      course_slug: 'excel-bases-analyse',
+      track_name: isEn ? 'Data Analyst Track' : 'Cursus Analyste de Données',
+      final_score: 94,
+      issued_at: '2026-11-15T10:00:00Z',
+      instructor_name: 'Dr. Emmanuel N.',
+      skills_summary: isEn
+        ? 'Data Cleaning · XLOOKUP & INDEX/MATCH · Pivot Tables · Financial Audit'
+        : 'Nettoyage de données · Formules RECHERCHEX & INDEX/EQUIV · Tableaux croisés dynamiques · Audit financier',
+      verification_url: 'https://datamboa.cm/verify/DM-EXC-2026-DEMO',
+      is_valid: true,
+    };
+    await downloadCertificateAsImage(demoCertificate);
+    setIsDownloadingSample(false);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -428,21 +455,39 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
       )}
 
       {/* 5. OFFICIAL CERTIFICATES */}
-      {certificates.length > 0 && (
-        <section aria-label={isEn ? 'My official certifications' : 'Mes certifications officielles'} className="bg-gradient-to-br from-amber-50/50 via-white to-teal-50/40 rounded-3xl p-5 sm:p-6 border border-amber-200 shadow-2xs">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-[#ffdea7] text-[#7c5800] flex items-center justify-center font-bold">
-                <Award className="w-4 h-4" />
-              </div>
-              <h2 className="text-base sm:text-lg font-bold text-[#121c2a]">
-                {isEn
-                  ? `My Official DataMboa Certifications (${certificates.length})`
-                  : `Mes Certifications Officielles DataMboa (${certificates.length})`}
-              </h2>
+      <section aria-label={isEn ? 'My official certifications' : 'Mes certifications officielles'} className="bg-gradient-to-br from-amber-50/50 via-white to-teal-50/40 rounded-3xl p-5 sm:p-6 border border-amber-200 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-[#ffdea7] text-[#7c5800] flex items-center justify-center font-bold">
+              <Award className="w-4 h-4" />
             </div>
+            <h2 className="text-base sm:text-lg font-bold text-[#121c2a]">
+              {certificates.length > 0
+                ? (isEn
+                  ? `My Official DataMboa Certifications (${certificates.length})`
+                  : `Mes Certifications Officielles DataMboa (${certificates.length})`)
+                : (isEn
+                  ? 'Official Practical Certifications'
+                  : 'Certifications Officielles DataMboa')}
+            </h2>
           </div>
 
+          <button
+            type="button"
+            onClick={handleDownloadSample}
+            disabled={isDownloadingSample}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-100/80 hover:bg-amber-200 border border-amber-300/80 text-amber-900 text-xs font-bold transition min-h-[38px] self-start sm:self-auto"
+          >
+            <Download className="w-3.5 h-3.5 text-amber-800" />
+            <span>
+              {isDownloadingSample
+                ? (isEn ? 'Downloading sample...' : 'Téléchargement de l’exemple...')
+                : (isEn ? 'Download sample certificate' : 'Télécharger un exemple de certificat')}
+            </span>
+          </button>
+        </div>
+
+        {certificates.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {certificates.map((cert) => (
               <div
@@ -495,8 +540,39 @@ export const LearnerDashboardView: React.FC<LearnerDashboardViewProps> = ({ loca
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="bg-white p-5 rounded-2xl border border-amber-200/70 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold text-[#7c5800] bg-amber-100/60 px-2 py-0.5 rounded-md font-mono inline-block">
+                {isEn ? 'DIPLOMA SPECIMEN READY' : 'SPÉCIMEN DE DIPLÔME DISPONIBLE'}
+              </span>
+              <p className="text-xs sm:text-sm text-slate-700 font-medium">
+                {isEn
+                  ? 'Complete all modules and real-world business cases of a course to unlock your tamper-proof certificate with QR code.'
+                  : 'Validez les cas pratiques et évaluations d’une formation pour débloquer votre diplôme officiel infalsifiable.'}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleDownloadSample}
+                disabled={isDownloadingSample}
+                className="px-4 py-2.5 bg-[#006b5f] hover:bg-[#00574d] text-white text-xs font-bold rounded-xl flex items-center gap-2 min-h-[44px]"
+              >
+                <Download className="w-4 h-4" />
+                <span>{isEn ? 'Download Sample (HD)' : 'Télécharger l’exemple (HD)'}</span>
+              </button>
+              <Link
+                href="/verify/DM-EXC-2026-DEMO"
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold rounded-xl flex items-center gap-1.5 min-h-[44px]"
+              >
+                <span>{isEn ? 'Inspect Demo' : 'Voir la démo'}</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+      </section>
 
       {/* 6. RECOMMENDED COURSES */}
       {recommendations.length > 0 && (

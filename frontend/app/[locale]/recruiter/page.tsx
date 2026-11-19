@@ -4,17 +4,17 @@ import React, { useState } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link, useRouter } from '@/i18n/routing';
 import { PublicHeader, PublicFooter } from '@/components';
-import { 
-  Users, 
-  Search, 
-  ShieldCheck, 
-  Award, 
-  FolderKanban, 
-  ArrowRight, 
-  Briefcase, 
-  CheckCircle2, 
-  Building2, 
-  Mail, 
+import {
+  Users,
+  Search,
+  ShieldCheck,
+  Award,
+  FolderKanban,
+  ArrowRight,
+  Briefcase,
+  CheckCircle2,
+  Building2,
+  Mail,
   Star,
   ExternalLink,
   Table,
@@ -87,7 +87,7 @@ export default function RecruiterPage() {
       <PublicHeader />
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 space-y-10">
-        
+
         {/* 1. HERO RECRUTEUR */}
         <section className="bg-white rounded-3xl p-6 sm:p-10 border border-brand-border shadow-xs relative overflow-hidden">
           <div className="max-w-3xl space-y-4 relative z-10">

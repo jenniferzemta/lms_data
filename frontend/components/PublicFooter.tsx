@@ -96,8 +96,8 @@ export const PublicFooter: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/verify/DM-EXC-2026-DEMO" className="hover:text-brand-primary transition">
-                  {isEn ? 'Certificate Verification' : 'Vérification de Certificat'}
+                <Link href="/verify" className="hover:text-brand-primary transition">
+                  {isEn ? 'Certificate Verification & Samples' : 'Certificats & Spécimens'}
                 </Link>
               </li>
             </ul>

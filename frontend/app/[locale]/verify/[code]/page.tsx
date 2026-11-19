@@ -20,7 +20,9 @@ import {
   BookOpen,
   ArrowLeft,
   Loader2,
+  Download,
 } from 'lucide-react';
+import { downloadCertificateAsImage } from '@/features/courses/utils/certificate-download';
 
 export default function CertificateVerificationPage() {
   const params = useParams();
@@ -33,6 +35,8 @@ export default function CertificateVerificationPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
 
   useEffect(() => {
     if (!certificateCode) {
@@ -83,6 +87,17 @@ export default function CertificateVerificationPage() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadImage = async () => {
+    if (!certificate) return;
+    setIsDownloading(true);
+    const success = await downloadCertificateAsImage(certificate);
+    setIsDownloading(false);
+    if (success) {
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 3000);
+    }
   };
 
   // Loading state
@@ -344,7 +359,34 @@ export default function CertificateVerificationPage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Direct HD Download */}
+              <button
+                type="button"
+                onClick={handleDownloadImage}
+                disabled={isDownloading}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-[#006b5f] hover:bg-[#005249] text-white font-medium rounded-xl text-sm transition min-h-[44px] shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                <span>
+                  {isDownloading
+                    ? (isEn ? 'Generating...' : 'Génération...')
+                    : downloadSuccess
+                    ? (isEn ? '✓ Downloaded!' : '✓ Téléchargé !')
+                    : (isEn ? 'Download HD Certificate' : 'Télécharger le diplôme (HD)')}
+                </span>
+              </button>
+
+              {/* Print / Save as PDF */}
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm transition min-h-[44px] shadow-sm"
+              >
+                <Printer className="w-4 h-4" />
+                <span>{isEn ? 'Print / Save as PDF' : 'Imprimer / Sauvegarder PDF'}</span>
+              </button>
+
               {/* WhatsApp Share */}
               <a
                 href={whatsappUrl}
@@ -366,26 +408,26 @@ export default function CertificateVerificationPage() {
                 <ExternalLink className="w-4 h-4" />
                 <span>{isEn ? 'Add to LinkedIn' : 'Ajouter à LinkedIn'}</span>
               </a>
-
-              {/* Print / Save as PDF */}
-              <button
-                type="button"
-                onClick={handlePrint}
-                className="inline-flex items-center justify-center gap-2 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl text-sm transition min-h-[44px] shadow-sm"
-              >
-                <Printer className="w-4 h-4" />
-                <span>{isEn ? 'Download / Print PDF' : 'Télécharger / Imprimer PDF'}</span>
-              </button>
             </div>
 
             <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500">
-              <Link
-                href={`/courses/${certificate.course_slug}`}
-                className="inline-flex items-center gap-1.5 text-[#006b5f] hover:underline font-medium min-h-[36px]"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                <span>{isEn ? 'View certified course details' : 'Voir le programme de la formation certifiée'}</span>
-              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href={`/courses/${certificate.course_slug}`}
+                  className="inline-flex items-center gap-1.5 text-[#006b5f] hover:underline font-medium min-h-[36px]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>{isEn ? 'View certified course details' : 'Voir le programme de la formation'}</span>
+                </Link>
+                <span className="text-slate-300 hidden sm:inline">•</span>
+                <Link
+                  href="/verify"
+                  className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 hover:underline min-h-[36px]"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-brand-teal" />
+                  <span>{isEn ? 'Registry index' : 'Registre des certificats'}</span>
+                </Link>
+              </div>
               <span>
                 {isEn
                   ? 'Public verification registry · DataMboa'
